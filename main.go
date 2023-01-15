@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
+	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	"net"
 	"time"
 
@@ -55,7 +56,6 @@ func main() {
 	for _, cluster := range clusters {
 		stop := make(chan struct{})
 		defer close(stop)
-
 		factory := informers.NewSharedInformerFactoryWithOptions(cluster, time.Second*10, informers.WithNamespace("demo"))
 		informer := factory.Core().V1().Endpoints().Informer()
 		endpointInformers = append(endpointInformers, informer)
@@ -107,11 +107,21 @@ func HandleEndpointsUpdate(oldObj, newObj interface{}) {
 		edsEndpoints = append(edsEndpoints, MakeEndpointsForCluster(envoyCluster))
 	}
 
-	snapshot := cache.NewSnapshot(fmt.Sprintf("%v.0", version), edsEndpoints, nil, nil, nil, nil, nil)
-
-	err := snapshotCache.SetSnapshot("mesh", snapshot)
+	//snapshot := cache.NewSnapshot(fmt.Sprintf("%v.0", version), edsEndpoints, nil, nil, nil, nil, nil)
+	snapshot, err := cache.NewSnapshot(fmt.Sprintf("%v.0", version), map[resource.Type][]types.Resource{
+		resource.EndpointType: edsEndpoints,
+	})
 	if err != nil {
 		fmt.Printf("%v", err)
+		return
+	}
+
+	IDs := snapshotCache.GetStatusKeys()
+	for _, id := range IDs {
+		err = snapshotCache.SetSnapshot(context.Background(), id, snapshot)
+		if err != nil {
+			fmt.Printf("%v", err)
+		}
 	}
 
 	version++
