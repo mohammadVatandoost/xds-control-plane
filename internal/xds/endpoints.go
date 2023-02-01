@@ -1,0 +1,112 @@
+package xds
+
+import (
+	"context"
+	"fmt"
+	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
+	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
+	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
+	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
+	corev1 "k8s.io/api/core/v1"
+	k8scache "k8s.io/client-go/tools/cache"
+)
+
+type EnvoyCluster struct {
+	name      string
+	port      uint32
+	endpoints []string
+}
+
+var (
+	endpoints         []types.Resource
+	version           int
+	snapshotCache     cache.SnapshotCache
+	endpointInformers []k8scache.SharedIndexInformer
+)
+
+func HandleEndpointsUpdate(oldObj, newObj interface{}) {
+
+	edsServiceData := map[string]*EnvoyCluster{}
+
+	for _, inform := range endpointInformers {
+		for _, ep := range inform.GetStore().List() {
+
+			endpoints := ep.(*corev1.Endpoints)
+			if _, ok := endpoints.Labels["xds"]; !ok {
+				continue
+			}
+
+			if _, ok := edsServiceData[endpoints.Name]; !ok {
+				edsServiceData[endpoints.Name] = &EnvoyCluster{
+					name: endpoints.Name,
+				}
+			}
+
+			for _, subset := range endpoints.Subsets {
+				for i, addr := range subset.Addresses {
+					edsServiceData[endpoints.Name].port = uint32(subset.Ports[i].Port)
+					edsServiceData[endpoints.Name].endpoints = append(edsServiceData[endpoints.Name].endpoints, addr.IP)
+				}
+			}
+		}
+	}
+
+	// for each service create endpoints
+	edsEndpoints := make([]types.Resource, len(edsServiceData))
+	for _, envoyCluster := range edsServiceData {
+		edsEndpoints = append(edsEndpoints, MakeEndpointsForCluster(envoyCluster))
+	}
+
+	//snapshot := cache.NewSnapshot(fmt.Sprintf("%v.0", version), edsEndpoints, nil, nil, nil, nil, nil)
+	snapshot, err := cache.NewSnapshot(fmt.Sprintf("%v.0", version), map[resource.Type][]types.Resource{
+		resource.EndpointType: edsEndpoints,
+	})
+	if err != nil {
+		fmt.Printf("%v", err)
+		return
+	}
+
+	IDs := snapshotCache.GetStatusKeys()
+	for _, id := range IDs {
+		err = snapshotCache.SetSnapshot(context.Background(), id, snapshot)
+		if err != nil {
+			fmt.Printf("%v", err)
+		}
+	}
+
+	version++
+}
+
+func MakeEndpointsForCluster(service *EnvoyCluster) *endpointv3.ClusterLoadAssignment {
+	fmt.Printf("Updating endpoints for cluster %s: %v\n", service.name, service.endpoints)
+	cla := &endpointv3.ClusterLoadAssignment{
+		ClusterName: service.name,
+		Endpoints:   []*endpointv3.LocalityLbEndpoints{},
+	}
+
+	for _, endpoint := range service.endpoints {
+		cla.Endpoints = append(cla.Endpoints,
+			&endpointv3.LocalityLbEndpoints{
+				LbEndpoints: []*endpointv3.LbEndpoint{{
+					HostIdentifier: &endpointv3.LbEndpoint_Endpoint{
+						Endpoint: &endpointv3.Endpoint{
+							Address: &core.Address{
+								Address: &core.Address_SocketAddress{
+									SocketAddress: &core.SocketAddress{
+										Protocol: core.SocketAddress_TCP,
+										Address:  endpoint,
+										PortSpecifier: &core.SocketAddress_PortValue{
+											PortValue: service.port,
+										},
+									},
+								},
+							},
+						},
+					},
+				}},
+			},
+		)
+	}
+	return cla
+}

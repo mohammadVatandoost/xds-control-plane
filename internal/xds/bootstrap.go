@@ -1,13 +1,12 @@
-package main
+package xds
 
 import (
 	"encoding/base64"
+	yaml "gopkg.in/yaml.v2"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
-
-	yaml "gopkg.in/yaml.v2"
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
