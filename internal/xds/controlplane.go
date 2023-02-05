@@ -1,12 +1,12 @@
 package xds
 
 import (
-	"fmt"
 	clusterservice "github.com/envoyproxy/go-control-plane/envoy/service/cluster/v3"
 	discoverygrpc "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	endpointservice "github.com/envoyproxy/go-control-plane/envoy/service/endpoint/v3"
 	listenerservice "github.com/envoyproxy/go-control-plane/envoy/service/listener/v3"
 	routeservice "github.com/envoyproxy/go-control-plane/envoy/service/route/v3"
+	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	xds "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"github.com/sirupsen/logrus"
@@ -18,14 +18,16 @@ import (
 )
 
 type ControlPlane struct {
-	log           *logrus.Logger
-	version       int
-	snapshotCache cache.SnapshotCache
-	server        xds.Server
-	callBacks     *callbacks
+	log               *logrus.Logger
+	version           int
+	snapshotCache     cache.SnapshotCache
+	server            xds.Server
+	callBacks         *callbacks
+	endpoints         []types.Resource
+	endpointInformers []k8scache.SharedIndexInformer
 }
 
-func (cp *ControlPlane) Run() {
+func (cp *ControlPlane) Run() error {
 	grpcServer := grpc.NewServer()
 
 	discoverygrpc.RegisterAggregatedDiscoveryServiceServer(grpcServer, cp.server)
@@ -41,10 +43,10 @@ func (cp *ControlPlane) Run() {
 		defer close(stop)
 		factory := informers.NewSharedInformerFactoryWithOptions(cluster, time.Second*10, informers.WithNamespace("demo"))
 		informer := factory.Core().V1().Endpoints().Informer()
-		endpointInformers = append(endpointInformers, informer)
+		cp.endpointInformers = append(cp.endpointInformers, informer)
 
 		informer.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
-			UpdateFunc: HandleEndpointsUpdate,
+			UpdateFunc: cp.HandleEndpointsUpdate,
 		})
 
 		go func() {
@@ -54,6 +56,7 @@ func (cp *ControlPlane) Run() {
 
 	lis, _ := net.Listen("tcp", ":8080")
 	if err := grpcServer.Serve(lis); err != nil {
-		fmt.Errorf("", err)
+		return err
 	}
+	return nil
 }

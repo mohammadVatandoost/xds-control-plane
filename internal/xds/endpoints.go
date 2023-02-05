@@ -9,7 +9,6 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	corev1 "k8s.io/api/core/v1"
-	k8scache "k8s.io/client-go/tools/cache"
 )
 
 type EnvoyCluster struct {
@@ -18,18 +17,11 @@ type EnvoyCluster struct {
 	endpoints []string
 }
 
-var (
-	endpoints         []types.Resource
-	version           int
-	snapshotCache     cache.SnapshotCache
-	endpointInformers []k8scache.SharedIndexInformer
-)
-
-func HandleEndpointsUpdate(oldObj, newObj interface{}) {
+func (cp *ControlPlane) HandleEndpointsUpdate(oldObj, newObj interface{}) {
 
 	edsServiceData := map[string]*EnvoyCluster{}
 
-	for _, inform := range endpointInformers {
+	for _, inform := range cp.endpointInformers {
 		for _, ep := range inform.GetStore().List() {
 
 			endpoints := ep.(*corev1.Endpoints)
@@ -55,11 +47,11 @@ func HandleEndpointsUpdate(oldObj, newObj interface{}) {
 	// for each service create endpoints
 	edsEndpoints := make([]types.Resource, len(edsServiceData))
 	for _, envoyCluster := range edsServiceData {
-		edsEndpoints = append(edsEndpoints, MakeEndpointsForCluster(envoyCluster))
+		edsEndpoints = append(edsEndpoints, cp.MakeEndpointsForCluster(envoyCluster))
 	}
 
 	//snapshot := cache.NewSnapshot(fmt.Sprintf("%v.0", version), edsEndpoints, nil, nil, nil, nil, nil)
-	snapshot, err := cache.NewSnapshot(fmt.Sprintf("%v.0", version), map[resource.Type][]types.Resource{
+	snapshot, err := cache.NewSnapshot(fmt.Sprintf("%v.0", cp.version), map[resource.Type][]types.Resource{
 		resource.EndpointType: edsEndpoints,
 	})
 	if err != nil {
@@ -67,18 +59,18 @@ func HandleEndpointsUpdate(oldObj, newObj interface{}) {
 		return
 	}
 
-	IDs := snapshotCache.GetStatusKeys()
+	IDs := cp.snapshotCache.GetStatusKeys()
 	for _, id := range IDs {
-		err = snapshotCache.SetSnapshot(context.Background(), id, snapshot)
+		err = cp.snapshotCache.SetSnapshot(context.Background(), id, snapshot)
 		if err != nil {
 			fmt.Printf("%v", err)
 		}
 	}
 
-	version++
+	cp.version++
 }
 
-func MakeEndpointsForCluster(service *EnvoyCluster) *endpointv3.ClusterLoadAssignment {
+func (cp *ControlPlane) MakeEndpointsForCluster(service *EnvoyCluster) *endpointv3.ClusterLoadAssignment {
 	fmt.Printf("Updating endpoints for cluster %s: %v\n", service.name, service.endpoints)
 	cla := &endpointv3.ClusterLoadAssignment{
 		ClusterName: service.name,
