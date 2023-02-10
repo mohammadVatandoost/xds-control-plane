@@ -1,0 +1,13 @@
+apiVersion: v2
+# Name of the chart, aka service
+name: xds-grpc-client-example
+description: xds-grpc-client-example service
+# Version of the chart
+version: 0.1.0
+# This should be equal to your service image version.
+appVersion: 0.1.0
+type: application
+dependencies:
+  - name: common
+    version: 0.1.0
+    repository: mohammadVatandoost.github.io/helm-chart/

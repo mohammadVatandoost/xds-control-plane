@@ -1,8 +1,8 @@
 package main
 
 import (
-	"echo"
 	"flag"
+	"github.com/mohammadVatandoost/interfaces/golang/echo"
 	"net"
 
 	"log"
@@ -15,8 +15,6 @@ import (
 	_ "google.golang.org/grpc/resolver" // use for "dns:///be.cluster.local:50051"
 	_ "google.golang.org/grpc/xds"      // use for xds-experimental:///be-srv
 )
-
-const ()
 
 var (
 	conn *grpc.ClientConn

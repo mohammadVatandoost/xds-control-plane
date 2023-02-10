@@ -8,7 +8,8 @@ import (
 )
 
 func NewControlPlane(log *logrus.Logger) *ControlPlane {
-	snapshotCache := cache.NewSnapshotCache(false, cache.IDHash{}, nil)
+	snapshotCache := cache.NewSnapshotCache(true, cache.IDHash{}, log)
+	snapshotCache.GetStatusKeys()
 	callBacks := newCallBack(log)
 	return &ControlPlane{
 		log:           log,
