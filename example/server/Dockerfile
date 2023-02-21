@@ -1,6 +1,5 @@
 FROM golang:1.19 as base_image
 
-
 WORKDIR /build-app
 
 ADD go.mod go.sum /build-app/
