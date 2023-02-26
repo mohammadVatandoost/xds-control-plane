@@ -1,6 +1,5 @@
 package redis
 
-
 import (
 	"context"
 	"time"
@@ -10,15 +9,14 @@ import (
 )
 
 type PrometheusHook struct {
-		options           *Options
-		singleCommands    *prometheus.HistogramVec
-		pipelinedCommands *prometheus.CounterVec
-		singleErrors      *prometheus.CounterVec
-		pipelinedErrors   *prometheus.CounterVec
-	}
+	options           *Options
+	singleCommands    *prometheus.HistogramVec
+	pipelinedCommands *prometheus.CounterVec
+	singleErrors      *prometheus.CounterVec
+	pipelinedErrors   *prometheus.CounterVec
+}
 
 type startKey struct{}
-
 
 var (
 	labelNames = []string{"instance", "command"}
@@ -116,4 +114,3 @@ func register(collector prometheus.Collector) prometheus.Collector {
 func isActualErr(err error) bool {
 	return err != nil && err != redis.Nil
 }
-

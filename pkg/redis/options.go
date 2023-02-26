@@ -45,4 +45,3 @@ func WithDurationBuckets(buckets []float64) Option {
 		options.DurationBuckets = buckets
 	}
 }
-

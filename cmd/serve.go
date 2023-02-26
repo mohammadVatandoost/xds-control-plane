@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/mohammadVatandoost/xds-conrol-plane/internal/config"
 	"github.com/mohammadVatandoost/xds-conrol-plane/internal/xds"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/logger"
 	"github.com/sirupsen/logrus"
@@ -35,4 +34,5 @@ func serve(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		log.Error(err)
 	}
+	return nil
 }

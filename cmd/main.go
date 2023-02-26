@@ -32,5 +32,3 @@ func configureLoggerOrPanic(loggerConfig logger.Config) {
 		logrus.WithError(err).Panic("Failed to configure logger")
 	}
 }
-
-

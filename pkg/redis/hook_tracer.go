@@ -73,4 +73,3 @@ func recordError(ctx context.Context, errorTag string, span opentracing.Span, er
 		span.SetTag(errorTag, err.Error())
 	}
 }
-

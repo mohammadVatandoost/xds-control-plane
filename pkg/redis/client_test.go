@@ -6,11 +6,11 @@ import (
 	"github.com/alicebob/miniredis/v2"
 	"github.com/elliotchance/redismock/v8"
 	"github.com/go-redis/redis/v8"
+	internalRedis "github.com/mohammadVatandoost/xds-conrol-plane/pkg/redis"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"testing"
 	"time"
-	internalRedis "github.com/mohammadVatandoost/xds-conrol-plane/pkg/redis"
 )
 
 type ClientTestSuite struct {

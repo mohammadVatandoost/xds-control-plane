@@ -2,9 +2,11 @@ package xds
 
 import (
 	"context"
-	"github.com/sirupsen/logrus"
 	"sync"
 
+	"github.com/sirupsen/logrus"
+
+	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 )
 
@@ -25,7 +27,7 @@ func (cb *callbacks) OnStreamOpen(ctx context.Context, id int64, typ string) err
 	cb.log.Infof("OnStreamOpen %d open for Type [%s]", id, typ)
 	return nil
 }
-func (cb *callbacks) OnStreamClosed(id int64) {
+func (cb *callbacks) OnStreamClosed(id int64, node *core.Node) {
 	cb.log.Infof("OnStreamClosed %d closed", id)
 }
 func (cb *callbacks) OnStreamRequest(id int64, r *discovery.DiscoveryRequest) error {
@@ -58,7 +60,7 @@ func (cb *callbacks) OnFetchResponse(req *discovery.DiscoveryRequest, resp *disc
 	cb.log.Infof("OnFetchResponse... Resquest[%v],  Response[%v]", req.TypeUrl, resp.TypeUrl)
 }
 
-func (cb *callbacks) OnDeltaStreamClosed(id int64) {
+func (cb *callbacks) OnDeltaStreamClosed(id int64, node *core.Node) {
 	cb.log.Infof("OnDeltaStreamClosed... %v", id)
 }
 

@@ -15,4 +15,4 @@ WORKDIR /app
 
 COPY --from=base_image /build-app/service .
 
-ENTRYPOINT ["./service"]
+ENTRYPOINT ["./service", "serve"]

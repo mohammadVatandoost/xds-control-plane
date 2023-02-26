@@ -2,10 +2,12 @@ package config
 
 import (
 	"strings"
+	"time"
 
 	"github.com/mohammadVatandoost/xds-conrol-plane/internal/xds"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/logger"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/prometheus"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/redis"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -16,8 +18,9 @@ import (
 type Config struct {
 	ConfigFile string
 	Logger     logger.Config
-	XDS       xds.Config
+	XDS        xds.Config
 	Metric     prometheus.Config
+	Redis      redis.Config
 }
 
 // LoadConfig loads the config from a file if specified, otherwise from the environment
@@ -31,6 +34,9 @@ func LoadConfig(cmd *cobra.Command) (*Config, error) {
 
 	viper.SetDefault("xds.ListenPort", 8888)
 	viper.SetDefault("xds.ADSEnabled", true)
+
+	viper.SetDefault("redis.Address", "redis:6379")
+	viper.SetDefault("redis.ConnectionTimeout", 5*time.Second)
 
 	// Read Config from ENV
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))

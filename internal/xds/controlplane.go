@@ -28,6 +28,7 @@ type ControlPlane struct {
 	endpoints         []types.Resource
 	endpointInformers []k8scache.SharedIndexInformer
 	conf              *Config
+	storage           cache.Storage
 }
 
 func (cp *ControlPlane) Run() error {

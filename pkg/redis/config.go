@@ -3,11 +3,6 @@ package redis
 import "time"
 
 type Config struct {
-	Addr              string
+	Address           string
 	ConnectionTimeout time.Duration
-	QueryTimeout      time.Duration
-	PostTTL           time.Duration
-	SchemaTTL         time.Duration
 }
-
-
