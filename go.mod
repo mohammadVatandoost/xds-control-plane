@@ -1,4 +1,4 @@
-module xds-conrol-plane
+module github.com/mohammadVatandoost/xds-conrol-plane
 
 go 1.17
 

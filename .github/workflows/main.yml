@@ -33,6 +33,7 @@ jobs:
         run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-server-example:latest
 
        - name: Build XDS control plane
+        working-directory: ./build
         run: docker build . --tag $DOCKER_REPOSITORY_NAME/xds-control-plane:latest
 
       - name: Push XDS control plane

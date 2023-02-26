@@ -1,6 +1,10 @@
 package xds
 
 import (
+	"net"
+	"strconv"
+	"time"
+
 	clusterservice "github.com/envoyproxy/go-control-plane/envoy/service/cluster/v3"
 	discoverygrpc "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	endpointservice "github.com/envoyproxy/go-control-plane/envoy/service/endpoint/v3"
@@ -13,8 +17,6 @@ import (
 	"google.golang.org/grpc"
 	"k8s.io/client-go/informers"
 	k8scache "k8s.io/client-go/tools/cache"
-	"net"
-	"time"
 )
 
 type ControlPlane struct {
@@ -25,6 +27,7 @@ type ControlPlane struct {
 	callBacks         *callbacks
 	endpoints         []types.Resource
 	endpointInformers []k8scache.SharedIndexInformer
+	conf              *Config
 }
 
 func (cp *ControlPlane) Run() error {
@@ -54,7 +57,7 @@ func (cp *ControlPlane) Run() error {
 		}()
 	}
 
-	lis, _ := net.Listen("tcp", ":8080")
+	lis, _ := net.Listen("tcp", ":"+strconv.Itoa(cp.conf.ListenPort))
 	if err := grpcServer.Serve(lis); err != nil {
 		return err
 	}

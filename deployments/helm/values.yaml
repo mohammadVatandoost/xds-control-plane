@@ -1,0 +1,48 @@
+# Default values for MY_CHART.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: mvatandoost/xds-control-plane
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: [name: registry-secret, name: mvatandoost]
+nameOverride: ""
+fullnameOverride: ""
+
+
+podAnnotations: {}
+
+service:
+  labels:
+    monitoring-app: xds-apps
+  type: clusterIP
+  headless: true
+  ports:
+  - name: grpc
+    port: 8888
+    targetPort: 8888
+    protocol: TCP
+  - name: metrics
+    port: 9000
+    targetPort: 9000
+    protocol: TCP
+
+
+resources:
+  limits:
+    cpu: 800m
+    memory: 9000Mi
+  requests:
+    cpu: 200m
+    memory: 500Mi
+
+configMap:
+  data:
+    METRIC_LISTENPORT: 9000
+    LOGGER_LEVEL: "error"
+    GRPC_LISTENPORT: 8888
+    GRPC_TIMEOUT: 5

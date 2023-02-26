@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"testing"
 	"time"
-	internalRedis "xds-conrol-plane/pkg/redis"
+	internalRedis "github.com/mohammadVatandoost/xds-conrol-plane/pkg/redis"
 )
 
 type ClientTestSuite struct {

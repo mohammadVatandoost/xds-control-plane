@@ -7,8 +7,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func NewControlPlane(log *logrus.Logger) *ControlPlane {
-	snapshotCache := cache.NewSnapshotCache(true, cache.IDHash{}, log)
+func NewControlPlane(log *logrus.Logger, config *Config) *ControlPlane {
+	snapshotCache := cache.NewSnapshotCache(config.ADSEnabled, cache.IDHash{}, log)
 	snapshotCache.GetStatusKeys()
 	callBacks := newCallBack(log)
 	return &ControlPlane{

@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    {{- include "MY_CHART.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "MY_CHART.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "MY_CHART.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            {{- range .Values.service.ports }}
+            - containerPort: {{ .port }}
+              name: {{ .name }}
+              protocol: {{ .protocol }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-config
+          env:
+          - name: POSTGRES_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: divar-control-plane-secret
+                key: db_username
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: divar-control-plane-secret
+                key: db_password
+          - name: S3STORAGE_ACCESSKEYID
+            valueFrom:
+              secretKeyRef:
+                name: divar-control-plane-secret
+                key: s3_access_key
+          - name: S3STORAGE_SECRETACCESSKEY
+            valueFrom:
+              secretKeyRef:
+                name: divar-control-plane-secret
+                key: s3_secret_key
+          - name: K8S_CERTIFICATE_AUTHORITY_DATA
+            valueFrom:
+              secretKeyRef:
+                name: kubectl-bot-secret
+                key: K8S_CERTIFICATE_AUTHORITY_DATA
+          - name: K8S_SERVER_URL
+            valueFrom:
+              secretKeyRef:
+                name: kubectl-bot-secret
+                key: K8S_SERVER_URL
+          - name: K8S_USER
+            valueFrom:
+              secretKeyRef:
+                name: kubectl-bot-secret
+                key: K8S_USER
+          - name: K8S_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: kubectl-bot-secret
+                key: K8S_TOKEN
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
