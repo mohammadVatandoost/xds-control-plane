@@ -29,7 +29,7 @@ func serve(cmd *cobra.Command, args []string) error {
 
 	log := logger.NewLogger()
 
-	xdsServer := xds.NewControlPlane(log, &conf.XDS)
+	xdsServer := xds.NewControlPlane(log, &conf.XDS, nil)
 	err := xdsServer.Run()
 	if err != nil {
 		log.Error(err)

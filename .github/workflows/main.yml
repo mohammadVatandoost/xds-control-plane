@@ -15,6 +15,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Helm Add Repo
+        run: helm repo add myhelmrepo https://mohammadVatandoost.github.io/helm-chart/
+
+      - name: Helm lint
+        working-directory: ./deployments/helm
+        run: helm lint .
+      
       - name: Docker login
         run: docker login  -u $DOCKER_REPOSITORY_NAME -p $DOCKER_REPOSITORY_ACCESS_TOKEN
 
@@ -37,5 +44,6 @@ jobs:
         run: docker build . --tag $DOCKER_REPOSITORY_NAME/xds-control-plane:latest
 
       - name: Push XDS control plane
-        run: docker push $DOCKER_REPOSITORY_NAME/xds-control-plane:latest  
+        run: docker push $DOCKER_REPOSITORY_NAME/xds-control-plane:latest 
+   
 

@@ -1,9 +1,12 @@
 package main
 
 import (
-	"flag"
-	"github.com/mohammadVatandoost/interfaces/golang/echo"
 	"net"
+	"strings"
+
+	"github.com/mohammadVatandoost/interfaces/golang/echo"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 
 	"log"
 	"time"
@@ -13,17 +16,33 @@ import (
 
 	"google.golang.org/grpc/admin"
 	_ "google.golang.org/grpc/resolver" // use for "dns:///be.cluster.local:50051"
-	_ "google.golang.org/grpc/xds"      // use for xds-experimental:///be-srv
+	// _ "google.golang.org/grpc/xds"      // use for xds-experimental:///be-srv
 )
 
 var (
 	conn *grpc.ClientConn
 )
 
-func main() {
+type Config struct {
+	Server1Address string
+}
 
-	address := flag.String("host", "dns:///be.cluster.local:50071", "dns:///be.cluster.local:50071 or xds-experimental:///be-srv")
-	flag.Parse()
+func main() {
+	viper.SetDefault("Server1Address", "xds-grpc-server-example-headless:8888")
+	// Read Config from ENV
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv()
+
+	var config Config
+
+	err := viper.Unmarshal(&config)
+	if err != nil {
+		logrus.Fatalf("failed to read configs: %v", err)
+	}
+
+	
+	// address := flag.String("host", "dns:///be.cluster.local:50071", "dns:///be.cluster.local:50071 or xds-experimental:///be-srv")
+	// flag.Parse()
 
 	//address = fmt.Sprintf("xds-experimental:///be-srv")
 
@@ -39,18 +58,19 @@ func main() {
 		grpcServer := grpc.NewServer(opts...)
 		cleanup, err := admin.Register(grpcServer)
 		if err != nil {
-			log.Fatalf("failed to register admin services: %v", err)
+			logrus.Fatalf("failed to register admin services: %v", err)
 		}
 		defer cleanup()
 
-		log.Printf("Admin port listen on :%s", lis.Addr().String())
+		logrus.Printf("Admin port listen on :%s", lis.Addr().String())
 		if err := grpcServer.Serve(lis); err != nil {
-			log.Fatalf("failed to serve: %v", err)
+			logrus.Fatalf("failed to serve: %v", err)
 		}
 	}()
 
-	conn, err := grpc.Dial(*address, grpc.WithInsecure())
+	logrus.Infof("Connectting to server: %v ", config.Server1Address)
 
+	conn, err := grpc.Dial(config.Server1Address, grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
@@ -58,14 +78,15 @@ func main() {
 
 	c := echo.NewEchoServerClient(conn)
 	ctx := context.Background()
-
-	for i := 0; i < 30; i++ {
+	i := 0
+	for {
 		r, err := c.SayHello(ctx, &echo.EchoRequest{Name: "unary RPC msg "})
 		if err != nil {
-			log.Fatalf("could not greet: %v", err)
+			logrus.Fatalf("could not greet: %v", err)
 		}
-		log.Printf("RPC Response: %v %v", i, r)
-		time.Sleep(2 * time.Second)
+		logrus.Printf("RPC Response: %v %v", i, r)
+		time.Sleep(5 * time.Second)
+		i++
 	}
 
 }

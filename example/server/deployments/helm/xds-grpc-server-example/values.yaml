@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: mvatandoost/xds-grpc-client-example
+  repository: mvatandoost/xds-grpc-server-example
   pullPolicy: IfNotPresent
   tag: "latest"
 
@@ -22,6 +22,10 @@ service:
   type: clusterIP
   headless: true
   ports:
+  - name: grpc
+    port: 8888
+    targetPort: 8888
+    protocol: TCP
   - name: metrics
     port: 9000
     targetPort: 9000
@@ -39,5 +43,7 @@ resources:
 configMap:
   data:
     METRIC_LISTENPORT: 9000
+    REST_LISTENPORT: 8080
     LOGGER_LEVEL: "error"
-    Server1Address: "xds-grpc-server-example-headless:8888"
+    GRPC_LISTENPORT: 8888
+    GRPC_TIMEOUT: 5
