@@ -1,6 +1,7 @@
 package xds
 
 import (
+	"context"
 	"net"
 	"strconv"
 	"time"
@@ -15,6 +16,7 @@ import (
 	xds "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	k8scache "k8s.io/client-go/tools/cache"
 )
@@ -40,23 +42,52 @@ func (cp *ControlPlane) Run() error {
 	routeservice.RegisterRouteDiscoveryServiceServer(grpcServer, cp.server)
 	listenerservice.RegisterListenerDiscoveryServiceServer(grpcServer, cp.server)
 
-	clusters, _ := CreateBootstrapClients()
-
-	for _, cluster := range clusters {
+	// clusters, _ := CreateBootstrapClients()
+	clusterClient, err := CreateClusterClient()
+	if err != nil {
+		cp.log.WithError(err).Error("can not create cluster client")
+		return err
+	}
+	cp.log.Info("cluster client created")
+	namespaces, err := clusterClient.CoreV1().Namespaces().List(context.Background(), v1.ListOptions{})
+	if err != nil {
+		cp.log.WithError(err).Error("can not get namespaces list")
+		return err
+	}
+	cp.log.Infof("cluster number of namespaces: %v", len(namespaces.Items))
+	for _, namespace := range namespaces.Items {
+		cp.log.Infof("add endpoint informer for namespace: %v", namespace.Name)
 		stop := make(chan struct{})
 		defer close(stop)
-		factory := informers.NewSharedInformerFactoryWithOptions(cluster, time.Second*10, informers.WithNamespace("demo"))
+		factory := informers.NewSharedInformerFactoryWithOptions(clusterClient, time.Second*10, informers.WithNamespace(namespace.Name))
 		informer := factory.Core().V1().Endpoints().Informer()
 		cp.endpointInformers = append(cp.endpointInformers, informer)
-
+	
 		informer.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
 			UpdateFunc: cp.HandleEndpointsUpdate,
 		})
-
+	
 		go func() {
 			informer.Run(stop)
 		}()
 	}
+
+
+	// for _, cluster := range clusters {
+	// 	stop := make(chan struct{})
+	// 	defer close(stop)
+	// 	factory := informers.NewSharedInformerFactoryWithOptions(cluster, time.Second*10, informers.WithNamespace("demo"))
+	// 	informer := factory.Core().V1().Endpoints().Informer()
+	// 	cp.endpointInformers = append(cp.endpointInformers, informer)
+
+	// 	informer.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
+	// 		UpdateFunc: cp.HandleEndpointsUpdate,
+	// 	})
+
+	// 	go func() {
+	// 		informer.Run(stop)
+	// 	}()
+	// }
 
 	lis, _ := net.Listen("tcp", ":"+strconv.Itoa(cp.conf.ListenPort))
 	if err := grpcServer.Serve(lis); err != nil {

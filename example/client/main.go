@@ -40,7 +40,6 @@ func main() {
 		logrus.Fatalf("failed to read configs: %v", err)
 	}
 
-	
 	// address := flag.String("host", "dns:///be.cluster.local:50071", "dns:///be.cluster.local:50071 or xds-experimental:///be-srv")
 	// flag.Parse()
 

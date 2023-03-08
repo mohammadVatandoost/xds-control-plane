@@ -67,3 +67,17 @@ func CreateBootstrapClients() ([]kubernetes.Interface, error) {
 	}
 	return bootstrapClients, nil
 }
+
+func CreateClusterClient() (kubernetes.Interface, error) {
+	// creates the in-cluster config
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		return nil, err
+	}
+	// creates the clientset
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+	return clientset, nil
+}
