@@ -56,22 +56,23 @@ func (cp *ControlPlane) Run() error {
 	}
 	cp.log.Infof("cluster number of namespaces: %v", len(namespaces.Items))
 	for _, namespace := range namespaces.Items {
-		cp.log.Infof("add endpoint informer for namespace: %v", namespace.Name)
-		stop := make(chan struct{})
-		defer close(stop)
-		factory := informers.NewSharedInformerFactoryWithOptions(clusterClient, time.Second*10, informers.WithNamespace(namespace.Name))
-		informer := factory.Core().V1().Endpoints().Informer()
-		cp.endpointInformers = append(cp.endpointInformers, informer)
-	
-		informer.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
-			UpdateFunc: cp.HandleEndpointsUpdate,
-		})
-	
-		go func() {
-			informer.Run(stop)
-		}()
+		cp.log.Infof("namespace: %v", namespace.Name)
 	}
+	cp.log.Info("==========")
+	stop := make(chan struct{})
+	defer close(stop)
+	// for all namespaces
+	factory := informers.NewSharedInformerFactoryWithOptions(clusterClient, time.Second*10, informers.WithNamespace(""))
+	informer := factory.Core().V1().Endpoints().Informer()
+	cp.endpointInformers = append(cp.endpointInformers, informer)
 
+	informer.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
+		UpdateFunc: cp.HandleEndpointsUpdate,
+	})
+
+	go func() {
+		informer.Run(stop)
+	}()
 
 	// for _, cluster := range clusters {
 	// 	stop := make(chan struct{})
@@ -89,7 +90,11 @@ func (cp *ControlPlane) Run() error {
 	// 	}()
 	// }
 
-	lis, _ := net.Listen("tcp", ":"+strconv.Itoa(cp.conf.ListenPort))
+	lis, err := net.Listen("tcp", ":"+strconv.Itoa(cp.conf.ListenPort))
+	if err != nil {
+		return err
+	}
+
 	if err := grpcServer.Serve(lis); err != nil {
 		return err
 	}

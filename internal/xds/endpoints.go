@@ -18,13 +18,15 @@ type EnvoyCluster struct {
 }
 
 func (cp *ControlPlane) HandleEndpointsUpdate(oldObj, newObj interface{}) {
-
+	cp.log.Info("ControlPlane HandleEndpointsUpdate")
 	edsServiceData := map[string]*EnvoyCluster{}
 
 	for _, inform := range cp.endpointInformers {
 		for _, ep := range inform.GetStore().List() {
 
 			endpoints := ep.(*corev1.Endpoints)
+			// cp.log.Infof("endpoints Labels: %v", endpoints.Labels)
+			//ToDo: use it only for specefic services
 			if _, ok := endpoints.Labels["xds"]; !ok {
 				continue
 			}
@@ -34,9 +36,11 @@ func (cp *ControlPlane) HandleEndpointsUpdate(oldObj, newObj interface{}) {
 					name: endpoints.Name,
 				}
 			}
-
+			cp.log.Infof("endpoints: %v", endpoints.String())
 			for _, subset := range endpoints.Subsets {
+				cp.log.Infof("endpoints subset: %v", subset.String())
 				for i, addr := range subset.Addresses {
+					cp.log.Infof("endpoints Subsets addresses, IP: %v, Port: %v", addr.IP, subset.Ports[i].Port)
 					edsServiceData[endpoints.Name].port = uint32(subset.Ports[i].Port)
 					edsServiceData[endpoints.Name].endpoints = append(edsServiceData[endpoints.Name].endpoints, addr.IP)
 				}
@@ -71,7 +75,7 @@ func (cp *ControlPlane) HandleEndpointsUpdate(oldObj, newObj interface{}) {
 }
 
 func (cp *ControlPlane) MakeEndpointsForCluster(service *EnvoyCluster) *endpointv3.ClusterLoadAssignment {
-	fmt.Printf("Updating endpoints for cluster %s: %v\n", service.name, service.endpoints)
+	cp.log.Infof("Updating endpoints for cluster,  service.name %s: service.endpoints: %v", service.name, service.endpoints)
 	cla := &endpointv3.ClusterLoadAssignment{
 		ClusterName: service.name,
 		Endpoints:   []*endpointv3.LocalityLbEndpoints{},

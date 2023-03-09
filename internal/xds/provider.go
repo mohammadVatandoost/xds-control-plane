@@ -22,6 +22,7 @@ func NewControlPlane(log *logrus.Logger, config *Config, storage cache.Storage) 
 		callBacks:     callBacks,
 		server:        xds.NewServer(context.Background(), snapshotCache, callBacks),
 		storage:       storage,
+		conf:          config,
 	}
 }
 

@@ -37,47 +37,6 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-config
-          env:
-          - name: POSTGRES_USERNAME
-            valueFrom:
-              secretKeyRef:
-                name: divar-control-plane-secret
-                key: db_username
-          - name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: divar-control-plane-secret
-                key: db_password
-          - name: S3STORAGE_ACCESSKEYID
-            valueFrom:
-              secretKeyRef:
-                name: divar-control-plane-secret
-                key: s3_access_key
-          - name: S3STORAGE_SECRETACCESSKEY
-            valueFrom:
-              secretKeyRef:
-                name: divar-control-plane-secret
-                key: s3_secret_key
-          - name: K8S_CERTIFICATE_AUTHORITY_DATA
-            valueFrom:
-              secretKeyRef:
-                name: kubectl-bot-secret
-                key: K8S_CERTIFICATE_AUTHORITY_DATA
-          - name: K8S_SERVER_URL
-            valueFrom:
-              secretKeyRef:
-                name: kubectl-bot-secret
-                key: K8S_SERVER_URL
-          - name: K8S_USER
-            valueFrom:
-              secretKeyRef:
-                name: kubectl-bot-secret
-                key: K8S_USER
-          - name: K8S_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: kubectl-bot-secret
-                key: K8S_TOKEN
       {{- with .Values.nodeSelector }}
       nodeSelector:
       {{- toYaml . | nindent 8 }}

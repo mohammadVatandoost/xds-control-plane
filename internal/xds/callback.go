@@ -28,7 +28,7 @@ func (cb *callbacks) OnStreamOpen(ctx context.Context, id int64, typ string) err
 	return nil
 }
 func (cb *callbacks) OnStreamClosed(id int64, node *core.Node) {
-	cb.log.Infof("OnStreamClosed %d closed", id)
+	cb.log.Infof("OnStreamClosed %d closed, node id: %v, node cluster: %v", id, node.Id, node.Cluster)
 }
 func (cb *callbacks) OnStreamRequest(id int64, r *discovery.DiscoveryRequest) error {
 	cb.log.Infof("OnStreamRequest %d  Request[%v]", id, r.TypeUrl)

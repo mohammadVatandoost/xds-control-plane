@@ -1,4 +1,4 @@
-.PHONY: help generate test lint fmt dependencies clean check coverage service race .remove_empty_dirs .pre-check-go
+.PHONY: help generate test lint fmt dependencies clean check coverage service race .remove_empty_dirs .pre-check-go build-docker kind-load helm-lint helm-package helm-deploy
 
 SRCS = $(patsubst ./%,%,$(shell find . -name "*.go" -not -path "*vendor*" -not -path "*.pb.go"))
 DOCKER_REPOSITORY = "mvatandoost"
@@ -38,5 +38,9 @@ helm-package:
 helm-deploy:
 	helm -n $(NAMESPACE) upgrade -i $(PROJECT_NAME) -f ./deployments/helm/$(PROJECT_NAME)/values.yaml *.tgz 
 
-
-
+helm-ci-cd:
+	helm lint deployments/helm/$(PROJECT_NAME)
+	helm repo add $(HELM_REPO_NAME) $(HELM_REPO_ADDRESS)
+	helm dependency update ./deployments/helm/$(PROJECT_NAME)
+	helm package --app-version=$(VERSION) ./deployments/helm/$(PROJECT_NAME)
+	helm -n $(NAMESPACE) upgrade -i $(PROJECT_NAME) -f ./deployments/helm/$(PROJECT_NAME)/values.yaml *.tgz
