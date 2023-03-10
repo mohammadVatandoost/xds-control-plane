@@ -20,6 +20,9 @@ fmt: ## to run `go fmt` on all source code
 build-docker:
 	docker build . --tag $(DOCKER_REPOSITORY)/$(PROJECT_NAME):$(TAG)
 
+kind-load:
+	kind load docker-image $(DOCKER_REPOSITORY)/$(PROJECT_NAME):$(TAG)	
+
 helm-lint:
 	helm lint deployments/helm/$(PROJECT_NAME)
 
