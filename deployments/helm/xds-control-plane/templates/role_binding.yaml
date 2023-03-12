@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: xds-control-plane-role-binding
+subjects:
+- kind: ServiceAccount
+  name: xds-control-plane-service-account
+  namespace: test
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: xds-control-plane-cluster-role
+  
