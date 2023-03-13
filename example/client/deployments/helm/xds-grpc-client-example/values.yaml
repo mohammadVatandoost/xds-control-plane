@@ -42,3 +42,4 @@ configMap:
     METRIC_LISTENPORT: 9000
     LOGGER_LEVEL: "error"
     Server1Address: "xds-grpc-server-example-headless:8888"
+    GRPC_XDS_BOOTSTRAP_CONFIG: ""
