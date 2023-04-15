@@ -28,7 +28,7 @@ type Config struct {
 }
 
 func main() {
-	viper.SetDefault("Server1Address", "xds-grpc-server-example-headless:8888")
+	viper.SetDefault("Server1Address", "xds:///xds-grpc-server-example-headless:8888")
 	// Read Config from ENV
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
@@ -40,8 +40,6 @@ func main() {
 		logrus.Fatalf("failed to read configs: %v", err)
 	}
 
-	// address := flag.String("host", "dns:///be.cluster.local:50071", "dns:///be.cluster.local:50071 or xds-experimental:///be-srv")
-	// flag.Parse()
 
 	//address = fmt.Sprintf("xds-experimental:///be-srv")
 
@@ -61,13 +59,13 @@ func main() {
 		}
 		defer cleanup()
 
-		logrus.Printf("Admin port listen on :%s", lis.Addr().String())
+		logrus.Printf("GRPC Admin port listen on :%s", lis.Addr().String())
 		if err := grpcServer.Serve(lis); err != nil {
 			logrus.Fatalf("failed to serve: %v", err)
 		}
 	}()
 
-	logrus.Infof("Connectting to server: %v ", config.Server1Address)
+	logrus.Printf("Connectting to server: %v ", config.Server1Address)
 
 	conn, err := grpc.Dial(config.Server1Address, grpc.WithInsecure())
 	if err != nil {

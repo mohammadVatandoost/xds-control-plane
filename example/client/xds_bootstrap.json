@@ -1,7 +1,7 @@
 {
   "xds_servers": [
     {
-      "server_uri": "xds.domain.com:18000",
+      "server_uri": "xds-control-plane-headless:8888",
       "channel_creds": [
         {
           "type": "insecure"

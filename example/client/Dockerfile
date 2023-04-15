@@ -14,5 +14,6 @@ FROM debian:stable-20220509 as final
 WORKDIR /app
 
 COPY --from=base_image /build-app/service .
+COPY --from=base_image /build-app/xds_bootstrap.json .
 
 ENTRYPOINT ["./service"]
