@@ -2,6 +2,7 @@ package main
 
 import (
 	"net"
+	"net/http"
 	"strings"
 
 	"github.com/mohammadVatandoost/interfaces/golang/echo"
@@ -13,6 +14,10 @@ import (
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"google.golang.org/grpc/admin"
 	_ "google.golang.org/grpc/resolver" // use for "dns:///be.cluster.local:50051"
@@ -26,6 +31,14 @@ var (
 type Config struct {
 	Server1Address string
 }
+
+var (
+        opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
+                Name: "client_rpc_call_counter",
+                Help: "The total number of rpc calls",
+        })
+)
+
 
 func main() {
 	viper.SetDefault("Server1Address", "xds:///xds-grpc-server-example-headless:8888")
@@ -73,6 +86,14 @@ func main() {
 	}
 	defer conn.Close()
 
+	http.Handle("/metrics", promhttp.Handler())
+    go func() {
+		err := http.ListenAndServe(":9000", nil)
+		if err != nil {
+			logrus.WithError(err).Error("can not listen to expose metrics")
+		}
+	}() 
+
 	c := echo.NewEchoServerClient(conn)
 	ctx := context.Background()
 	i := 0
@@ -82,6 +103,7 @@ func main() {
 			logrus.Fatalf("could not greet: %v", err)
 		}
 		logrus.Printf("RPC Response: %v %v", i, r)
+		opsProcessed.Inc()
 		time.Sleep(5 * time.Second)
 		i++
 	}
