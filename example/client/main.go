@@ -41,16 +41,17 @@ var (
 
 
 func main() {
-	viper.SetDefault("Server1Address", "xds:///xds-grpc-server-example-headless:8888")
+	// viper.SetDefault("Server1Address", "xds:///xds-grpc-server-example-headless:8888")
+	viper.SetDefault("Server1Address", "xds-grpc-server-example-headless:8888")
 	// Read Config from ENV
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
-
+	logger := logrus.WithField("name", "client")
 	var config Config
 
 	err := viper.Unmarshal(&config)
 	if err != nil {
-		logrus.Fatalf("failed to read configs: %v", err)
+		logger.Fatalf("failed to read configs: %v", err)
 	}
 
 
@@ -61,28 +62,28 @@ func main() {
 	go func() {
 		lis, err := net.Listen("tcp", ":19000")
 		if err != nil {
-			log.Fatalf("failed to listen: %v", err)
+			logger.Fatalf("failed to listen: %v", err)
 		}
 		defer lis.Close()
 		opts := []grpc.ServerOption{grpc.MaxConcurrentStreams(10)}
 		grpcServer := grpc.NewServer(opts...)
 		cleanup, err := admin.Register(grpcServer)
 		if err != nil {
-			logrus.Fatalf("failed to register admin services: %v", err)
+			logger.Fatalf("failed to register admin services: %v", err)
 		}
 		defer cleanup()
 
-		logrus.Printf("GRPC Admin port listen on :%s", lis.Addr().String())
+		logger.Printf("GRPC Admin port listen on :%s", lis.Addr().String())
 		if err := grpcServer.Serve(lis); err != nil {
 			logrus.Fatalf("failed to serve: %v", err)
 		}
 	}()
 
-	logrus.Printf("Connectting to server: %v ", config.Server1Address)
+	logger.Printf("Connectting to server: %v ", config.Server1Address)
 
 	conn, err := grpc.Dial(config.Server1Address, grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		logger.Fatalf("did not connect: %v", err)
 	}
 	defer conn.Close()
 
@@ -102,7 +103,7 @@ func main() {
 		if err != nil {
 			logrus.Fatalf("could not greet: %v", err)
 		}
-		logrus.Printf("RPC Response: %v %v", i, r)
+		logger.Printf("RPC Response: %v %v", i, r)
 		opsProcessed.Inc()
 		time.Sleep(5 * time.Second)
 		i++
