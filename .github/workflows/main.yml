@@ -13,38 +13,38 @@ jobs:
   build-examples:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v3
 
-      - name: Helm Add Repo
-        run: helm repo add myhelmrepo https://mohammadVatandoost.github.io/helm-chart/
+    - name: Helm Add Repo
+      run: helm repo add myhelmrepo https://mohammadVatandoost.github.io/helm-chart/
 
-      - name: Helm lint
-        working-directory: ./deployments/helm
-        run: helm lint .
+    - name: Helm lint
+      working-directory: ./deployments/helm
+      run: helm lint .
       
-      - name: Docker login
-        run: docker login  -u $DOCKER_REPOSITORY_NAME -p $DOCKER_REPOSITORY_ACCESS_TOKEN
+    - name: Docker login
+      run: docker login  -u $DOCKER_REPOSITORY_NAME -p $DOCKER_REPOSITORY_ACCESS_TOKEN
 
-      - name: Build Example client
-        working-directory: ./example/client
-        run: docker build . --tag $DOCKER_REPOSITORY_NAME/xds-grpc-client-example:latest
+    - name: Build Example client
+      working-directory: ./example/client
+      run: docker build . --tag $DOCKER_REPOSITORY_NAME/xds-grpc-client-example:latest
 
-      - name: Push Example Client
-        run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-client-example:latest
+    - name: Push Example Client
+      run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-client-example:latest
 
-      - name: Build Example Server
-        working-directory: ./example/server
-        run: docker build . --tag $DOCKER_REPOSITORY_NAME/xds-grpc-server-example:latest
+    - name: Build Example Server
+      working-directory: ./example/server
+      run: docker build . --tag $DOCKER_REPOSITORY_NAME/xds-grpc-server-example:latest
 
-      - name: Push Example Server
-        run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-server-example:latest
+    - name: Push Example Server
+      run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-server-example:latest
 
-       - name: Build XDS control plane
-        working-directory: ./build
-        run: docker build . --tag $DOCKER_REPOSITORY_NAME/xds-control-plane:latest
+    - name: Build XDS control plane
+      working-directory: ./build
+      run: docker build . --tag $DOCKER_REPOSITORY_NAME/xds-control-plane:latest
 
-      - name: Push XDS control plane
-        run: docker push $DOCKER_REPOSITORY_NAME/xds-control-plane:latest 
+    - name: Push XDS control plane
+      run: docker push $DOCKER_REPOSITORY_NAME/xds-control-plane:latest 
    
 
