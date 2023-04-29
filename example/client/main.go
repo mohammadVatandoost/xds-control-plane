@@ -9,7 +9,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	"log"
 	"time"
 
 	"golang.org/x/net/context"
