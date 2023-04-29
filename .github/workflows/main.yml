@@ -20,7 +20,7 @@ jobs:
       run: helm repo add myhelmrepo https://mohammadVatandoost.github.io/helm-chart/
 
     - name: Helm lint
-      working-directory: ./deployments/helm
+      working-directory: ./deployments/helm/xds-control-plane
       run: helm lint .
       
     - name: Docker login
