@@ -75,6 +75,14 @@ func main() {
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
 
+	logrus.SetFormatter(&logrus.JSONFormatter{
+		FieldMap: logrus.FieldMap{                               
+			logrus.FieldKeyTime:  "@timestamp",            
+			logrus.FieldKeyMsg:   "message",
+		},
+	  })
+	logrus.SetLevel(logrus.TraceLevel)
+
 	var config Config
 
 	err := viper.Unmarshal(&config)
