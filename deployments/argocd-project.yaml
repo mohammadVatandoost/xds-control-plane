@@ -20,3 +20,7 @@ spec:
   - namespace: '*'
     server: '*'
 
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'  
+

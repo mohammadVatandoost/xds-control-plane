@@ -34,11 +34,11 @@ service:
 
 resources:
   limits:
-    cpu: 800m
-    memory: 9000Mi
+    cpu: 200m
+    memory: 4000Mi
   requests:
     cpu: 200m
-    memory: 500Mi
+    memory: 400Mi
 
 configMap:
   data:

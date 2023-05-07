@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: xds-control-plane
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: xds-control-plane
+    server: "https://kubernetes.default.svc"
+  project: xds-control-plane
+  source:
+    path: deployments/helm/xds-control-plane
+    repoURL: https://github.com/mohammadVatandoost/xds-control-plane
+    targetRevision: HEAD
+    helm:
+      valueFiles:
+      - values.yaml
