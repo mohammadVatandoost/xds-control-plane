@@ -11,7 +11,7 @@ spec:
     server: "https://kubernetes.default.svc"
   project: xds-control-plane
   source:
-    path: /example/client/deployments/helm/xds-grpc-client-example
+    path: example/client/deployments/helm/xds-grpc-client-example
     repoURL: https://github.com/mohammadVatandoost/xds-control-plane
     targetRevision: HEAD
     helm:
