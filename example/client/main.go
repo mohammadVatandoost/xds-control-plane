@@ -40,8 +40,9 @@ var (
 
 
 func main() {
-	// viper.SetDefault("Server1Address", "xds:///xds-grpc-server-example-headless:8888")
-	viper.SetDefault("Server1Address", "xds-grpc-server-example-headless:8888")
+	
+	viper.SetDefault("Server1Address", "xds:///xds-grpc-server-example-headless:8888")
+	// viper.SetDefault("Server1Address", "xds-grpc-server-example-headless:8888")
 	// Read Config from ENV
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
@@ -53,7 +54,7 @@ func main() {
 		},
 	  })
 	logrus.SetLevel(logrus.TraceLevel)
-	
+
 	logger := logrus.WithField("name", "client")
 	var config Config
 
