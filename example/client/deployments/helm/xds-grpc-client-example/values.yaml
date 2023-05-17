@@ -45,5 +45,5 @@ configMap:
     GRPC_GO_LOG_SEVERITY_LEVEL: "info"
     Server1Address: "xds:///xds-grpc-server-example-headless:8888"
     GRPC_XDS_BOOTSTRAP: "./xds_bootstrap.json"
-    GRPC_XDS_BOOTSTRAP_CONFIG: "{\n  \"xds_servers\": [\n    {\n      \"server_uri\": \"xds-control-plane-headless:8888\",\n      \"channel_creds\": [\n        {\n          \"type\": \"insecure\"\n        }\n      ],\n      \"server_features\": [\"xds_v3\"]      \n    }\n  ],\n  \"node\": {\n    \"id\": \"b7f9c818-fb46-43ca-8662-d3bdbcf7ec18~10.0.0.1\",\n    \"metadata\": {\n      \"R_GCP_PROJECT_NUMBER\": \"123456789012\"\n    },\n    \"locality\": {\n      \"zone\": \"us-central1-a\"\n    }\n  }\n}\n"
+    GRPC_XDS_BOOTSTRAP_CONFIG: "{\n  \"xds_servers\": [\n    {\n      \"server_uri\": \"xds-control-plane-headless.xds-control-plane.svc.cluster.local:8888\",\n      \"channel_creds\": [\n        {\n          \"type\": \"insecure\"\n        }\n      ],\n      \"server_features\": [\"xds_v3\"]      \n    }\n  ],\n  \"node\": {\n    \"id\": \"b7f9c818-fb46-43ca-8662-d3bdbcf7ec18~10.0.0.1\",\n    \"metadata\": {\n      \"R_GCP_PROJECT_NUMBER\": \"123456789012\"\n    },\n    \"locality\": {\n      \"zone\": \"us-central1-a\"\n    }\n  }\n}\n"
 
