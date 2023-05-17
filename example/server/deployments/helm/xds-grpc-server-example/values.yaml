@@ -36,10 +36,10 @@ service:
 resources:
   limits:
     cpu: 200m
-    memory: 200Mi
+    memory: 100Mi
   requests:
     cpu: 200m
-    memory: 200Mi
+    memory: 100Mi
 
 configMap:
   data:

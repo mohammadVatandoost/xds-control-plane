@@ -5,7 +5,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: xds-control-plane-service-account
-  namespace: test
+  namespace: xds-control-plane
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
