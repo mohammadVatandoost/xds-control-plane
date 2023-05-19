@@ -69,6 +69,7 @@ func main() {
 	// (optional) start background grpc admin services to monitor client
 	// "google.golang.org/grpc/admin"
 	go func() {
+		logger.Printf("Starting GRPC admin ")
 		lis, err := net.Listen("tcp", ":19000")
 		if err != nil {
 			logger.Fatalf("failed to listen: %v", err)

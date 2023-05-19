@@ -28,22 +28,22 @@ jobs:
 
     - name: Build Example client
       working-directory: ./example/client
-      run: docker build . --tag $DOCKER_REPOSITORY_NAME/xds-grpc-client-example:latest
+      run: docker build . --tag $DOCKER_REPOSITORY_NAME/xds-grpc-client-example:${GITHUB_SHA::6}
 
     - name: Push Example Client
-      run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-client-example:latest
+      run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-client-example:${GITHUB_SHA::6}
 
     - name: Build Example Server
       working-directory: ./example/server
-      run: docker build . --tag $DOCKER_REPOSITORY_NAME/xds-grpc-server-example:latest
+      run: docker build . --tag $DOCKER_REPOSITORY_NAME/xds-grpc-server-example:${GITHUB_SHA::6}
 
     - name: Push Example Server
-      run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-server-example:latest
+      run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-server-example:${GITHUB_SHA::6}
 
     - name: Build XDS control plane
-      run: docker build . -f build/Dockerfile --tag $DOCKER_REPOSITORY_NAME/xds-control-plane:latest
+      run: docker build . -f build/Dockerfile --tag $DOCKER_REPOSITORY_NAME/xds-control-plane:${GITHUB_SHA::6}
 
     - name: Push XDS control plane
-      run: docker push $DOCKER_REPOSITORY_NAME/xds-control-plane:latest 
+      run: docker push $DOCKER_REPOSITORY_NAME/xds-control-plane:${GITHUB_SHA::6} 
    
 
