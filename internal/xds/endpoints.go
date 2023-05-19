@@ -18,7 +18,7 @@ type EnvoyCluster struct {
 }
 
 func (cp *ControlPlane) HandleEndpointsUpdate(oldObj, newObj interface{}) {
-	cp.log.Info("ControlPlane HandleEndpointsUpdate")
+	// cp.log.Info("ControlPlane HandleEndpointsUpdate")
 	edsServiceData := map[string]*EnvoyCluster{}
 
 	for _, inform := range cp.endpointInformers {
@@ -38,9 +38,9 @@ func (cp *ControlPlane) HandleEndpointsUpdate(oldObj, newObj interface{}) {
 			}
 			cp.log.Infof("endpoints: %v", endpoints.String())
 			for _, subset := range endpoints.Subsets {
-				cp.log.Infof("endpoints subset: %v", subset.String())
+				// cp.log.Infof("endpoints subset: %v", subset.String())
 				for i, addr := range subset.Addresses {
-					cp.log.Infof("endpoints Subsets addresses, IP: %v, Port: %v", addr.IP, subset.Ports[i].Port)
+					// cp.log.Infof("endpoints Subsets addresses, IP: %v, Port: %v", addr.IP, subset.Ports[i].Port)
 					edsServiceData[endpoints.Name].port = uint32(subset.Ports[i].Port)
 					edsServiceData[endpoints.Name].endpoints = append(edsServiceData[endpoints.Name].endpoints, addr.IP)
 				}
