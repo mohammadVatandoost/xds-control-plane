@@ -7,6 +7,8 @@ on:
 env:
   DOCKER_REPOSITORY_ACCESS_TOKEN: ${{ secrets.DOCKER_REPOSITORY_ACCESS_TOKEN }}
   DOCKER_REPOSITORY_NAME: ${{ vars.DOCKER_REPOSITORY_NAME }}
+  # IMAGE_TAG: ${GITHUB_SHA::6}
+  IMAGE_TAG: latest
 
 
 jobs:
@@ -28,22 +30,22 @@ jobs:
 
     - name: Build Example client
       working-directory: ./example/client
-      run: docker build . --tag $DOCKER_REPOSITORY_NAME/xds-grpc-client-example:${GITHUB_SHA::6}
+      run: docker build . --tag $DOCKER_REPOSITORY_NAME/xds-grpc-client-example:$IMAGE_TAG
 
     - name: Push Example Client
-      run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-client-example:${GITHUB_SHA::6}
+      run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-client-example:$IMAGE_TAG
 
     - name: Build Example Server
       working-directory: ./example/server
-      run: docker build . --tag $DOCKER_REPOSITORY_NAME/xds-grpc-server-example:${GITHUB_SHA::6}
+      run: docker build . --tag $DOCKER_REPOSITORY_NAME/xds-grpc-server-example:$IMAGE_TAG
 
     - name: Push Example Server
-      run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-server-example:${GITHUB_SHA::6}
+      run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-server-example:$IMAGE_TAG
 
     - name: Build XDS control plane
-      run: docker build . -f build/Dockerfile --tag $DOCKER_REPOSITORY_NAME/xds-control-plane:${GITHUB_SHA::6}
+      run: docker build . -f build/Dockerfile --tag $DOCKER_REPOSITORY_NAME/xds-control-plane:$IMAGE_TAG
 
     - name: Push XDS control plane
-      run: docker push $DOCKER_REPOSITORY_NAME/xds-control-plane:${GITHUB_SHA::6} 
+      run: docker push $DOCKER_REPOSITORY_NAME/xds-control-plane:$IMAGE_TAG
    
 
