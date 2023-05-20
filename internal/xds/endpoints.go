@@ -36,7 +36,7 @@ func (cp *ControlPlane) HandleEndpointsUpdate(oldObj, newObj interface{}) {
 					name: endpoints.Name,
 				}
 			}
-			cp.log.Infof("endpoints: %v", endpoints.String())
+			// cp.log.Infof("endpoints: %v", endpoints.String())
 			for _, subset := range endpoints.Subsets {
 				// cp.log.Infof("endpoints subset: %v", subset.String())
 				for i, addr := range subset.Addresses {

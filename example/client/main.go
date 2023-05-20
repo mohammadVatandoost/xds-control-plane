@@ -111,7 +111,9 @@ func main() {
 	for {
 		r, err := c.SayHello(ctx, &echo.EchoRequest{Name: "unary RPC msg "})
 		if err != nil {
-			logrus.Fatalf("could not greet: %v", err)
+			logrus.Errorf("could not greet: %v", err)
+			time.Sleep(5 * time.Second)
+			continue
 		}
 		logger.Printf("RPC Response: %v %v", i, r)
 		opsProcessed.Inc()
