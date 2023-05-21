@@ -34,7 +34,8 @@ jobs:
       working-directory: ./example/client
       run: |
           docker build . --tag $DOCKER_REPOSITORY_NAME/xds-grpc-client-example:$IMAGE_TAG
-          sed -i "s~latest~$IMAGE_TAG~g" ./deployments/helm/xds-grpc-client-example/values.yaml
+          sed -i -e "s/tag.*/tag: $IMAGE_TAG/g" ./deployments/helm/xds-grpc-client-example/values.yaml
+          # sed -i "s~latest~$IMAGE_TAG~g" ./deployments/helm/xds-grpc-client-example/values.yaml
 
     - name: Push Example Client
       run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-client-example:$IMAGE_TAG
@@ -43,7 +44,7 @@ jobs:
       working-directory: ./example/server
       run: |
           docker build . --tag $DOCKER_REPOSITORY_NAME/xds-grpc-server-example:$IMAGE_TAG
-          sed -i "s~latest~$IMAGE_TAG~g" ./deployments/helm/xds-grpc-server-example/values.yaml
+          sed -i -e "s/tag.*/tag: $IMAGE_TAG/g" ./deployments/helm/xds-grpc-server-example/values.yaml
 
     - name: Push Example Server
       run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-server-example:$IMAGE_TAG
@@ -54,7 +55,7 @@ jobs:
     - name: Push XDS control plane
       run: |
           docker push $DOCKER_REPOSITORY_NAME/xds-control-plane:$IMAGE_TAG
-          sed -i "s~latest~$IMAGE_TAG~g" ./deployments/helm/xds-control-plane/values.yaml
+          sed -i -e "s/tag.*/tag: $IMAGE_TAG/g" ./deployments/helm/xds-control-plane/values.yaml
 
     - name: Commit and push changes
       uses: devops-infra/action-commit-push@v0.3
