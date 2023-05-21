@@ -7,7 +7,7 @@ on:
 env:
   DOCKER_REPOSITORY_ACCESS_TOKEN: ${{ secrets.DOCKER_REPOSITORY_ACCESS_TOKEN }}
   DOCKER_REPOSITORY_NAME: ${{ vars.DOCKER_REPOSITORY_NAME }}
-  IMAGE_TAG: $(git rev-parse --short "$GITHUB_SHA")
+  # IMAGE_TAG: $(git rev-parse --short "$GITHUB_SHA")
   # IMAGE_TAG: latest # $GITHUB_SHA::6
 
 
@@ -17,6 +17,7 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+      run: echo "IMAGE_TAG=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
 
     - name: Helm Add Repo
       run: helm repo add myhelmrepo https://mohammadVatandoost.github.io/helm-chart/
