@@ -7,7 +7,6 @@ on:
 env:
   DOCKER_REPOSITORY_ACCESS_TOKEN: ${{ secrets.DOCKER_REPOSITORY_ACCESS_TOKEN }}
   DOCKER_REPOSITORY_NAME: ${{ vars.DOCKER_REPOSITORY_NAME }}
-  # IMAGE_TAG: $(git rev-parse --short "$GITHUB_SHA")
   # IMAGE_TAG: latest # $GITHUB_SHA::6
 
 
