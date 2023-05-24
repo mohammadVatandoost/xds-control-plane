@@ -1,15 +1,22 @@
 # XDS Control Plane
 
+## Running in K8S
+
+Use argoCD yaml files or Helm charts to deploy on K8s
 
 ## Running Locally
-
+Run XDS control plane
 ```shell
+go run ./cmd/... serve  
+```
 
-
+Run Client
+```shell
 export GRPC_XDS_BOOTSTRAP= "./example/client/xds_bootstrap_local.json"
 export GRPC_GO_LOG_VERBOSITY_LEVEL=99
 export GRPC_GO_LOG_SEVERITY_LEVEL="info"
-go run ./example/client/main.go
+cd example/client
+go run ./main.go
 ```
 
 ## Issues
