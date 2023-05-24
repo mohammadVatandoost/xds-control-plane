@@ -20,7 +20,7 @@ require (
 	k8s.io/client-go v0.26.0
 )
 
-replace github.com/envoyproxy/go-control-plane => github.com/mohammadVatandoost/go-control-plane v0.1.1
+replace github.com/envoyproxy/go-control-plane => github.com/mohammadVatandoost/go-control-plane v0.1.2
 
 require (
 	github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a // indirect

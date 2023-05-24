@@ -29,6 +29,7 @@ type ControlPlane struct {
 	callBacks         *callbacks
 	endpoints         []types.Resource
 	endpointInformers []k8scache.SharedIndexInformer
+	serviceInformers  []k8scache.SharedIndexInformer
 	conf              *Config
 	storage           cache.Storage
 }
@@ -61,17 +62,29 @@ func (cp *ControlPlane) Run() error {
 	cp.log.Info("==========")
 	stop := make(chan struct{})
 	defer close(stop)
-	// for all namespaces
-	factory := informers.NewSharedInformerFactoryWithOptions(clusterClient, time.Second*10, informers.WithNamespace(""))
-	informer := factory.Core().V1().Endpoints().Informer()
-	cp.endpointInformers = append(cp.endpointInformers, informer)
 
-	informer.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
+	factory := informers.NewSharedInformerFactoryWithOptions(clusterClient, time.Second*10, informers.WithNamespace(""))
+
+	informerEndpoints := factory.Core().V1().Endpoints().Informer()
+	cp.endpointInformers = append(cp.endpointInformers, informerEndpoints)
+
+	informerServices := factory.Core().V1().Services().Informer()
+	cp.serviceInformers = append(cp.endpointInformers, informerServices)
+
+	informerEndpoints.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
 		UpdateFunc: cp.HandleEndpointsUpdate,
 	})
 
+	informerServices.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
+		UpdateFunc: cp.HandleServicesUpdate,
+	})
+
 	go func() {
-		informer.Run(stop)
+		informerEndpoints.Run(stop)
+	}()
+	
+	go func() {
+		informerServices.Run(stop)
 	}()
 
 	// for _, cluster := range clusters {

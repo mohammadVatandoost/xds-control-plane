@@ -3,12 +3,15 @@ package xds
 import (
 	"context"
 	"fmt"
+	"reflect"
+
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	corev1 "k8s.io/api/core/v1"
+	
 )
 
 type EnvoyCluster struct {
@@ -17,9 +20,30 @@ type EnvoyCluster struct {
 	endpoints []string
 }
 
+func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
+	cp.log.Info("ControlPlane HandleServicesUpdate")
+	for _, inform := range cp.serviceInformers {
+		for _, svc := range inform.GetStore().List() {
+			
+			k8sService, ok := svc.(*corev1.Service)
+			if !ok {
+				cp.log.Infof("service type is not match, type is: %v", reflect.TypeOf(svc).Elem())
+				continue
+			}
+			cp.log.Infof("Service name: %s, ports: %v\n", k8sService.Name, k8sService.Spec)
+		}
+	}    
+}
+
 func (cp *ControlPlane) HandleEndpointsUpdate(oldObj, newObj interface{}) {
 	// cp.log.Info("ControlPlane HandleEndpointsUpdate")
-	edsServiceData := map[string]*EnvoyCluster{}
+
+	edsServiceData := make(map[string]*EnvoyCluster, 0)
+	// rt := make([]types.Resource, 0)
+	// sec := make([]types.Resource, 0)
+	// lbEndPoints := make([]types.Resource, 0)
+	// lbEndPoints := make([]types.Resource, 0)
+	// lbEndPoints := make([]types.Resource, 0)
 
 	for _, inform := range cp.endpointInformers {
 		for _, ep := range inform.GetStore().List() {
@@ -38,7 +62,7 @@ func (cp *ControlPlane) HandleEndpointsUpdate(oldObj, newObj interface{}) {
 			}
 			// cp.log.Infof("endpoints: %v", endpoints.String())
 			for _, subset := range endpoints.Subsets {
-				// cp.log.Infof("endpoints subset: %v", subset.String())
+				cp.log.Infof("endpoints subset: %v", subset.String())
 				for i, addr := range subset.Addresses {
 					// cp.log.Infof("endpoints Subsets addresses, IP: %v, Port: %v", addr.IP, subset.Ports[i].Port)
 					edsServiceData[endpoints.Name].port = uint32(subset.Ports[i].Port)
@@ -48,7 +72,7 @@ func (cp *ControlPlane) HandleEndpointsUpdate(oldObj, newObj interface{}) {
 		}
 	}
 
-	// for each service create endpoints
+	// for each pod create endpoints
 	edsEndpoints := make([]types.Resource, len(edsServiceData))
 	for _, envoyCluster := range edsServiceData {
 		edsEndpoints = append(edsEndpoints, cp.MakeEndpointsForCluster(envoyCluster))
@@ -75,7 +99,7 @@ func (cp *ControlPlane) HandleEndpointsUpdate(oldObj, newObj interface{}) {
 }
 
 func (cp *ControlPlane) MakeEndpointsForCluster(service *EnvoyCluster) *endpointv3.ClusterLoadAssignment {
-	cp.log.Infof("Updating endpoints for cluster,  service.name %s: service.endpoints: %v", service.name, service.endpoints)
+	// cp.log.Infof("Updating endpoints for cluster,  service.name %s: service.endpoints: %v", service.name, service.endpoints)
 	cla := &endpointv3.ClusterLoadAssignment{
 		ClusterName: service.name,
 		Endpoints:   []*endpointv3.LocalityLbEndpoints{},

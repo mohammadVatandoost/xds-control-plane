@@ -7,7 +7,9 @@ import (
 	"strings"
 
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
+	"google.golang.org/grpc/xds"
 
 	"github.com/mohammadVatandoost/interfaces/golang/echo"
 	"github.com/sirupsen/logrus"
@@ -95,9 +97,12 @@ func main() {
 		logrus.Fatalf("failed to listen: %v", err)
 	}
 
-	sopts := []grpc.ServerOption{grpc.MaxConcurrentStreams(10)}
+	
 
-	s := grpc.NewServer(sopts...)
+	// s := grpc.NewServer(sopts...)
+	creds := insecure.NewCredentials()
+	sopts := []grpc.ServerOption{grpc.MaxConcurrentStreams(10), grpc.Creds(creds)}
+	s := xds.NewGRPCServer(sopts...)
 
 	echo.RegisterEchoServerServer(s, &server{ServerName: config.ServerName})
 

@@ -31,7 +31,7 @@ func (cb *callbacks) OnStreamClosed(id int64, node *core.Node) {
 	cb.log.Infof("OnStreamClosed %d closed, node id: %v, node cluster: %v", id, node.Id, node.Cluster)
 }
 func (cb *callbacks) OnStreamRequest(id int64, r *discovery.DiscoveryRequest) error {
-	cb.log.Infof("OnStreamRequest %d  Request[%v]", id, r.TypeUrl)
+	cb.log.Infof("OnStreamRequest %d  Request[%v], ResourceNames: %v", id, r.TypeUrl, r.ResourceNames)
 	cb.mu.Lock()
 	defer cb.mu.Unlock()
 	cb.requests++
