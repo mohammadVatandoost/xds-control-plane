@@ -8,10 +8,10 @@ import (
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
-	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
+	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 	corev1 "k8s.io/api/core/v1"
-	
 )
 
 type EnvoyCluster struct {
@@ -21,18 +21,54 @@ type EnvoyCluster struct {
 }
 
 func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
-	cp.log.Info("ControlPlane HandleServicesUpdate")
+	// cp.log.Info("ControlPlane HandleServicesUpdate")
+	clusters := make([]types.Resource, 0)
+	listeners := make([]types.Resource, 0)
+	endpoints := make([]types.Resource, 0)
+	routes := make([]types.Resource, 0)
+
 	for _, inform := range cp.serviceInformers {
 		for _, svc := range inform.GetStore().List() {
-			
+			if reflect.TypeOf(svc).Elem().Name() == "Endpoints" {
+				continue
+			} 
 			k8sService, ok := svc.(*corev1.Service)
 			if !ok {
-				cp.log.Infof("service type is not match, type is: %v", reflect.TypeOf(svc).Elem())
+				cp.log.Errorf("service type is not match, type is: %v", reflect.TypeOf(svc).Elem().Name())
 				continue
 			}
-			cp.log.Infof("Service name: %s, ports: %v\n", k8sService.Name, k8sService.Spec)
+			clusters = append(clusters, createClusters(k8sService)...)
+			listeners = append(listeners, createListeners(k8sService)...)
+			endpoints = append(endpoints, createEndpoints(k8sService)...)
+			routes = append(routes, createRoutes(k8sService)...)
 		}
 	}    
+	// cp.log.Infof("clusters: %v\n", clusters)
+	// cp.log.Infof("listeners: %v\n", listeners)
+	// cp.log.Infof("endpoints: %v\n", endpoints)
+	// cp.log.Infof("routes: %v\n", routes)
+	//snapshot := cache.NewSnapshot(fmt.Sprintf("%v.0", version), edsEndpoints, nil, nil, nil, nil, nil)
+	snapshot, err := cachev3.NewSnapshot(fmt.Sprintf("%v.0", cp.version), map[resource.Type][]types.Resource{
+		resource.EndpointType: endpoints,
+		resource.ClusterType: clusters,
+		resource.ListenerType: listeners,
+		resource.RouteType: routes,
+	})
+	if err != nil {
+		fmt.Printf("%v", err)
+		return
+	}
+
+	IDs := cp.snapshotCache.GetStatusKeys()
+	// cp.log.Infof("snapshotCache IDs: %v\n", IDs)
+	for _, id := range IDs {
+		err = cp.snapshotCache.SetSnapshot(context.Background(), id, snapshot)
+		if err != nil {
+			fmt.Printf("%v", err)
+		}
+	}
+
+	cp.version++
 }
 
 func (cp *ControlPlane) HandleEndpointsUpdate(oldObj, newObj interface{}) {
@@ -41,7 +77,7 @@ func (cp *ControlPlane) HandleEndpointsUpdate(oldObj, newObj interface{}) {
 	edsServiceData := make(map[string]*EnvoyCluster, 0)
 	// rt := make([]types.Resource, 0)
 	// sec := make([]types.Resource, 0)
-	// lbEndPoints := make([]types.Resource, 0)
+	
 	// lbEndPoints := make([]types.Resource, 0)
 	// lbEndPoints := make([]types.Resource, 0)
 
@@ -62,7 +98,7 @@ func (cp *ControlPlane) HandleEndpointsUpdate(oldObj, newObj interface{}) {
 			}
 			// cp.log.Infof("endpoints: %v", endpoints.String())
 			for _, subset := range endpoints.Subsets {
-				cp.log.Infof("endpoints subset: %v", subset.String())
+				// cp.log.Infof("endpoints subset: %v", subset.String())
 				for i, addr := range subset.Addresses {
 					// cp.log.Infof("endpoints Subsets addresses, IP: %v, Port: %v", addr.IP, subset.Ports[i].Port)
 					edsServiceData[endpoints.Name].port = uint32(subset.Ports[i].Port)
@@ -78,24 +114,24 @@ func (cp *ControlPlane) HandleEndpointsUpdate(oldObj, newObj interface{}) {
 		edsEndpoints = append(edsEndpoints, cp.MakeEndpointsForCluster(envoyCluster))
 	}
 
-	//snapshot := cache.NewSnapshot(fmt.Sprintf("%v.0", version), edsEndpoints, nil, nil, nil, nil, nil)
-	snapshot, err := cache.NewSnapshot(fmt.Sprintf("%v.0", cp.version), map[resource.Type][]types.Resource{
-		resource.EndpointType: edsEndpoints,
-	})
-	if err != nil {
-		fmt.Printf("%v", err)
-		return
-	}
+	// //snapshot := cache.NewSnapshot(fmt.Sprintf("%v.0", version), edsEndpoints, nil, nil, nil, nil, nil)
+	// snapshot, err := cache.NewSnapshot(fmt.Sprintf("%v.0", cp.version), map[resource.Type][]types.Resource{
+	// 	resource.EndpointType: edsEndpoints,
+	// })
+	// if err != nil {
+	// 	fmt.Printf("%v", err)
+	// 	return
+	// }
 
-	IDs := cp.snapshotCache.GetStatusKeys()
-	for _, id := range IDs {
-		err = cp.snapshotCache.SetSnapshot(context.Background(), id, snapshot)
-		if err != nil {
-			fmt.Printf("%v", err)
-		}
-	}
+	// IDs := cp.snapshotCache.GetStatusKeys()
+	// for _, id := range IDs {
+	// 	err = cp.snapshotCache.SetSnapshot(context.Background(), id, snapshot)
+	// 	if err != nil {
+	// 		fmt.Printf("%v", err)
+	// 	}
+	// }
 
-	cp.version++
+	// cp.version++
 }
 
 func (cp *ControlPlane) MakeEndpointsForCluster(service *EnvoyCluster) *endpointv3.ClusterLoadAssignment {
@@ -129,4 +165,39 @@ func (cp *ControlPlane) MakeEndpointsForCluster(service *EnvoyCluster) *endpoint
 		)
 	}
 	return cla
+}
+
+func createEndpoints(service *corev1.Service) []types.Resource {
+	// Create the endpoints based on the service information
+	endpoint := &endpointv3.ClusterLoadAssignment{
+		ClusterName: "service_cluster",
+		Endpoints: []*endpointv3.LocalityLbEndpoints{
+			{
+				LbEndpoints: []*endpointv3.LbEndpoint{
+					{
+						HostIdentifier: &endpointv3.LbEndpoint_Endpoint{
+							Endpoint: &endpointv3.Endpoint{
+								Address: &core.Address{
+									Address: &core.Address_SocketAddress{
+										SocketAddress: &core.SocketAddress{
+											Protocol: core.SocketAddress_TCP,
+											Address:  service.Name + "." + service.Namespace + ".svc.cluster.local",
+											PortSpecifier: &core.SocketAddress_PortValue{
+												PortValue: uint32(service.Spec.Ports[0].Port),
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				LoadBalancingWeight: &wrapperspb.UInt32Value{
+					Value: 100,
+				},
+			},
+		},
+	}
+
+	return []types.Resource{endpoint}
 }

@@ -11,11 +11,11 @@ import (
 func createRoutes(service *corev1.Service) []types.Resource {
 	// Create the routes based on the service information
 	route := &route.RouteConfiguration{
-		Name: "local_route",
+		Name: service.Name + "." + service.Namespace + ".svc.cluster.local",
 		VirtualHosts: []*route.VirtualHost{
 			{
-				Name:    "local_service",
-				Domains: []string{"*"},
+				Name:    service.Name + "." + service.Namespace + ".svc.cluster.local",
+				Domains: []string{service.Name + "." + service.Namespace + ".svc.cluster.local", service.Name, service.Name + "." + service.Namespace},
 				Routes: []*route.Route{
 					{
 						Match: &route.RouteMatch{
@@ -26,7 +26,7 @@ func createRoutes(service *corev1.Service) []types.Resource {
 						Action: &route.Route_Route{
 							Route: &route.RouteAction{
 								ClusterSpecifier: &route.RouteAction_Cluster{
-									Cluster: "service_cluster",
+									Cluster: service.Name+"-cluster",
 								},
 								Timeout: &durationpb.Duration{
 									Seconds: 0,

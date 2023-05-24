@@ -1,17 +1,21 @@
 package xds
 
 import (
+	"fmt"
+
+	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	listener "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/golang/protobuf/ptypes/any"
 	corev1 "k8s.io/api/core/v1"
-	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
-	listener "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 )
 
 func createListeners(service *corev1.Service) []types.Resource {
 	// Create the listeners based on the service information
+	// serviceName := service.Name + "." + service.Namespace + ".svc.cluster.local"
+	serviceName := fmt.Sprintf("%s:%d", service.Name, service.Spec.Ports[0].Port)
 	listener := &listener.Listener{
-		Name: "listener_1",
+		Name: serviceName,
 		Address: &core.Address{
 			Address: &core.Address_SocketAddress{
 				SocketAddress: &core.SocketAddress{
