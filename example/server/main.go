@@ -97,10 +97,11 @@ func main() {
 		logrus.Fatalf("failed to listen: %v", err)
 	}
 
-	// s := grpc.NewServer(sopts...)
+	
 	creds := insecure.NewCredentials()
 	sopts := []grpc.ServerOption{grpc.MaxConcurrentStreams(10), grpc.Creds(creds)}
-	s := xds.NewGRPCServer(sopts...)
+	// s := xds.NewGRPCServer(sopts...)
+	s := grpc.NewServer(sopts...)
 
 	echo.RegisterEchoServerServer(s, &server{ServerName: config.ServerName})
 
