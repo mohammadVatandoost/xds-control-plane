@@ -100,7 +100,7 @@ func getAddresses(svcc ServiceConfig) []string {
 		logrus.Errorf("Could not find server %s", serviceName, err.Error())
 		return upstreamPorts
 	} else {
-		logrus.Printf("SRV CNAME: %v\n", cname)
+		logrus.Infof("SRV CNAME: %v, rec: %v\n", cname, rec)
 	}
 
 	var wg sync.WaitGroup
@@ -121,14 +121,14 @@ func getAddresses(svcc ServiceConfig) []string {
 			}
 			resp, err := healthpb.NewHealthClient(conn).Check(ctx, &healthpb.HealthCheckRequest{Service: grpcServiceName})
 			if err != nil {
-				logrus.Errorf("HealthCheck failed err: %v, conn: %v, address: %v", conn, err.Error(), address)
+				logrus.WithField("address", address).Errorf("HealthCheck failed err: %v, conn: %v", conn, err.Error())
 				// return // ToDo: for testign disable this
 			}
 			if resp.GetStatus() != healthpb.HealthCheckResponse_SERVING {
 				logrus.Errorf("Service not healthy %v %v", conn, fmt.Sprintf("service not in serving state: %v", resp.GetStatus().String()))
 				// return ToDo: for testign disable this
 			}
-			logrus.Printf("RPC HealthChekStatus: for %v %v", address, resp.GetStatus())
+			logrus.Infof("RPC HealthChekStatus: for %v %v", address, resp.GetStatus())
 			upstreamPorts = append(upstreamPorts, address)
 		}(rec[i].Target, strconv.Itoa(int(rec[i].Port)))
 	}

@@ -40,7 +40,8 @@ var (
 
 func main() {
 
-	viper.SetDefault("Server1Address", "xds:///xds-grpc-server-example-headless:8888")
+	// viper.SetDefault("Server1Address", "xds:///xds-grpc-server-example-headless:8888")
+	viper.SetDefault("Server1Address", "xds:///xds-grpc-server-example-headless")
 	// viper.SetDefault("Server1Address", "xds-grpc-server-example-headless:8888")
 	// Read Config from ENV
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
