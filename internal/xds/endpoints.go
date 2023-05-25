@@ -31,7 +31,7 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 		for _, svc := range inform.GetStore().List() {
 			if reflect.TypeOf(svc).Elem().Name() == "Endpoints" {
 				continue
-			} 
+			}
 			k8sService, ok := svc.(*corev1.Service)
 			if !ok {
 				cp.log.Errorf("service type is not match, type is: %v", reflect.TypeOf(svc).Elem().Name())
@@ -42,7 +42,7 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 			endpoints = append(endpoints, createEndpoints(k8sService)...)
 			routes = append(routes, createRoutes(k8sService)...)
 		}
-	}    
+	}
 	// cp.log.Infof("clusters: %v\n", clusters)
 	// cp.log.Infof("listeners: %v\n", listeners)
 	// cp.log.Infof("endpoints: %v\n", endpoints)
@@ -50,9 +50,9 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 	//snapshot := cache.NewSnapshot(fmt.Sprintf("%v.0", version), edsEndpoints, nil, nil, nil, nil, nil)
 	snapshot, err := cachev3.NewSnapshot(fmt.Sprintf("%v.0", cp.version), map[resource.Type][]types.Resource{
 		resource.EndpointType: endpoints,
-		resource.ClusterType: clusters,
+		resource.ClusterType:  clusters,
 		resource.ListenerType: listeners,
-		resource.RouteType: routes,
+		resource.RouteType:    routes,
 	})
 	if err != nil {
 		fmt.Printf("%v", err)
@@ -77,7 +77,7 @@ func (cp *ControlPlane) HandleEndpointsUpdate(oldObj, newObj interface{}) {
 	edsServiceData := make(map[string]*EnvoyCluster, 0)
 	// rt := make([]types.Resource, 0)
 	// sec := make([]types.Resource, 0)
-	
+
 	// lbEndPoints := make([]types.Resource, 0)
 	// lbEndPoints := make([]types.Resource, 0)
 

@@ -79,13 +79,15 @@ func (cp *ControlPlane) Run() error {
 		UpdateFunc: cp.HandleServicesUpdate,
 	})
 
-	go func() {
-		informerEndpoints.Run(stop)
-	}()
-	
-	go func() {
-		informerServices.Run(stop)
-	}()
+	// go func() {
+	// 	informerEndpoints.Run(stop)
+	// }()
+
+	// go func() {
+	// 	informerServices.Run(stop)
+	// }()
+
+	go RunXDSserver(stop, cp.snapshotCache)
 
 	// for _, cluster := range clusters {
 	// 	stop := make(chan struct{})

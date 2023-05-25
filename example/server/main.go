@@ -78,11 +78,11 @@ func main() {
 	viper.AutomaticEnv()
 
 	logrus.SetFormatter(&logrus.JSONFormatter{
-		FieldMap: logrus.FieldMap{                               
-			logrus.FieldKeyTime:  "@timestamp",            
-			logrus.FieldKeyMsg:   "message",
+		FieldMap: logrus.FieldMap{
+			logrus.FieldKeyTime: "@timestamp",
+			logrus.FieldKeyMsg:  "message",
 		},
-	  })
+	})
 	logrus.SetLevel(logrus.TraceLevel)
 
 	var config Config
@@ -96,8 +96,6 @@ func main() {
 	if err != nil {
 		logrus.Fatalf("failed to listen: %v", err)
 	}
-
-	
 
 	// s := grpc.NewServer(sopts...)
 	creds := insecure.NewCredentials()

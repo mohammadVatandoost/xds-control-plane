@@ -1,12 +1,11 @@
 package xds
 
 import (
-	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
-	corev1 "k8s.io/api/core/v1"
 	route "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	durationpb "github.com/golang/protobuf/ptypes/duration"
+	corev1 "k8s.io/api/core/v1"
 )
-
 
 func createRoutes(service *corev1.Service) []types.Resource {
 	// Create the routes based on the service information
@@ -26,7 +25,7 @@ func createRoutes(service *corev1.Service) []types.Resource {
 						Action: &route.Route_Route{
 							Route: &route.RouteAction{
 								ClusterSpecifier: &route.RouteAction_Cluster{
-									Cluster: service.Name+"-cluster",
+									Cluster: service.Name + "-cluster",
 								},
 								Timeout: &durationpb.Duration{
 									Seconds: 0,

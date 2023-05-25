@@ -32,15 +32,14 @@ type Config struct {
 }
 
 var (
-        opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
-                Name: "client_rpc_call_counter",
-                Help: "The total number of rpc calls",
-        })
+	opsProcessed = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "client_rpc_call_counter",
+		Help: "The total number of rpc calls",
+	})
 )
 
-
 func main() {
-	
+
 	viper.SetDefault("Server1Address", "xds:///xds-grpc-server-example-headless:8888")
 	// viper.SetDefault("Server1Address", "xds-grpc-server-example-headless:8888")
 	// Read Config from ENV
@@ -48,11 +47,11 @@ func main() {
 	viper.AutomaticEnv()
 
 	logrus.SetFormatter(&logrus.JSONFormatter{
-		FieldMap: logrus.FieldMap{                               
-			logrus.FieldKeyTime:  "@timestamp",            
-			logrus.FieldKeyMsg:   "message",
+		FieldMap: logrus.FieldMap{
+			logrus.FieldKeyTime: "@timestamp",
+			logrus.FieldKeyMsg:  "message",
 		},
-	  })
+	})
 	logrus.SetLevel(logrus.TraceLevel)
 
 	logger := logrus.WithField("name", "client")
@@ -62,7 +61,6 @@ func main() {
 	if err != nil {
 		logger.Fatalf("failed to read configs: %v", err)
 	}
-
 
 	//address = fmt.Sprintf("xds-experimental:///be-srv")
 
@@ -98,12 +96,12 @@ func main() {
 	defer conn.Close()
 
 	http.Handle("/metrics", promhttp.Handler())
-    go func() {
+	go func() {
 		err := http.ListenAndServe(":9000", nil)
 		if err != nil {
 			logrus.WithError(err).Error("can not listen to expose metrics")
 		}
-	}() 
+	}()
 
 	c := echo.NewEchoServerClient(conn)
 	ctx := context.Background()
