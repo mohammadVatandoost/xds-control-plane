@@ -7,7 +7,7 @@ replicaCount: 1
 image:
   repository: mvatandoost/xds-control-plane
   pullPolicy: IfNotPresent
-  tag: a86139
+  tag: 765b07
 
 imagePullSecrets: [name: registry-secret, name: mvatandoost]
 nameOverride: ""
