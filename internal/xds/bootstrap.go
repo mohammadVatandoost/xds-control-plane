@@ -237,10 +237,15 @@ func (cp *ControlPlane) makeSnapshot(version int32) (*cachev3.Snapshot, error) {
 				},
 			},
 		}
+		// filters := []*hcm.HttpFilter{
+		// 	{
+		// 		Name: "envoy.filters.http.grpc_stats",
+		// 	},
+		// 	{
+		// 		Name: "envoy.filters.http.router",
+		// 	},
+		// }
 		filters := []*hcm.HttpFilter{
-			{
-				Name: "envoy.filters.http.grpc_stats",
-			},
 			{
 				Name: "envoy.filters.http.router",
 			},
