@@ -136,22 +136,22 @@ func getAddresses(svcc ServiceConfig) []string {
 	return upstreamPorts
 }
 
-func RunXDSserver(stopCh <-chan struct{}, snapshotCache cachev3.SnapshotCache) {
+func (cp *ControlPlane) RunXDSserver(stopCh <-chan struct{}) {
 	var version int32
 	for {
 		select {
 		case <-stopCh:
 			return
 		default:
-			snapshot, err := makeSnapshot(version)
+			snapshot, err := cp.makeSnapshot(version)
 			if err != nil {
-				logrus.Printf(">>>>>>>>>>  Error setting snapshot %v", err)
+				cp.log.Printf(">>>>>>>>>>  Error setting snapshot %v", err)
 				return
 			}
-			IDs := snapshotCache.GetStatusKeys()
-			logrus.Infof("snapshotCache IDs: %v\n", IDs)
+			IDs := cp.snapshotCache.GetStatusKeys()
+			cp.log.Infof("snapshotCache IDs: %v\n", IDs)
 			for _, id := range IDs {
-				err = snapshotCache.SetSnapshot(context.Background(), id, snapshot)
+				err = cp.snapshotCache.SetSnapshot(context.Background(), id, snapshot)
 				if err != nil {
 					logrus.Errorf("%v", err)
 				}
@@ -161,7 +161,7 @@ func RunXDSserver(stopCh <-chan struct{}, snapshotCache cachev3.SnapshotCache) {
 	}
 }
 
-func makeSnapshot(version int32) (*cachev3.Snapshot, error) {
+func (cp *ControlPlane) makeSnapshot(version int32) (*cachev3.Snapshot, error) {
 	services := getServices()
 	eds := []types.Resource{}
 	cls := []types.Resource{}
@@ -174,7 +174,7 @@ func makeSnapshot(version int32) (*cachev3.Snapshot, error) {
 		region := svc.Region //"us-central1"
 		zone := svc.Zone     // us-central1-a
 		addresses := getAddresses(svc)
-		logrus.Infof("service: %v, addresses: %v \n", svc.ServiceName, addresses)
+		cp.log.Infof("service: %v, addresses: %v \n", svc.ServiceName, addresses)
 		lbe := makeLBEndpoint(addresses)
 		eds = append(eds, &endpoint.ClusterLoadAssignment{
 			ClusterName: clusterName,
@@ -200,7 +200,7 @@ func makeSnapshot(version int32) (*cachev3.Snapshot, error) {
 		})
 
 		// RDS
-		logrus.Infof(">>>>>>>>>>>>>>>>>>> creating RDS " + virtualHostName)
+		cp.log.Infof(">>>>>>>>>>>>>>>>>>> creating RDS " + virtualHostName)
 		vh := &route.VirtualHost{
 			Name:    virtualHostName,
 			Domains: []string{svc.ServiceName}, //******************* >> must match what is specified at xds:/// //
@@ -226,7 +226,7 @@ func makeSnapshot(version int32) (*cachev3.Snapshot, error) {
 		})
 
 		// LISTENER
-		logrus.Infof(">>>>>>>>>>>>>>>>>>> creating LISTENER " + svc.ServiceName)
+		cp.log.Infof(">>>>>>>>>>>>>>>>>>> creating LISTENER " + svc.ServiceName)
 		hcRds := &hcm.HttpConnectionManager_Rds{
 			Rds: &hcm.Rds{
 				RouteConfigName: routeConfigName,
@@ -237,10 +237,18 @@ func makeSnapshot(version int32) (*cachev3.Snapshot, error) {
 				},
 			},
 		}
-
+		filters := []*hcm.HttpFilter{
+			{
+				Name: "envoy.filters.http.grpc_stats",
+			},
+			{
+				Name: "envoy.filters.http.router",
+			},
+		}
 		manager := &hcm.HttpConnectionManager{
 			CodecType:      hcm.HttpConnectionManager_AUTO,
 			RouteSpecifier: hcRds,
+			HttpFilters:    filters,
 		}
 
 		pbst, err := ptypes.MarshalAny(manager)
@@ -257,12 +265,12 @@ func makeSnapshot(version int32) (*cachev3.Snapshot, error) {
 	}
 
 	atomic.AddInt32(&version, 1)
-	logrus.Infof(" creating snapshot Version " + fmt.Sprint(version))
+	cp.log.Infof(" creating snapshot Version " + fmt.Sprint(version))
 
-	logrus.Infof("   snapshot with Listener %v", lsnr)
-	logrus.Infof("   snapshot with EDS %v", eds)
-	logrus.Infof("   snapshot with CLS %v", cls)
-	logrus.Infof("   snapshot with RDS %v", rds)
+	cp.log.Infof("   snapshot with Listener %v", lsnr)
+	cp.log.Infof("   snapshot with EDS %v", eds)
+	cp.log.Infof("   snapshot with CLS %v", cls)
+	cp.log.Infof("   snapshot with RDS %v", rds)
 
 	return cachev3.NewSnapshot(fmt.Sprint(version), map[resource.Type][]types.Resource{
 		resource.EndpointType: eds,
@@ -270,10 +278,6 @@ func makeSnapshot(version int32) (*cachev3.Snapshot, error) {
 		resource.ListenerType: lsnr,
 		resource.RouteType:    rds,
 	})
-
-	// snap := cachev3.NewSnapshot(fmt.Sprint(version), eds, cls, rds, lsnr, rt, sec)
-	// err = config.SetSnapshot(nodeId, snap)
-
 }
 
 func makeLBEndpoint(addresses []string) []*endpoint.LbEndpoint {

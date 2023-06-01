@@ -87,7 +87,7 @@ func (cp *ControlPlane) Run() error {
 	// 	informerServices.Run(stop)
 	// }()
 
-	go RunXDSserver(stop, cp.snapshotCache)
+	go cp.RunXDSserver(stop)
 
 	// for _, cluster := range clusters {
 	// 	stop := make(chan struct{})
