@@ -1,15 +1,12 @@
 package xds
 
 import (
-	"context"
-	"fmt"
 	"reflect"
+	"strings"
 
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
-	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
-	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -37,10 +34,30 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 				cp.log.Errorf("service type is not match, type is: %v", reflect.TypeOf(svc).Elem().Name())
 				continue
 			}
+			cp.log.Info("=============")
+			tmp := ServiceConfig{}
+			tmp.GRPCServiceName = k8sService.Name
+			tmp.Namespace = k8sService.Namespace
+			for _, port := range k8sService.Spec.Ports {
+				if strings.Contains(port.Name, "grpc") {
+					tmp.PortName = port.Name
+					tmp.Protocol = "tcp"
+					tmp.Region = "us-central1"
+					tmp.Zone = "us-central1-a"
+					// 		Protocol:        "tcp",
+					// Zone:            "us-central1-a",
+					// Region:          "us-central1",
+				}
+
+			}
+
+			cp.log.Infof("k8sService: %v\n", k8sService)
+			cp.log.Infof("tmp: %v\n", tmp)
 			clusters = append(clusters, createClusters(k8sService)...)
 			listeners = append(listeners, createListeners(k8sService)...)
 			endpoints = append(endpoints, createEndpoints(k8sService)...)
 			routes = append(routes, createRoutes(k8sService)...)
+			cp.log.Info("=============")
 		}
 	}
 	// cp.log.Infof("clusters: %v\n", clusters)
@@ -48,27 +65,27 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 	// cp.log.Infof("endpoints: %v\n", endpoints)
 	// cp.log.Infof("routes: %v\n", routes)
 	//snapshot := cache.NewSnapshot(fmt.Sprintf("%v.0", version), edsEndpoints, nil, nil, nil, nil, nil)
-	snapshot, err := cachev3.NewSnapshot(fmt.Sprintf("%v.0", cp.version), map[resource.Type][]types.Resource{
-		resource.EndpointType: endpoints,
-		resource.ClusterType:  clusters,
-		resource.ListenerType: listeners,
-		resource.RouteType:    routes,
-	})
-	if err != nil {
-		fmt.Printf("%v", err)
-		return
-	}
+	// snapshot, err := cachev3.NewSnapshot(fmt.Sprintf("%v.0", cp.version), map[resource.Type][]types.Resource{
+	// 	resource.EndpointType: endpoints,
+	// 	resource.ClusterType:  clusters,
+	// 	resource.ListenerType: listeners,
+	// 	resource.RouteType:    routes,
+	// })
+	// if err != nil {
+	// 	fmt.Printf("%v", err)
+	// 	return
+	// }
 
-	IDs := cp.snapshotCache.GetStatusKeys()
-	// cp.log.Infof("snapshotCache IDs: %v\n", IDs)
-	for _, id := range IDs {
-		err = cp.snapshotCache.SetSnapshot(context.Background(), id, snapshot)
-		if err != nil {
-			fmt.Printf("%v", err)
-		}
-	}
+	// IDs := cp.snapshotCache.GetStatusKeys()
+	// // cp.log.Infof("snapshotCache IDs: %v\n", IDs)
+	// for _, id := range IDs {
+	// 	err = cp.snapshotCache.SetSnapshot(context.Background(), id, snapshot)
+	// 	if err != nil {
+	// 		fmt.Printf("%v", err)
+	// 	}
+	// }
 
-	cp.version++
+	// cp.version++
 }
 
 func (cp *ControlPlane) HandleEndpointsUpdate(oldObj, newObj interface{}) {
