@@ -51,8 +51,8 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 
 			}
 
-			cp.log.Infof("k8sService: %v\n", k8sService)
-			cp.log.Infof("tmp: %v\n", tmp)
+			cp.log.Infof("k8sService: %v", k8sService)
+			cp.log.Infof("tmp: %v", tmp)
 			clusters = append(clusters, createClusters(k8sService)...)
 			listeners = append(listeners, createListeners(k8sService)...)
 			endpoints = append(endpoints, createEndpoints(k8sService)...)
