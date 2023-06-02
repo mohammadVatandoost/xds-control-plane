@@ -16,6 +16,7 @@ import (
 	endpoint "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	listener "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	route "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	v3routerpb "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
 	hcm "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
@@ -245,11 +246,27 @@ func (cp *ControlPlane) makeSnapshot(version int32) (*cachev3.Snapshot, error) {
 		// 		Name: "envoy.filters.http.router",
 		// 	},
 		// }
-		filters := []*hcm.HttpFilter{
-			{
-				Name: "envoy.filters.http.router",
+		// filters := []*hcm.HttpFilter{
+		// 	{
+		// 		Name: "envoy.filters.http.router",
+		// 	},
+		// }
+
+		filterPbst, err := ptypes.MarshalAny(&v3routerpb.Router{})
+		if err != nil {
+			panic(err)
+		}
+		// RouterHTTPFilter := hcm.HTTPFilter("router", &v3routerpb.Router{})
+		RouterHTTPFilter := &hcm.HttpFilter{
+			Name: "router",
+			ConfigType: &hcm.HttpFilter_TypedConfig{
+				TypedConfig: filterPbst,
 			},
 		}
+		filters := []*hcm.HttpFilter{
+			RouterHTTPFilter,
+		}
+
 		manager := &hcm.HttpConnectionManager{
 			CodecType:      hcm.HttpConnectionManager_AUTO,
 			RouteSpecifier: hcRds,
@@ -284,6 +301,26 @@ func (cp *ControlPlane) makeSnapshot(version int32) (*cachev3.Snapshot, error) {
 		resource.RouteType:    rds,
 	})
 }
+
+// // HTTPFilter constructs an xds HttpFilter with the provided name and config.
+// func HTTPFilter(name string, config proto.Message) *hcm.HttpFilter {
+// 	return &hcm.HttpFilter{
+// 		Name: name,
+// 		ConfigType: &hcm.HttpFilter_TypedConfig{
+// 			TypedConfig: MarshalAny(config),
+// 		},
+// 	}
+// }
+
+// // MarshalAny is a convenience function to marshal protobuf messages into any
+// // protos. It will panic if the marshaling fails.
+// func MarshalAny(m proto.Message) *anypb.Any {
+// 	a, err := ptypes.MarshalAny(m)
+// 	if err != nil {
+// 		panic(fmt.Sprintf("ptypes.MarshalAny(%+v) failed: %v", m, err))
+// 	}
+// 	return a
+// }
 
 func makeLBEndpoint(addresses []string) []*endpoint.LbEndpoint {
 	lbe := make([]*endpoint.LbEndpoint, 0)
