@@ -199,7 +199,7 @@ func (cp *ControlPlane) makeXDSConfigFromService(svc ServiceConfig) (*endpoint.C
 	region := svc.Region //"us-central1"
 	zone := svc.Zone     // us-central1-a
 	addresses := getAddresses(svc)
-	cp.log.Infof("service: %v, addresses: %v \n", svc.ServiceName, addresses)
+	// cp.log.Infof("service: %v, addresses: %v \n", svc.ServiceName, addresses)
 	lbe := makeLBEndpoint(addresses)
 	eds := &endpoint.ClusterLoadAssignment{
 		ClusterName: clusterName,
@@ -225,7 +225,7 @@ func (cp *ControlPlane) makeXDSConfigFromService(svc ServiceConfig) (*endpoint.C
 	}
 
 	// RDS
-	cp.log.Infof(">>>>>>>>>>>>>>>>>>> creating RDS " + virtualHostName)
+	// cp.log.Infof(">>>>>>>>>>>>>>>>>>> creating RDS " + virtualHostName)
 	vh := &route.VirtualHost{
 		Name:    virtualHostName,
 		Domains: []string{svc.ServiceName}, //******************* >> must match what is specified at xds:/// //
@@ -251,7 +251,7 @@ func (cp *ControlPlane) makeXDSConfigFromService(svc ServiceConfig) (*endpoint.C
 	}
 
 	// LISTENER
-	cp.log.Infof(">>>>>>>>>>>>>>>>>>> creating LISTENER " + svc.ServiceName)
+	// cp.log.Infof(">>>>>>>>>>>>>>>>>>> creating LISTENER " + svc.ServiceName)
 	hcRds := &hcm.HttpConnectionManager_Rds{
 		Rds: &hcm.Rds{
 			RouteConfigName: routeConfigName,
