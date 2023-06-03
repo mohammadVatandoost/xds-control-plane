@@ -169,121 +169,11 @@ func (cp *ControlPlane) makeSnapshot(version int32) (*cachev3.Snapshot, error) {
 	rds := []types.Resource{}
 	lsnr := []types.Resource{}
 	for _, svc := range services {
-		routeConfigName := svc.ServiceName + "-route"
-		clusterName := svc.ServiceName + "-cluster"
-		virtualHostName := svc.ServiceName + "-vs"
-		region := svc.Region //"us-central1"
-		zone := svc.Zone     // us-central1-a
-		addresses := getAddresses(svc)
-		cp.log.Infof("service: %v, addresses: %v \n", svc.ServiceName, addresses)
-		lbe := makeLBEndpoint(addresses)
-		eds = append(eds, &endpoint.ClusterLoadAssignment{
-			ClusterName: clusterName,
-			Endpoints: []*endpoint.LocalityLbEndpoints{{
-				Locality: &core.Locality{
-					Region: region,
-					Zone:   zone,
-				},
-				Priority:            0,
-				LoadBalancingWeight: &wrapperspb.UInt32Value{Value: uint32(1000)},
-				LbEndpoints:         lbe,
-			}},
-		})
-		cls = append(cls, &cluster.Cluster{
-			Name:                 clusterName,
-			LbPolicy:             cluster.Cluster_ROUND_ROBIN,
-			ClusterDiscoveryType: &cluster.Cluster_Type{Type: cluster.Cluster_EDS},
-			EdsClusterConfig: &cluster.Cluster_EdsClusterConfig{
-				EdsConfig: &core.ConfigSource{
-					ConfigSourceSpecifier: &core.ConfigSource_Ads{},
-				},
-			},
-		})
-
-		// RDS
-		cp.log.Infof(">>>>>>>>>>>>>>>>>>> creating RDS " + virtualHostName)
-		vh := &route.VirtualHost{
-			Name:    virtualHostName,
-			Domains: []string{svc.ServiceName}, //******************* >> must match what is specified at xds:/// //
-
-			Routes: []*route.Route{{
-				Match: &route.RouteMatch{
-					PathSpecifier: &route.RouteMatch_Prefix{
-						Prefix: "",
-					},
-				},
-				Action: &route.Route_Route{
-					Route: &route.RouteAction{
-						ClusterSpecifier: &route.RouteAction_Cluster{
-							Cluster: clusterName,
-						},
-					},
-				},
-			}}}
-
-		rds = append(rds, &route.RouteConfiguration{
-			Name:         routeConfigName,
-			VirtualHosts: []*route.VirtualHost{vh},
-		})
-
-		// LISTENER
-		cp.log.Infof(">>>>>>>>>>>>>>>>>>> creating LISTENER " + svc.ServiceName)
-		hcRds := &hcm.HttpConnectionManager_Rds{
-			Rds: &hcm.Rds{
-				RouteConfigName: routeConfigName,
-				ConfigSource: &core.ConfigSource{
-					ConfigSourceSpecifier: &core.ConfigSource_Ads{
-						Ads: &core.AggregatedConfigSource{},
-					},
-				},
-			},
-		}
-		// filters := []*hcm.HttpFilter{
-		// 	{
-		// 		Name: "envoy.filters.http.grpc_stats",
-		// 	},
-		// 	{
-		// 		Name: "envoy.filters.http.router",
-		// 	},
-		// }
-		// filters := []*hcm.HttpFilter{
-		// 	{
-		// 		Name: "envoy.filters.http.router",
-		// 	},
-		// }
-
-		filterPbst, err := ptypes.MarshalAny(&v3routerpb.Router{})
-		if err != nil {
-			panic(err)
-		}
-		// RouterHTTPFilter := hcm.HTTPFilter("router", &v3routerpb.Router{})
-		RouterHTTPFilter := &hcm.HttpFilter{
-			Name: "router",
-			ConfigType: &hcm.HttpFilter_TypedConfig{
-				TypedConfig: filterPbst,
-			},
-		}
-		filters := []*hcm.HttpFilter{
-			RouterHTTPFilter,
-		}
-
-		manager := &hcm.HttpConnectionManager{
-			CodecType:      hcm.HttpConnectionManager_AUTO,
-			RouteSpecifier: hcRds,
-			HttpFilters:    filters,
-		}
-
-		pbst, err := ptypes.MarshalAny(manager)
-		if err != nil {
-			panic(err)
-		}
-
-		lsnr = append(lsnr, &listener.Listener{
-			Name: svc.ServiceName,
-			ApiListener: &listener.ApiListener{
-				ApiListener: pbst,
-			},
-		})
+		edsService, clsService, rdsService, lsnrService := cp.makeXDSConfigFromService(svc)
+		eds = append(eds, edsService)
+		cls = append(cls, clsService)
+		rds = append(rds, rdsService)
+		lsnr = append(lsnr, lsnrService)
 	}
 
 	atomic.AddInt32(&version, 1)
@@ -300,6 +190,113 @@ func (cp *ControlPlane) makeSnapshot(version int32) (*cachev3.Snapshot, error) {
 		resource.ListenerType: lsnr,
 		resource.RouteType:    rds,
 	})
+}
+
+func (cp *ControlPlane) makeXDSConfigFromService(svc ServiceConfig) (*endpoint.ClusterLoadAssignment, *cluster.Cluster, *route.RouteConfiguration, *listener.Listener) {
+	routeConfigName := svc.ServiceName + "-route"
+	clusterName := svc.ServiceName + "-cluster"
+	virtualHostName := svc.ServiceName + "-vs"
+	region := svc.Region //"us-central1"
+	zone := svc.Zone     // us-central1-a
+	addresses := getAddresses(svc)
+	cp.log.Infof("service: %v, addresses: %v \n", svc.ServiceName, addresses)
+	lbe := makeLBEndpoint(addresses)
+	eds := &endpoint.ClusterLoadAssignment{
+		ClusterName: clusterName,
+		Endpoints: []*endpoint.LocalityLbEndpoints{{
+			Locality: &core.Locality{
+				Region: region,
+				Zone:   zone,
+			},
+			Priority:            0,
+			LoadBalancingWeight: &wrapperspb.UInt32Value{Value: uint32(1000)},
+			LbEndpoints:         lbe,
+		}},
+	}
+	cls := &cluster.Cluster{
+		Name:                 clusterName,
+		LbPolicy:             cluster.Cluster_ROUND_ROBIN,
+		ClusterDiscoveryType: &cluster.Cluster_Type{Type: cluster.Cluster_EDS},
+		EdsClusterConfig: &cluster.Cluster_EdsClusterConfig{
+			EdsConfig: &core.ConfigSource{
+				ConfigSourceSpecifier: &core.ConfigSource_Ads{},
+			},
+		},
+	}
+
+	// RDS
+	cp.log.Infof(">>>>>>>>>>>>>>>>>>> creating RDS " + virtualHostName)
+	vh := &route.VirtualHost{
+		Name:    virtualHostName,
+		Domains: []string{svc.ServiceName}, //******************* >> must match what is specified at xds:/// //
+
+		Routes: []*route.Route{{
+			Match: &route.RouteMatch{
+				PathSpecifier: &route.RouteMatch_Prefix{
+					Prefix: "",
+				},
+			},
+			Action: &route.Route_Route{
+				Route: &route.RouteAction{
+					ClusterSpecifier: &route.RouteAction_Cluster{
+						Cluster: clusterName,
+					},
+				},
+			},
+		}}}
+
+	rds := &route.RouteConfiguration{
+		Name:         routeConfigName,
+		VirtualHosts: []*route.VirtualHost{vh},
+	}
+
+	// LISTENER
+	cp.log.Infof(">>>>>>>>>>>>>>>>>>> creating LISTENER " + svc.ServiceName)
+	hcRds := &hcm.HttpConnectionManager_Rds{
+		Rds: &hcm.Rds{
+			RouteConfigName: routeConfigName,
+			ConfigSource: &core.ConfigSource{
+				ConfigSourceSpecifier: &core.ConfigSource_Ads{
+					Ads: &core.AggregatedConfigSource{},
+				},
+			},
+		},
+	}
+
+	filterPbst, err := ptypes.MarshalAny(&v3routerpb.Router{})
+	if err != nil {
+		panic(err)
+	}
+	// RouterHTTPFilter := hcm.HTTPFilter("router", &v3routerpb.Router{})
+	RouterHTTPFilter := &hcm.HttpFilter{
+		Name: "router",
+		ConfigType: &hcm.HttpFilter_TypedConfig{
+			TypedConfig: filterPbst,
+		},
+	}
+	filters := []*hcm.HttpFilter{
+		RouterHTTPFilter,
+	}
+
+	manager := &hcm.HttpConnectionManager{
+		CodecType:      hcm.HttpConnectionManager_AUTO,
+		RouteSpecifier: hcRds,
+		HttpFilters:    filters,
+	}
+
+	pbst, err := ptypes.MarshalAny(manager)
+	if err != nil {
+		panic(err)
+	}
+
+	lsnr := &listener.Listener{
+		Name: svc.ServiceName,
+		ApiListener: &listener.ApiListener{
+			ApiListener: pbst,
+		},
+	}
+
+	return eds, cls, rds, lsnr
 }
 
 // // HTTPFilter constructs an xds HttpFilter with the provided name and config.

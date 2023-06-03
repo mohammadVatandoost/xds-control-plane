@@ -23,7 +23,7 @@ import (
 
 type ControlPlane struct {
 	log               *logrus.Logger
-	version           int
+	version           int32
 	snapshotCache     cache.SnapshotCache
 	server            xds.Server
 	callBacks         *callbacks
@@ -87,7 +87,7 @@ func (cp *ControlPlane) Run() error {
 		informerServices.Run(stop)
 	}()
 
-	go cp.RunXDSserver(stop)
+	// go cp.RunXDSserver(stop)
 
 	// for _, cluster := range clusters {
 	// 	stop := make(chan struct{})
