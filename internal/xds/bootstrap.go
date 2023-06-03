@@ -95,10 +95,9 @@ func getAddresses(svcc ServiceConfig) []string {
 	protocol := svcc.Protocol               //"tcp"
 	grpcServiceName := svcc.GRPCServiceName //"echo.EchoServer"
 
-	logrus.Printf("Looking up svc")
 	cname, rec, err := net.LookupSRV(portName, protocol, fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace))
 	if err != nil {
-		logrus.Errorf("Could not find server %s", serviceName, err.Error())
+		logrus.Errorf("Could not find serviceNameL %s, portName: %v, protocol: %v,  err: %v", serviceName, portName, protocol, err.Error())
 		return upstreamPorts
 	} else {
 		logrus.Infof("SRV CNAME: %v, rec: %v\n", cname, rec)
