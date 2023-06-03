@@ -168,7 +168,10 @@ func (cp *ControlPlane) makeSnapshot(version int32) (*cachev3.Snapshot, error) {
 	rds := []types.Resource{}
 	lsnr := []types.Resource{}
 	for _, svc := range services {
-		edsService, clsService, rdsService, lsnrService := cp.makeXDSConfigFromService(svc)
+		edsService, clsService, rdsService, lsnrService, err := cp.makeXDSConfigFromService(svc)
+		if err != nil {
+			continue
+		}
 		eds = append(eds, edsService)
 		cls = append(cls, clsService)
 		rds = append(rds, rdsService)
@@ -191,13 +194,16 @@ func (cp *ControlPlane) makeSnapshot(version int32) (*cachev3.Snapshot, error) {
 	})
 }
 
-func (cp *ControlPlane) makeXDSConfigFromService(svc ServiceConfig) (*endpoint.ClusterLoadAssignment, *cluster.Cluster, *route.RouteConfiguration, *listener.Listener) {
+func (cp *ControlPlane) makeXDSConfigFromService(svc ServiceConfig) (*endpoint.ClusterLoadAssignment, *cluster.Cluster, *route.RouteConfiguration, *listener.Listener, error) {
 	routeConfigName := svc.ServiceName + "-route"
 	clusterName := svc.ServiceName + "-cluster"
 	virtualHostName := svc.ServiceName + "-vs"
 	region := svc.Region //"us-central1"
 	zone := svc.Zone     // us-central1-a
 	addresses := getAddresses(svc)
+	if len(addresses) == 0 {
+		return nil, nil, nil, nil, fmt.Errorf("there is no availabe address for service: %v", svc.ServiceName)
+	}
 	// cp.log.Infof("service: %v, addresses: %v \n", svc.ServiceName, addresses)
 	lbe := makeLBEndpoint(addresses)
 	eds := &endpoint.ClusterLoadAssignment{
