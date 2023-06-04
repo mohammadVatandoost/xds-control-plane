@@ -37,9 +37,9 @@ func (cb *callbacks) OnStreamClosed(id int64, node *core.Node) {
 }
 func (cb *callbacks) OnStreamRequest(id int64, r *discovery.DiscoveryRequest) error {
 	cb.log.Infof("OnStreamRequest %d  Request[%v], ResourceNames: %v", id, r.TypeUrl, r.ResourceNames)
+	cb.eventsHandler.UpdateCache(r.Node.Id, r.ResourceNames, r.TypeUrl)
 	cb.mu.Lock()
 	defer cb.mu.Unlock()
-	cb.eventsHandler.UpdateCache(r.Node.Id, r.ResourceNames, r.TypeUrl)
 	cb.requests++
 	if cb.signal != nil {
 		close(cb.signal)

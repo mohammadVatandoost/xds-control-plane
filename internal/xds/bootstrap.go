@@ -103,37 +103,40 @@ func getAddresses(svcc ServiceConfig) []string {
 		logrus.Infof("SRV CNAME: %v, rec: %v\n", cname, rec)
 	}
 
-	var wg sync.WaitGroup
+	// var wg sync.WaitGroup
 
 	for i := range rec {
-		wg.Add(1)
-		go func(host string, port string) {
-			defer wg.Done()
-			address := fmt.Sprintf("%s:%s", host, port)
+		// wg.Add(1)
+		// go func(host string, port string) {
+		// 	defer wg.Done()
+		// 	address := fmt.Sprintf("%s:%s", host, port)
 
-			ctx := context.Background()
-			ctx, cancel := context.WithTimeout(ctx, 30*time.Millisecond)
-			defer cancel()
-			// ToDo: handle health check later
-			// conn, err := grpc.Dial(address, grpc.WithInsecure())
-			// if err != nil {
-			// 	logrus.Errorf("Could not connect to endpoint %s  %v", address, err.Error())
-			// 	return
-			// }
-			// resp, err := healthpb.NewHealthClient(conn).Check(ctx, &healthpb.HealthCheckRequest{Service: grpcServiceName})
-			// if err != nil {
-			// 	logrus.WithField("address", address).Errorf("HealthCheck failed err: %v, conn: %v", conn, err.Error())
-			// 	// return // ToDo: for testign disable this
-			// }
-			// if resp.GetStatus() != healthpb.HealthCheckResponse_SERVING {
-			// 	logrus.Errorf("Service not healthy %v %v", conn, fmt.Sprintf("service not in serving state: %v", resp.GetStatus().String()))
-			// 	// return ToDo: for testign disable this
-			// }
-			// logrus.Infof("RPC HealthChekStatus: for %v %v", address, resp.GetStatus())
-			upstreamPorts = append(upstreamPorts, address)
-		}(rec[i].Target, strconv.Itoa(int(rec[i].Port)))
+		// 	ctx := context.Background()
+		// 	ctx, cancel := context.WithTimeout(ctx, 30*time.Millisecond)
+		// 	defer cancel()
+		// 	// ToDo: handle health check later
+		// 	// conn, err := grpc.Dial(address, grpc.WithInsecure())
+		// 	// if err != nil {
+		// 	// 	logrus.Errorf("Could not connect to endpoint %s  %v", address, err.Error())
+		// 	// 	return
+		// 	// }
+		// 	// resp, err := healthpb.NewHealthClient(conn).Check(ctx, &healthpb.HealthCheckRequest{Service: grpcServiceName})
+		// 	// if err != nil {
+		// 	// 	logrus.WithField("address", address).Errorf("HealthCheck failed err: %v, conn: %v", conn, err.Error())
+		// 	// 	// return // ToDo: for testign disable this
+		// 	// }
+		// 	// if resp.GetStatus() != healthpb.HealthCheckResponse_SERVING {
+		// 	// 	logrus.Errorf("Service not healthy %v %v", conn, fmt.Sprintf("service not in serving state: %v", resp.GetStatus().String()))
+		// 	// 	// return ToDo: for testign disable this
+		// 	// }
+		// 	// logrus.Infof("RPC HealthChekStatus: for %v %v", address, resp.GetStatus())
+		// 	// upstreamPorts = append(upstreamPorts, address)
+		// }(rec[i].Target, strconv.Itoa(int(rec[i].Port)))
+		address := fmt.Sprintf("%s:%s", rec[i].Target, strconv.Itoa(int(rec[i].Port)))
+		upstreamPorts = append(upstreamPorts, address)
 	}
-	wg.Wait()
+	// wg.Wait()
+	
 	return upstreamPorts
 }
 
