@@ -20,7 +20,7 @@ type callbacks struct {
 }
 
 type EventsHandler interface {
-	UpdateCache(nodeID string, resourceNames []string)
+	UpdateCache(nodeID string, resourceNames []string, resourceType string)
 }
 
 func (cb *callbacks) Report() {
@@ -39,7 +39,7 @@ func (cb *callbacks) OnStreamRequest(id int64, r *discovery.DiscoveryRequest) er
 	cb.log.Infof("OnStreamRequest %d  Request[%v], ResourceNames: %v", id, r.TypeUrl, r.ResourceNames)
 	cb.mu.Lock()
 	defer cb.mu.Unlock()
-	cb.eventsHandler.UpdateCache(r.Node.Id, r.ResourceNames)
+	cb.eventsHandler.UpdateCache(r.Node.Id, r.ResourceNames, r.TypeUrl)
 	cb.requests++
 	if cb.signal != nil {
 		close(cb.signal)

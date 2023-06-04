@@ -13,7 +13,10 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func (cp *ControlPlane) UpdateCache(nodeID string, resourceNames []string) {
+func (cp *ControlPlane) UpdateCache(nodeID string, resourceNames []string, resourceType string) {
+	if resourceType != resource.ListenerType {
+		return
+	}
 	cp.log.Infof("UpdateCache nodeID: %v, resourceNames: %v\n", nodeID, resourceNames)
 	clusters := make([]types.Resource, 0)
 	listeners := make([]types.Resource, 0)
@@ -34,7 +37,7 @@ func (cp *ControlPlane) UpdateCache(nodeID string, resourceNames []string) {
 				cp.log.Errorf("service type is not match, type is: %v", reflect.TypeOf(svc).Elem().Name())
 				continue
 			}
-			cp.log.Infof("k8sService Name: %v", k8sService.Name)
+			// cp.log.Infof("k8sService Name: %v", k8sService.Name)
 			_, ok = resourceNamesMap[k8sService.Name]
 			if !ok {
 				continue
