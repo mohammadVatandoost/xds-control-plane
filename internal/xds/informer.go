@@ -32,7 +32,8 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 			}
 			// cp.log.Info("=============")
 			seviceConfig := ServiceConfig{}
-			seviceConfig.GRPCServiceName = k8sService.Name
+			// seviceConfig.GRPCServiceName = k8sService.Name
+			seviceConfig.ServiceName = k8sService.Name
 			seviceConfig.Namespace = k8sService.Namespace
 			for _, port := range k8sService.Spec.Ports {
 				if strings.Contains(port.Name, "grpc") {
@@ -40,7 +41,10 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 					seviceConfig.Protocol = "tcp"
 					seviceConfig.Region = "us-central1"
 					seviceConfig.Zone = "us-central1-a"
-					edsService, clsService, rdsService, lsnrService := cp.makeXDSConfigFromService(seviceConfig)
+					edsService, clsService, rdsService, lsnrService, err := cp.makeXDSConfigFromService(seviceConfig)
+					if err != nil {
+						cp.log.Errorf("couldn't make service, err: %v", err)
+					}
 					endpoints = append(endpoints, edsService)
 					clusters = append(clusters, clsService)
 					routes = append(routes, rdsService)

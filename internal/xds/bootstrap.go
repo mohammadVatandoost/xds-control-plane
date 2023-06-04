@@ -24,10 +24,10 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/utils"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/grpc"
+	// "google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
-	healthpb "google.golang.org/grpc/health/grpc_health_v1"
+	// healthpb "google.golang.org/grpc/health/grpc_health_v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -93,11 +93,11 @@ func getAddresses(svcc ServiceConfig) []string {
 	namespace := svcc.Namespace             //"default"
 	portName := svcc.PortName               //"grpc"
 	protocol := svcc.Protocol               //"tcp"
-	grpcServiceName := svcc.GRPCServiceName //"echo.EchoServer"
+	// grpcServiceName := svcc.GRPCServiceName //"echo.EchoServer"
 
 	cname, rec, err := net.LookupSRV(portName, protocol, fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace))
 	if err != nil {
-		logrus.Errorf("Could not find serviceNameL %s, portName: %v, protocol: %v,  err: %v", serviceName, portName, protocol, err.Error())
+		logrus.Errorf("Could not find serviceName: %s, portName: %v, protocol: %v,  err: %v", serviceName, portName, protocol, err.Error())
 		return upstreamPorts
 	} else {
 		logrus.Infof("SRV CNAME: %v, rec: %v\n", cname, rec)
@@ -114,21 +114,22 @@ func getAddresses(svcc ServiceConfig) []string {
 			ctx := context.Background()
 			ctx, cancel := context.WithTimeout(ctx, 30*time.Millisecond)
 			defer cancel()
-			conn, err := grpc.Dial(address, grpc.WithInsecure())
-			if err != nil {
-				logrus.Errorf("Could not connect to endpoint %s  %v", address, err.Error())
-				return
-			}
-			resp, err := healthpb.NewHealthClient(conn).Check(ctx, &healthpb.HealthCheckRequest{Service: grpcServiceName})
-			if err != nil {
-				logrus.WithField("address", address).Errorf("HealthCheck failed err: %v, conn: %v", conn, err.Error())
-				// return // ToDo: for testign disable this
-			}
-			if resp.GetStatus() != healthpb.HealthCheckResponse_SERVING {
-				logrus.Errorf("Service not healthy %v %v", conn, fmt.Sprintf("service not in serving state: %v", resp.GetStatus().String()))
-				// return ToDo: for testign disable this
-			}
-			logrus.Infof("RPC HealthChekStatus: for %v %v", address, resp.GetStatus())
+			// ToDo: handle health check later
+			// conn, err := grpc.Dial(address, grpc.WithInsecure())
+			// if err != nil {
+			// 	logrus.Errorf("Could not connect to endpoint %s  %v", address, err.Error())
+			// 	return
+			// }
+			// resp, err := healthpb.NewHealthClient(conn).Check(ctx, &healthpb.HealthCheckRequest{Service: grpcServiceName})
+			// if err != nil {
+			// 	logrus.WithField("address", address).Errorf("HealthCheck failed err: %v, conn: %v", conn, err.Error())
+			// 	// return // ToDo: for testign disable this
+			// }
+			// if resp.GetStatus() != healthpb.HealthCheckResponse_SERVING {
+			// 	logrus.Errorf("Service not healthy %v %v", conn, fmt.Sprintf("service not in serving state: %v", resp.GetStatus().String()))
+			// 	// return ToDo: for testign disable this
+			// }
+			// logrus.Infof("RPC HealthChekStatus: for %v %v", address, resp.GetStatus())
 			upstreamPorts = append(upstreamPorts, address)
 		}(rec[i].Target, strconv.Itoa(int(rec[i].Port)))
 	}
@@ -301,7 +302,7 @@ func (cp *ControlPlane) makeXDSConfigFromService(svc ServiceConfig) (*endpoint.C
 		},
 	}
 
-	return eds, cls, rds, lsnr
+	return eds, cls, rds, lsnr, nil
 }
 
 // // HTTPFilter constructs an xds HttpFilter with the provided name and config.
