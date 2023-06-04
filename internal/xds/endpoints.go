@@ -1,7 +1,6 @@
 package xds
 
 import (
-
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	endpointv3 "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"

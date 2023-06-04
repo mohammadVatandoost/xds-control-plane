@@ -89,10 +89,10 @@ func CreateClusterClient() (kubernetes.Interface, error) {
 
 func getAddresses(svcc ServiceConfig) []string {
 	var upstreamPorts []string
-	serviceName := svcc.ServiceName         //"be-srv"
-	namespace := svcc.Namespace             //"default"
-	portName := svcc.PortName               //"grpc"
-	protocol := svcc.Protocol               //"tcp"
+	serviceName := svcc.ServiceName //"be-srv"
+	namespace := svcc.Namespace     //"default"
+	portName := svcc.PortName       //"grpc"
+	protocol := svcc.Protocol       //"tcp"
 	// grpcServiceName := svcc.GRPCServiceName //"echo.EchoServer"
 
 	cname, rec, err := net.LookupSRV(portName, protocol, fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace))

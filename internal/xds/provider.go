@@ -13,25 +13,26 @@ func NewControlPlane(log *logrus.Logger, config *Config, storage cache.Storage) 
 	if storage != nil {
 		snapshotCache = cache.NewSnapshotCacheWithStorage(config.ADSEnabled, cache.IDHash{}, log, storage)
 	}
-	snapshotCache.GetStatusKeys()
-	callBacks := newCallBack(log)
-	return &ControlPlane{
+	cp := &ControlPlane{
 		log:           log,
 		version:       0,
 		snapshotCache: snapshotCache,
-		callBacks:     callBacks,
-		server:        xds.NewServer(context.Background(), snapshotCache, callBacks),
 		storage:       storage,
 		conf:          config,
 	}
+	callBacks := newCallBack(log, cp)
+	cp.callBacks = callBacks
+	cp.server = xds.NewServer(context.Background(), snapshotCache, callBacks)
+	return cp
 }
 
-func newCallBack(log *logrus.Logger) *callbacks {
+func newCallBack(log *logrus.Logger, eventsHandler EventsHandler) *callbacks {
 	signal := make(chan struct{})
 	return &callbacks{
-		log:      log,
-		signal:   signal,
-		fetches:  0,
-		requests: 0,
+		log:           log,
+		signal:        signal,
+		fetches:       0,
+		requests:      0,
+		eventsHandler: eventsHandler,
 	}
 }

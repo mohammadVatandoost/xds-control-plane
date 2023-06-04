@@ -11,11 +11,16 @@ import (
 )
 
 type callbacks struct {
-	signal   chan struct{}
-	fetches  int
-	requests int
-	mu       sync.Mutex
-	log      *logrus.Logger
+	signal        chan struct{}
+	fetches       int
+	requests      int
+	mu            sync.Mutex
+	log           *logrus.Logger
+	eventsHandler EventsHandler
+}
+
+type EventsHandler interface {
+	UpdateCache(nodeID string, resourceNames []string)
 }
 
 func (cb *callbacks) Report() {
@@ -34,6 +39,7 @@ func (cb *callbacks) OnStreamRequest(id int64, r *discovery.DiscoveryRequest) er
 	cb.log.Infof("OnStreamRequest %d  Request[%v], ResourceNames: %v", id, r.TypeUrl, r.ResourceNames)
 	cb.mu.Lock()
 	defer cb.mu.Unlock()
+	cb.eventsHandler.UpdateCache(r.Node.Id, r.ResourceNames)
 	cb.requests++
 	if cb.signal != nil {
 		close(cb.signal)

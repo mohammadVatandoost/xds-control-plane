@@ -13,12 +13,16 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
-	// cp.log.Info("ControlPlane HandleServicesUpdate")
+func (cp *ControlPlane) UpdateCache(nodeID string, resourceNames []string) {
+	cp.log.Infof("UpdateCache nodeID: %v, resourceNames: %v\n", nodeID, resourceNames)
 	clusters := make([]types.Resource, 0)
 	listeners := make([]types.Resource, 0)
 	endpoints := make([]types.Resource, 0)
 	routes := make([]types.Resource, 0)
+	resourceNamesMap := make(map[string]struct{}, 0)
+	for _, v := range resourceNames {
+		resourceNamesMap[v] = struct{}{}
+	}
 
 	for _, inform := range cp.serviceInformers {
 		for _, svc := range inform.GetStore().List() {
@@ -30,7 +34,10 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 				cp.log.Errorf("service type is not match, type is: %v", reflect.TypeOf(svc).Elem().Name())
 				continue
 			}
-			// cp.log.Info("=============")
+			_, ok = resourceNamesMap[k8sService.Name]
+			if !ok {
+				continue
+			}
 			seviceConfig := ServiceConfig{}
 			// seviceConfig.GRPCServiceName = k8sService.Name
 			seviceConfig.ServiceName = k8sService.Name
@@ -52,20 +59,10 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 				}
 
 			}
-
-			// cp.log.Infof("k8sService: %v", k8sService)
-			// cp.log.Infof("tmp: %v", seviceConfig)
-			// cp.log.Info("=============")
 		}
 	}
 
 	atomic.AddInt32(&cp.version, 1)
-	// cp.log.Infof(" creating snapshot Version " + fmt.Sprint(cp.version))
-
-	// cp.log.Infof("   snapshot with Listener %v", listeners)
-	// cp.log.Infof("   snapshot with EDS %v", endpoints)
-	// cp.log.Infof("   snapshot with CLS %v", clusters)
-	// cp.log.Infof("   snapshot with RDS %v", routes)
 
 	snapshot, err := cachev3.NewSnapshot(fmt.Sprint(cp.version), map[resource.Type][]types.Resource{
 		resource.EndpointType: endpoints,
@@ -77,12 +74,9 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 		cp.log.Printf(">>>>>>>>>>  Error creating snapshot %v", err)
 		return
 	}
-	IDs := cp.snapshotCache.GetStatusKeys()
-	cp.log.Infof("snapshotCache IDs: %v\n", IDs)
-	for _, id := range IDs {
-		err = cp.snapshotCache.SetSnapshot(context.Background(), id, snapshot)
-		if err != nil {
-			cp.log.Errorf("%v", err)
-		}
+	cp.log.Infof("snapshotCache IDs: %v, listeners: %v\n", nodeID, listeners)
+	err = cp.snapshotCache.SetSnapshot(context.Background(), nodeID, snapshot)
+	if err != nil {
+		cp.log.Errorf("%v", err)
 	}
 }

@@ -83,9 +83,9 @@ func (cp *ControlPlane) Run() error {
 	// 	informerEndpoints.Run(stop)
 	// }()
 
-	go func() {
-		informerServices.Run(stop)
-	}()
+	// go func() {
+	// 	informerServices.Run(stop)
+	// }()
 
 	// go cp.RunXDSserver(stop)
 
