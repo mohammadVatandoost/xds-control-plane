@@ -7,7 +7,7 @@ replicaCount: 1
 image:
   repository: mvatandoost/xds-grpc-client-example
   pullPolicy: IfNotPresent
-  tag: 69cbe9
+  tag: 5e8ed5
 
 imagePullSecrets: [name: registry-secret, name: mvatandoost]
 nameOverride: ""
