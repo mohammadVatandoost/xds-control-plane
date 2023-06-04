@@ -75,17 +75,17 @@ func (cp *ControlPlane) Run() error {
 		UpdateFunc: cp.HandleEndpointsUpdate,
 	})
 
-	informerServices.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
-		UpdateFunc: cp.HandleServicesUpdate,
-	})
+	// informerServices.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
+	// 	UpdateFunc: cp.HandleServicesUpdate,
+	// })
 
 	// go func() {
 	// 	informerEndpoints.Run(stop)
 	// }()
 
-	// go func() {
-	// 	informerServices.Run(stop)
-	// }()
+	go func() {
+		informerServices.Run(stop)
+	}()
 
 	// go cp.RunXDSserver(stop)
 

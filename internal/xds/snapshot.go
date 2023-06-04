@@ -34,6 +34,7 @@ func (cp *ControlPlane) UpdateCache(nodeID string, resourceNames []string) {
 				cp.log.Errorf("service type is not match, type is: %v", reflect.TypeOf(svc).Elem().Name())
 				continue
 			}
+			cp.log.Infof("k8sService Name: %v", k8sService.Name)
 			_, ok = resourceNamesMap[k8sService.Name]
 			if !ok {
 				continue
