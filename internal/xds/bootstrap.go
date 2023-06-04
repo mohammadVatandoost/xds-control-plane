@@ -7,7 +7,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -24,6 +23,7 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/utils"
 	"github.com/sirupsen/logrus"
+
 	// "google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
@@ -136,7 +136,7 @@ func getAddresses(svcc ServiceConfig) []string {
 		upstreamPorts = append(upstreamPorts, address)
 	}
 	// wg.Wait()
-	
+
 	return upstreamPorts
 }
 
