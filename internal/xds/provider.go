@@ -19,8 +19,8 @@ func NewControlPlane(log *logrus.Logger, config *Config, storage cache.Storage) 
 		snapshotCache: snapshotCache,
 		storage:       storage,
 		conf:          config,
-		nodes: make(map[string]*Node),
-		resources: make(map[string][]string),
+		nodes:         make(map[string]*Node),
+		resources:     make(map[string]map[string]struct{}),
 	}
 	// callBacks := newCallBack(log, cp)
 	// cp.callBacks = callBacks

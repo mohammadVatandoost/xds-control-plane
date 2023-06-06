@@ -24,10 +24,10 @@ import (
 )
 
 type ControlPlane struct {
-	log               *logrus.Logger
-	version           int32
-	snapshotCache     cache.SnapshotCache
-	server            xds.Server
+	log           *logrus.Logger
+	version       int32
+	snapshotCache cache.SnapshotCache
+	server        xds.Server
 	fetches       int32
 	requests      int32
 	// callBacks         *callbacks
@@ -36,16 +36,16 @@ type ControlPlane struct {
 	serviceInformers  []k8scache.SharedIndexInformer
 	conf              *Config
 	storage           cache.Storage
-	nodes  map[string]*Node
-	mu            sync.RWMutex
-	resources  map[string]map[string]struct{} // A resource is watched by which nodes
-	muResource            sync.RWMutex
+	nodes             map[string]*Node
+	mu                sync.RWMutex
+	resources         map[string]map[string]struct{} // A resource is watched by which nodes
+	muResource        sync.RWMutex
 }
 
 func (cp *ControlPlane) CreateNode(id string) *Node {
 	cp.mu.Lock()
 	defer cp.mu.Unlock()
-	node, ok := cp.nodes[id] 
+	node, ok := cp.nodes[id]
 	if !ok {
 		node = &Node{
 			watchers: make(map[string]struct{}),
@@ -58,7 +58,7 @@ func (cp *ControlPlane) CreateNode(id string) *Node {
 func (cp *ControlPlane) GetNode(id string) (*Node, error) {
 	cp.mu.RLock()
 	defer cp.mu.RUnlock()
-	node, ok := cp.nodes[id] 
+	node, ok := cp.nodes[id]
 	if !ok {
 		return nil, fmt.Errorf("node with id: %s is not exist", id)
 	}
@@ -68,10 +68,10 @@ func (cp *ControlPlane) GetNode(id string) (*Node, error) {
 func (cp *ControlPlane) DeleteNode(id string) error {
 	cp.mu.Lock()
 	defer cp.mu.Unlock()
-	_, ok := cp.nodes[id] 
+	_, ok := cp.nodes[id]
 	if !ok {
 		return fmt.Errorf("node with id: %s is not exist", id)
-	}  
+	}
 	delete(cp.nodes, id)
 	return nil
 }
@@ -79,7 +79,7 @@ func (cp *ControlPlane) DeleteNode(id string) error {
 func (cp *ControlPlane) AddResourceWatchToNode(id string, resource string) {
 	cp.muResource.Lock()
 	defer cp.muResource.Unlock()
-	nodes, ok := cp.resources[resource] 
+	nodes, ok := cp.resources[resource]
 	if !ok {
 		nodes = make(map[string]struct{})
 		cp.resources[resource] = nodes
