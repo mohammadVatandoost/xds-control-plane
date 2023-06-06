@@ -19,20 +19,22 @@ func NewControlPlane(log *logrus.Logger, config *Config, storage cache.Storage) 
 		snapshotCache: snapshotCache,
 		storage:       storage,
 		conf:          config,
+		nodes: make(map[string]*Node),
+		resources: make(map[string][]string),
 	}
-	callBacks := newCallBack(log, cp)
-	cp.callBacks = callBacks
-	cp.server = xds.NewServer(context.Background(), snapshotCache, callBacks)
+	// callBacks := newCallBack(log, cp)
+	// cp.callBacks = callBacks
+	cp.server = xds.NewServer(context.Background(), snapshotCache, cp)
 	return cp
 }
 
-func newCallBack(log *logrus.Logger, eventsHandler EventsHandler) *callbacks {
-	signal := make(chan struct{})
-	return &callbacks{
-		log:           log,
-		signal:        signal,
-		fetches:       0,
-		requests:      0,
-		eventsHandler: eventsHandler,
-	}
-}
+// func newCallBack(log *logrus.Logger, eventsHandler EventsHandler) *callbacks {
+// 	signal := make(chan struct{})
+// 	return &callbacks{
+// 		log:           log,
+// 		signal:        signal,
+// 		fetches:       0,
+// 		requests:      0,
+// 		eventsHandler: eventsHandler,
+// 	}
+// }

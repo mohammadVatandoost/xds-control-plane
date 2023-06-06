@@ -80,6 +80,8 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 	IDs := cp.snapshotCache.GetStatusKeys()
 	cp.log.Infof("snapshotCache IDs: %v\n", IDs)
 	for _, id := range IDs {
+		status := cp.snapshotCache.GetStatusInfo(id)
+		cp.log.Infof("snapshotCache ID: %v, node meta data: %v", id, status.GetNode().GetMetadata().String())
 		err = cp.snapshotCache.SetSnapshot(context.Background(), id, snapshot)
 		if err != nil {
 			cp.log.Errorf("%v", err)

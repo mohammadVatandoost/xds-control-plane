@@ -2,8 +2,10 @@ package xds
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"strconv"
+	"sync"
 	"time"
 
 	clusterservice "github.com/envoyproxy/go-control-plane/envoy/service/cluster/v3"
@@ -26,12 +28,69 @@ type ControlPlane struct {
 	version           int32
 	snapshotCache     cache.SnapshotCache
 	server            xds.Server
-	callBacks         *callbacks
+	fetches       int32
+	requests      int32
+	// callBacks         *callbacks
 	endpoints         []types.Resource
 	endpointInformers []k8scache.SharedIndexInformer
 	serviceInformers  []k8scache.SharedIndexInformer
 	conf              *Config
 	storage           cache.Storage
+	nodes  map[string]*Node
+	resources  map[string][]string // A resource is watched by which nodes
+	mu            sync.RWMutex
+}
+
+func (cp *ControlPlane) CreateNode(id string) *Node {
+	cp.mu.Lock()
+	defer cp.mu.Unlock()
+	node, ok := cp.nodes[id] 
+	if !ok {
+		node = &Node{
+			watchers: make(map[string]struct{}),
+		}
+	}
+	cp.nodes[id] = node
+	return node
+}
+
+func (cp *ControlPlane) GetNode(id string) (*Node, error) {
+	cp.mu.RLock()
+	defer cp.mu.RUnlock()
+	node, ok := cp.nodes[id] 
+	if !ok {
+		return nil, fmt.Errorf("node with id: %s is not exist", id)
+	}
+	return node, nil
+}
+
+func (cp *ControlPlane) DeleteNode(id string) error {
+	cp.mu.Lock()
+	defer cp.mu.Unlock()
+	_, ok := cp.nodes[id] 
+	if !ok {
+		return fmt.Errorf("node with id: %s is not exist", id)
+	}  
+	delete(cp.nodes, id)
+	return nil
+}
+
+type Node struct {
+	watchers map[string]struct{}
+	mu sync.RWMutex
+}
+
+func (n *Node) AddWatcher(resource string) {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+	n.watchers[resource] = struct{}{}
+}
+
+func (n *Node) IsWatched(resource string) bool {
+	n.mu.RLock()
+	defer n.mu.RUnlock()
+	_, ok := n.watchers[resource] 
+	return ok
 }
 
 func (cp *ControlPlane) Run() error {

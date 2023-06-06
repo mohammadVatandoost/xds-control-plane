@@ -14,9 +14,7 @@ import (
 )
 
 func (cp *ControlPlane) UpdateCache(nodeID string, resourceNames []string, resourceType string) {
-	if resourceType != resource.ListenerType {
-		return
-	}
+	
 	cp.log.Infof("UpdateCache nodeID: %v, resourceNames: %v\n", nodeID, resourceNames)
 	clusters := make([]types.Resource, 0)
 	listeners := make([]types.Resource, 0)
