@@ -37,8 +37,9 @@ type ControlPlane struct {
 	conf              *Config
 	storage           cache.Storage
 	nodes  map[string]*Node
-	resources  map[string][]string // A resource is watched by which nodes
 	mu            sync.RWMutex
+	resources  map[string]map[string]struct{} // A resource is watched by which nodes
+	muResource            sync.RWMutex
 }
 
 func (cp *ControlPlane) CreateNode(id string) *Node {
@@ -75,22 +76,15 @@ func (cp *ControlPlane) DeleteNode(id string) error {
 	return nil
 }
 
-type Node struct {
-	watchers map[string]struct{}
-	mu sync.RWMutex
-}
-
-func (n *Node) AddWatcher(resource string) {
-	n.mu.Lock()
-	defer n.mu.Unlock()
-	n.watchers[resource] = struct{}{}
-}
-
-func (n *Node) IsWatched(resource string) bool {
-	n.mu.RLock()
-	defer n.mu.RUnlock()
-	_, ok := n.watchers[resource] 
-	return ok
+func (cp *ControlPlane) AddResourceWatchToNode(id string, resource string) {
+	cp.muResource.Lock()
+	defer cp.muResource.Unlock()
+	nodes, ok := cp.resources[resource] 
+	if !ok {
+		nodes = make(map[string]struct{})
+		cp.resources[resource] = nodes
+	}
+	nodes[id] = struct{}{}
 }
 
 func (cp *ControlPlane) Run() error {

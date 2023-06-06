@@ -41,8 +41,9 @@ func (cp *ControlPlane) OnStreamRequest(id int64, r *discovery.DiscoveryRequest)
 	}
 	cp.log.Infof("OnStreamRequest %d  Request[%v], ResourceNames: %v", id, r.TypeUrl, r.ResourceNames)
 	node := cp.CreateNode(r.Node.Id)
-	for _, r := range r.ResourceNames {
-		node.AddWatcher(r)
+	for _, rn := range r.ResourceNames {
+		node.AddWatcher(rn)
+		cp.AddResourceWatchToNode(r.Node.Id, rn)
 	}
 	// cp.eventsHandler.UpdateCache(r.Node.Id, r.ResourceNames, r.TypeUrl)
 	return nil
