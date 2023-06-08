@@ -13,7 +13,6 @@ import (
 	endpointservice "github.com/envoyproxy/go-control-plane/envoy/service/endpoint/v3"
 	listenerservice "github.com/envoyproxy/go-control-plane/envoy/service/listener/v3"
 	routeservice "github.com/envoyproxy/go-control-plane/envoy/service/route/v3"
-	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	xds "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"github.com/sirupsen/logrus"
@@ -31,7 +30,7 @@ type ControlPlane struct {
 	fetches       int32
 	requests      int32
 	// callBacks         *callbacks
-	endpoints         []types.Resource
+	// endpoints         []types.Resource
 	endpointInformers []k8scache.SharedIndexInformer
 	serviceInformers  []k8scache.SharedIndexInformer
 	conf              *Config
@@ -85,6 +84,20 @@ func (cp *ControlPlane) AddResourceWatchToNode(id string, resource string) {
 		cp.resources[resource] = nodes
 	}
 	nodes[id] = struct{}{}
+}
+
+func (cp *ControlPlane) GetNodesWatchTheResource(resource string) []string {
+	cp.muResource.RLock()
+	defer cp.muResource.RUnlock()
+	nodesArray := make([]string, 0)
+	nodes, ok := cp.resources[resource]
+	if !ok {
+		return nodesArray
+	}
+	for n := range nodes {
+		nodesArray = append(nodesArray, n)
+	}
+	return nodesArray
 }
 
 func (cp *ControlPlane) Run() error {

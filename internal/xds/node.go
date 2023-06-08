@@ -52,3 +52,45 @@ func (n *Node) GetClusters() []types.Resource {
 	defer n.mu.RUnlock()
 	return n.clusters
 }
+
+func (n *Node) AddCluster(r types.Resource) {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+	n.clusters = append(n.clusters, r)
+}
+
+func (n *Node) GetListeners() []types.Resource {
+	n.mu.RLock()
+	defer n.mu.RUnlock()
+	return n.listeners
+}
+
+func (n *Node) AddListener(r types.Resource) {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+	n.listeners = append(n.listeners, r)
+}
+
+func (n *Node) GetEndpoints() []types.Resource {
+	n.mu.RLock()
+	defer n.mu.RUnlock()
+	return n.endpoints
+}
+
+func (n *Node) AddEndpoint(r types.Resource) {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+	n.endpoints = append(n.endpoints, r)
+}
+
+func (n *Node) GetRoutes() []types.Resource {
+	n.mu.RLock()
+	defer n.mu.RUnlock()
+	return n.routes
+}
+
+func (n *Node) AddRoute(r types.Resource) {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+	n.routes = append(n.routes, r)
+}
