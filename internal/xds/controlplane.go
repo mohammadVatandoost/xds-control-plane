@@ -137,13 +137,13 @@ func (cp *ControlPlane) Run() error {
 	informerServices := factory.Core().V1().Services().Informer()
 	cp.serviceInformers = append(cp.endpointInformers, informerServices)
 
-	informerEndpoints.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
-		UpdateFunc: cp.HandleEndpointsUpdate,
-	})
-
-	// informerServices.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
-	// 	UpdateFunc: cp.HandleServicesUpdate,
+	// informerEndpoints.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
+	// 	UpdateFunc: cp.HandleEndpointsUpdate,
 	// })
+
+	informerServices.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
+		UpdateFunc: cp.HandleServicesUpdate,
+	})
 
 	// go func() {
 	// 	informerEndpoints.Run(stop)
