@@ -14,7 +14,7 @@ import (
 )
 
 func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
-	// cp.log.Info("ControlPlane HandleServicesUpdate")
+	
 	// clusters := make([]types.Resource, 0)
 	// listeners := make([]types.Resource, 0)
 	// endpoints := make([]types.Resource, 0)
@@ -47,12 +47,14 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 						cp.log.Errorf("couldn't make service, err: %v", err)
 					}
 					nodes := cp.GetNodesWatchTheResource(seviceConfig.ServiceName)
+					cp.log.Infof("ControlPlane HandleServicesUpdate nodes: %v, serviceName: %s", nodes, seviceConfig.ServiceName)
 					for _, n := range nodes {
 						node, err := cp.GetNode(n)
 						if err != nil {
 							cp.log.Errorf("node id: %s is not watched the resource id: %s", n, seviceConfig.ServiceName)
 							continue
 						}
+						cp.log.Infof("ControlPlane HandleServicesUpdate nodes: %v, serviceName: %s, listeners: %v", nodes, seviceConfig.ServiceName, lsnrService)
 						node.AddCluster(clsService)
 						node.AddEndpoint(edsService)
 						node.AddRoute(rdsService)
