@@ -19,6 +19,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"google.golang.org/grpc/admin"
+	"google.golang.org/grpc/credentials/insecure"
 	_ "google.golang.org/grpc/resolver" // use for "dns:///be.cluster.local:50051"
 	_ "google.golang.org/grpc/xds"      // use for xds-experimental:///be-srv
 )
@@ -89,8 +90,11 @@ func main() {
 	}()
 
 	logger.Printf("Connectting to server: %v ", config.Server1Address)
-
-	conn, err := grpc.Dial(config.Server1Address, grpc.WithInsecure())
+	
+	conn, err := grpc.Dial(config.Server1Address, 
+		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig": [{"round_robin":{}}]}`), // This sets the initial balancing policy.
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
 		logger.Fatalf("did not connect: %v", err)
 	}

@@ -11,19 +11,6 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 )
 
-// type callbacks struct {
-// 	signal        chan struct{}
-// 	fetches       int
-// 	requests      int
-// 	mu            sync.Mutex
-// 	log           *logrus.Logger
-// 	eventsHandler EventsHandler
-// }
-
-// type EventsHandler interface {
-// 	AddR(nodeID string, resourceNames []string, resourceType string)
-// }
-
 func (cp *ControlPlane) Report() {
 	cp.log.WithFields(logrus.Fields{"fetches": cp.fetches, "requests": cp.requests}).Info("cp.Report()  callbacks")
 }
@@ -45,7 +32,6 @@ func (cp *ControlPlane) OnStreamRequest(id int64, r *discovery.DiscoveryRequest)
 		node.AddWatcher(rn)
 		cp.AddResourceWatchToNode(r.Node.Id, rn)
 	}
-	// cp.eventsHandler.UpdateCache(r.Node.Id, r.ResourceNames, r.TypeUrl)
 	return nil
 }
 func (cp *ControlPlane) OnStreamResponse(ctx context.Context, id int64, req *discovery.DiscoveryRequest, resp *discovery.DiscoveryResponse) {
