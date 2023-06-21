@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package kuma.mesh.v1alpha1;
+
+option go_package = "github.com/mohammadVatandoost/xds-conrol-plane/api/mesh/v1alpha1";
+
+import "api/mesh/v1alpha1/kds.proto";
+
+service InterCPEnvoyAdminForwardService {
+  rpc XDSConfig(XDSConfigRequest) returns (XDSConfigResponse);
+  rpc Stats(StatsRequest) returns (StatsResponse);
+  rpc Clusters(ClustersRequest) returns (ClustersResponse);
+}

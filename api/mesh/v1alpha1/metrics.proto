@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package kuma.mesh.v1alpha1;
+
+option go_package = "github.com/mohammadVatandoost/xds-conrol-plane/api/mesh/v1alpha1";
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/wrappers.proto";
+
+// Metrics defines configuration for metrics that should be collected and
+// exposed by dataplanes.
+message Metrics {
+
+  // Name of the enabled backend
+  string enabledBackend = 1;
+
+  // List of available Metrics backends
+  repeated MetricsBackend backends = 2;
+}
+
+// MetricsBackend defines metric backends
+message MetricsBackend {
+  // Name of the backend, can be then used in Mesh.metrics.enabledBackend
+  string name = 1;
+
+  // Type of the backend (Kuma ships with 'prometheus')
+  string type = 2;
+
+  // Configuration of the backend
+  google.protobuf.Struct conf = 3;
+}
+
+// PrometheusMetricsBackendConfig defines configuration of Prometheus backend
+message PrometheusMetricsBackendConfig {
+  // Port on which a dataplane should expose HTTP endpoint with Prometheus
+  // metrics.
+  uint32 port = 1;
+
+  // Path on which a dataplane should expose HTTP endpoint with Prometheus
+  // metrics.
+  string path = 2;
+
+  // Tags associated with an application this dataplane is deployed next to,
+  // e.g. service=web, version=1.0.
+  // `service` tag is mandatory.
+  map<string, string> tags = 3;
+
+  // If true then endpoints for scraping metrics won't require mTLS even if mTLS
+  // is enabled in Mesh. If nil, then it is treated as false.
+  google.protobuf.BoolValue skipMTLS = 4;
+
+  // Map with the configuration of applications which metrics are going to be
+  // scrapped by kuma-dp.
+  repeated PrometheusAggregateMetricsConfig aggregate = 5;
+
+  // Configuration of Envoy's metrics.
+  PrometheusEnvoyConfig envoy = 6;
+}
+
+// PrometheusAggregateMetricsConfig defines endpoints that should be scrapped
+// by kuma-dp for prometheus metrics.
+// Any configuration change require sidecar restart.
+message PrometheusAggregateMetricsConfig {
+  // Name which identify given configuration.
+  string name = 1;
+
+  // Port on which a service expose HTTP endpoint with Prometheus metrics.
+  uint32 port = 2;
+
+  // Path on which a service expose HTTP endpoint with Prometheus metrics.
+  string path = 3;
+
+  // If false then the application won't be scrapped. If nil, then it is treated
+  // as true and kuma-dp scrapes metrics from the service.
+  google.protobuf.BoolValue enabled = 4;
+
+  // Address on which a service expose HTTP endpoint with Prometheus metrics.
+  string address = 5;
+}
+
+// PrometheusEnvoyConfig defines filters that should be passed to Envoy
+// for filtering.
+message PrometheusEnvoyConfig {
+  // FilterRegex value that is going to be passed to Envoy for filtering
+  // Envoy metrics.
+  string filterRegex = 1;
+
+  // If true then return metrics that Envoy has updated (counters incremented
+  // at least once, gauges changed at least once, and histograms added to at
+  // least once). If nil, then it is treated as false.
+  google.protobuf.BoolValue usedOnly = 2;
+}
