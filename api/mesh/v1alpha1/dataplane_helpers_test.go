@@ -4,7 +4,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	. "github.com/mohammadVatandoos/xds-conrol-planet/api/mesh/v1alpha1"
+	. "github.com/mohammadVatandoost/xds-conrol-planet/api/mesh/v1alpha1"
 )
 
 var _ = Describe("MultiValueTagSet", func() {

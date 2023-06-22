@@ -21,7 +21,7 @@ import (
 	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/utils"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/util"
 	"github.com/sirupsen/logrus"
 
 	// "google.golang.org/grpc"
