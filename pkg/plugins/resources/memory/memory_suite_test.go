@@ -3,7 +3,7 @@ package memory_test
 import (
 	"testing"
 
-	"github.com/kumahq/kuma/pkg/test"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/test"
 )
 
 func TestClient(t *testing.T) {

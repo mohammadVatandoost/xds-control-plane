@@ -3,10 +3,10 @@ package k8s
 import (
 	"fmt"
 
-	core_model "github.com/kumahq/kuma/pkg/core/resources/model"
-	k8s_common "github.com/kumahq/kuma/pkg/plugins/common/k8s"
-	k8s_model "github.com/kumahq/kuma/pkg/plugins/resources/k8s/native/pkg/model"
-	"github.com/kumahq/kuma/pkg/plugins/resources/k8s/native/pkg/registry"
+	core_model "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/model"
+	k8s_common "github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/common/k8s"
+	k8s_model "github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/k8s/native/pkg/model"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/k8s/native/pkg/registry"
 )
 
 var _ k8s_common.Converter = &SimpleConverter{}

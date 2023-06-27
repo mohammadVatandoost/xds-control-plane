@@ -4,12 +4,12 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	mesh_proto "github.com/kumahq/kuma/api/mesh/v1alpha1"
-	"github.com/kumahq/kuma/pkg/core/resources/store"
-	"github.com/kumahq/kuma/pkg/plugins/resources/k8s"
-	mesh_k8s "github.com/kumahq/kuma/pkg/plugins/resources/k8s/native/api/v1alpha1"
-	k8s_registry "github.com/kumahq/kuma/pkg/plugins/resources/k8s/native/pkg/registry"
-	test_store "github.com/kumahq/kuma/pkg/test/store"
+	mesh_proto "github.com/mohammadVatandoost/xds-conrol-plane/api/mesh/v1alpha1"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/store"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/k8s"
+	mesh_k8s "github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/k8s/native/api/v1alpha1"
+	k8s_registry "github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/k8s/native/pkg/registry"
+	test_store "github.com/mohammadVatandoost/xds-conrol-plane/pkg/test/store"
 )
 
 var _ = Describe("KubernetesStore template", func() {

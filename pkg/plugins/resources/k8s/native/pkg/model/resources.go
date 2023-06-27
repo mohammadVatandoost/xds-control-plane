@@ -5,7 +5,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/kumahq/kuma/pkg/core/resources/model"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/model"
 )
 
 type Scope string

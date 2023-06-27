@@ -5,11 +5,11 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/kumahq/kuma/pkg/core/policy"
-	core_mesh "github.com/kumahq/kuma/pkg/core/resources/apis/mesh"
-	"github.com/kumahq/kuma/pkg/core/resources/manager"
-	"github.com/kumahq/kuma/pkg/core/resources/store"
-	core_xds "github.com/kumahq/kuma/pkg/core/xds"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/policy"
+	core_mesh "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/apis/mesh"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/manager"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/store"
+	core_xds "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/xds"
 )
 
 // Current limitations:

@@ -14,17 +14,17 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	mesh_proto "github.com/kumahq/kuma/api/mesh/v1alpha1"
-	core_mesh "github.com/kumahq/kuma/pkg/core/resources/apis/mesh"
-	core_model "github.com/kumahq/kuma/pkg/core/resources/model"
-	core_rest "github.com/kumahq/kuma/pkg/core/resources/model/rest"
-	core_store "github.com/kumahq/kuma/pkg/core/resources/store"
-	errors_types "github.com/kumahq/kuma/pkg/core/rest/errors/types"
-	"github.com/kumahq/kuma/pkg/plugins/resources/remote"
-	"github.com/kumahq/kuma/pkg/test/matchers"
-	"github.com/kumahq/kuma/pkg/test/resources/builders"
-	"github.com/kumahq/kuma/pkg/test/resources/model"
-	"github.com/kumahq/kuma/pkg/test/resources/samples"
+	mesh_proto "github.com/mohammadVatandoost/xds-conrol-plane/api/mesh/v1alpha1"
+	core_mesh "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/apis/mesh"
+	core_model "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/model"
+	core_rest "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/model/rest"
+	core_store "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/store"
+	errors_types "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/rest/errors/types"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/remote"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/test/matchers"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/test/resources/builders"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/test/resources/model"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/test/resources/samples"
 )
 
 var _ = Describe("RemoteStore", func() {

@@ -10,12 +10,12 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/kumahq/kuma/pkg/core/resources/model"
-	"github.com/kumahq/kuma/pkg/core/resources/model/rest"
-	rest_v1alpha1 "github.com/kumahq/kuma/pkg/core/resources/model/rest/v1alpha1"
-	"github.com/kumahq/kuma/pkg/core/resources/store"
-	"github.com/kumahq/kuma/pkg/core/rest/errors/types"
-	util_http "github.com/kumahq/kuma/pkg/util/http"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/model"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/model/rest"
+	rest_v1alpha1 "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/model/rest/v1alpha1"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/store"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/rest/errors/types"
+	util_http "github.com/mohammadVatandoost/xds-conrol-plane/pkg/util/http"
 )
 
 func NewStore(client util_http.Client, api rest.Api) store.ResourceStore {

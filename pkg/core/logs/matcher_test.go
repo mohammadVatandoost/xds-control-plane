@@ -6,14 +6,14 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	mesh_proto "github.com/kumahq/kuma/api/mesh/v1alpha1"
-	"github.com/kumahq/kuma/pkg/core/logs"
-	core_mesh "github.com/kumahq/kuma/pkg/core/resources/apis/mesh"
-	core_manager "github.com/kumahq/kuma/pkg/core/resources/manager"
-	"github.com/kumahq/kuma/pkg/core/resources/model"
-	"github.com/kumahq/kuma/pkg/core/resources/store"
-	"github.com/kumahq/kuma/pkg/plugins/resources/memory"
-	"github.com/kumahq/kuma/pkg/util/proto"
+	mesh_proto "github.com/mohammadVatandoost/xds-conrol-plane/api/mesh/v1alpha1"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/logs"
+	core_mesh "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/apis/mesh"
+	core_manager "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/manager"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/model"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/store"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/memory"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/util/proto"
 )
 
 var _ = Describe("Matcher", func() {

@@ -4,9 +4,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	mesh_proto "github.com/kumahq/kuma/api/mesh/v1alpha1"
-	"github.com/kumahq/kuma/pkg/plugins/resources/k8s/native/pkg/model"
-	"github.com/kumahq/kuma/pkg/plugins/resources/k8s/native/pkg/registry"
+	mesh_proto "github.com/mohammadVatandoost/xds-conrol-plane/api/mesh/v1alpha1"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/k8s/native/pkg/model"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/k8s/native/pkg/registry"
 )
 
 var _ = Describe("global TypeRegistry", func() {

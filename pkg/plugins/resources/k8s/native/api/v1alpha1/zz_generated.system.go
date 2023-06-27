@@ -10,11 +10,11 @@ import (
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	system_proto "github.com/kumahq/kuma/api/system/v1alpha1"
-	core_model "github.com/kumahq/kuma/pkg/core/resources/model"
-	"github.com/kumahq/kuma/pkg/plugins/resources/k8s/native/pkg/model"
-	"github.com/kumahq/kuma/pkg/plugins/resources/k8s/native/pkg/registry"
-	util_proto "github.com/kumahq/kuma/pkg/util/proto"
+	system_proto "github.com/mohammadVatandoost/xds-conrol-plane/api/system/v1alpha1"
+	core_model "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/model"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/k8s/native/pkg/model"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/k8s/native/pkg/registry"
+	util_proto "github.com/mohammadVatandoost/xds-conrol-plane/pkg/util/proto"
 )
 
 // +kubebuilder:object:root=true

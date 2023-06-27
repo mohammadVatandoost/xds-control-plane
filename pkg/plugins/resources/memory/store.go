@@ -8,10 +8,10 @@ import (
 	"sync"
 	"time"
 
-	core_model "github.com/kumahq/kuma/pkg/core/resources/model"
-	"github.com/kumahq/kuma/pkg/core/resources/registry"
-	"github.com/kumahq/kuma/pkg/core/resources/store"
-	"github.com/kumahq/kuma/pkg/events"
+	core_model "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/model"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/registry"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/store"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/events"
 )
 
 type resourceKey struct {

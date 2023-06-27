@@ -4,10 +4,10 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/kumahq/kuma/pkg/config/plugins/resources/postgres"
-	"github.com/kumahq/kuma/pkg/core/plugins"
-	common_postgres "github.com/kumahq/kuma/pkg/plugins/common/postgres"
-	test_postgres "github.com/kumahq/kuma/pkg/test/store/postgres"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/plugins/resources/postgres"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/plugins"
+	common_postgres "github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/common/postgres"
+	test_postgres "github.com/mohammadVatandoost/xds-conrol-plane/pkg/test/store/postgres"
 )
 
 var _ = Describe("Migrate", func() {

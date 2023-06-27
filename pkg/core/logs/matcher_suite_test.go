@@ -3,7 +3,7 @@ package logs_test
 import (
 	"testing"
 
-	"github.com/kumahq/kuma/pkg/test"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/test"
 )
 
 func TestMatcher(t *testing.T) {

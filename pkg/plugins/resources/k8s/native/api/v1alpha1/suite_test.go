@@ -28,8 +28,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
-	"github.com/kumahq/kuma/pkg/plugins/resources/k8s/native/pkg/model"
-	"github.com/kumahq/kuma/pkg/test"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/k8s/native/pkg/model"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/test"
 )
 
 var (

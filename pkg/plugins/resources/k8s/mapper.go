@@ -3,9 +3,9 @@ package k8s
 import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kumahq/kuma/pkg/core/resources/model"
-	k8s_model "github.com/kumahq/kuma/pkg/plugins/resources/k8s/native/pkg/model"
-	util_k8s "github.com/kumahq/kuma/pkg/util/k8s"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/model"
+	k8s_model "github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/k8s/native/pkg/model"
+	util_k8s "github.com/mohammadVatandoost/xds-conrol-plane/pkg/util/k8s"
 )
 
 type ResourceMapperFunc func(resource model.Resource, namespace string) (k8s_model.KubernetesObject, error)

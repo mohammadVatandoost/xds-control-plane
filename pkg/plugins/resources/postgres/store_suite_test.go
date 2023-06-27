@@ -7,8 +7,8 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/testcontainers/testcontainers-go"
 
-	"github.com/kumahq/kuma/pkg/test"
-	test_postgres "github.com/kumahq/kuma/pkg/test/store/postgres"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/test"
+	test_postgres "github.com/mohammadVatandoost/xds-conrol-plane/pkg/test/store/postgres"
 )
 
 var c test_postgres.PostgresContainer

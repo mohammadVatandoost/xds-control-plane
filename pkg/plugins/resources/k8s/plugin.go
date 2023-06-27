@@ -3,11 +3,11 @@ package k8s
 import (
 	"github.com/pkg/errors"
 
-	core_plugins "github.com/kumahq/kuma/pkg/core/plugins"
-	core_store "github.com/kumahq/kuma/pkg/core/resources/store"
-	"github.com/kumahq/kuma/pkg/events"
-	k8s_runtime "github.com/kumahq/kuma/pkg/plugins/extensions/k8s"
-	k8s_events "github.com/kumahq/kuma/pkg/plugins/resources/k8s/events"
+	core_plugins "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/plugins"
+	core_store "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/store"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/events"
+	k8s_runtime "github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/extensions/k8s"
+	k8s_events "github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/k8s/events"
 )
 
 var _ core_plugins.ResourceStorePlugin = &plugin{}

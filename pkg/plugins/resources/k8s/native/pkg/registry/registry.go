@@ -5,8 +5,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	core_model "github.com/kumahq/kuma/pkg/core/resources/model"
-	"github.com/kumahq/kuma/pkg/plugins/resources/k8s/native/pkg/model"
+	core_model "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/model"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/k8s/native/pkg/model"
 )
 
 // UnknownTypeError is returned by NewObject and NewList when the

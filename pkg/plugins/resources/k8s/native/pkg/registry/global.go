@@ -1,7 +1,7 @@
 package registry
 
 import (
-	"github.com/kumahq/kuma/pkg/plugins/resources/k8s/native/pkg/model"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/k8s/native/pkg/model"
 )
 
 var global = NewTypeRegistry()

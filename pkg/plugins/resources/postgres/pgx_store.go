@@ -14,11 +14,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus"
 
-	config "github.com/kumahq/kuma/pkg/config/plugins/resources/postgres"
-	core_model "github.com/kumahq/kuma/pkg/core/resources/model"
-	"github.com/kumahq/kuma/pkg/core/resources/store"
-	core_metrics "github.com/kumahq/kuma/pkg/metrics"
-	pgx_config "github.com/kumahq/kuma/pkg/plugins/resources/postgres/config"
+	config "github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/plugins/resources/postgres"
+	core_model "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/model"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/store"
+	core_metrics "github.com/mohammadVatandoost/xds-conrol-plane/pkg/metrics"
+	pgx_config "github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/postgres/config"
 )
 
 type pgxResourceStore struct {

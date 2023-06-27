@@ -5,12 +5,12 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/kumahq/kuma/pkg/config/plugins/resources/postgres"
-	"github.com/kumahq/kuma/pkg/core"
-	"github.com/kumahq/kuma/pkg/core/resources/model"
-	"github.com/kumahq/kuma/pkg/core/runtime/component"
-	"github.com/kumahq/kuma/pkg/events"
-	common_postgres "github.com/kumahq/kuma/pkg/plugins/common/postgres"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/plugins/resources/postgres"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/model"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/runtime/component"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/events"
+	common_postgres "github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/common/postgres"
 )
 
 var log = core.Log.WithName("postgres-event-listener")

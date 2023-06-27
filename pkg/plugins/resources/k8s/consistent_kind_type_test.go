@@ -4,11 +4,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/kumahq/kuma/pkg/core/resources/apis/mesh"
-	"github.com/kumahq/kuma/pkg/core/resources/apis/system"
-	"github.com/kumahq/kuma/pkg/core/resources/model"
-	core_registry "github.com/kumahq/kuma/pkg/core/resources/registry"
-	k8s_registry "github.com/kumahq/kuma/pkg/plugins/resources/k8s/native/pkg/registry"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/apis/mesh"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/apis/system"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/model"
+	core_registry "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/registry"
+	k8s_registry "github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/k8s/native/pkg/registry"
 )
 
 // Those types are not mapped directly to Kubernetes Resource

@@ -1,8 +1,8 @@
 package registry
 
 import (
-	core_model "github.com/kumahq/kuma/pkg/core/resources/model"
-	"github.com/kumahq/kuma/pkg/plugins/resources/k8s/native/pkg/model"
+	core_model "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/model"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/k8s/native/pkg/model"
 )
 
 type ResourceType = core_model.ResourceSpec

@@ -3,13 +3,13 @@ package postgres
 import (
 	"errors"
 
-	"github.com/kumahq/kuma/pkg/config/plugins/resources/postgres"
-	"github.com/kumahq/kuma/pkg/core"
-	core_plugins "github.com/kumahq/kuma/pkg/core/plugins"
-	core_store "github.com/kumahq/kuma/pkg/core/resources/store"
-	"github.com/kumahq/kuma/pkg/core/runtime/component"
-	"github.com/kumahq/kuma/pkg/events"
-	postgres_events "github.com/kumahq/kuma/pkg/plugins/resources/postgres/events"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/plugins/resources/postgres"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core"
+	core_plugins "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/plugins"
+	core_store "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/store"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/runtime/component"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/events"
+	postgres_events "github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/postgres/events"
 )
 
 var _ core_plugins.ResourceStorePlugin = &plugin{}

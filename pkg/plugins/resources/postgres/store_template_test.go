@@ -4,12 +4,12 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/kumahq/kuma/pkg/config/plugins/resources/postgres"
-	"github.com/kumahq/kuma/pkg/core/resources/store"
-	core_metrics "github.com/kumahq/kuma/pkg/metrics"
-	"github.com/kumahq/kuma/pkg/plugins/resources/postgres/config"
-	test_store "github.com/kumahq/kuma/pkg/test/store"
-	test_postgres "github.com/kumahq/kuma/pkg/test/store/postgres"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/plugins/resources/postgres"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/store"
+	core_metrics "github.com/mohammadVatandoost/xds-conrol-plane/pkg/metrics"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/plugins/resources/postgres/config"
+	test_store "github.com/mohammadVatandoost/xds-conrol-plane/pkg/test/store"
+	test_postgres "github.com/mohammadVatandoost/xds-conrol-plane/pkg/test/store/postgres"
 )
 
 var _ = Describe("PostgresStore template", func() {
