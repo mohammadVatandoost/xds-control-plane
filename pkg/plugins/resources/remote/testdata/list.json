@@ -1,0 +1,30 @@
+{
+    "total": 2,
+    "items": [
+        {
+            "type": "TrafficRoute",
+            "mesh": "default",
+            "name": "one",
+            "creationTime": "2018-07-17T16:05:36.995Z",
+            "modificationTime": "2019-07-17T16:05:36.995Z",
+            "conf": {
+                "loadBalancer": {
+                    "roundRobin": {}
+                }
+            }
+        },
+        {
+            "type": "TrafficRoute",
+            "mesh": "demo",
+            "name": "two",
+            "creationTime": "2018-07-17T16:05:36.995Z",
+            "modificationTime": "2019-07-17T16:05:36.995Z",
+            "conf": {
+                "loadBalancer": {
+                    "leastRequest": {}
+                }
+            }
+        }
+    ],
+    "next": null
+}

@@ -10,7 +10,7 @@ HELM_REPO_NAME = "myhelmrepo"
 VERSION = "dev"
 NAMESPACE = "test"
 
-service: $(SRCS)
+build: $(SRCS)
 	go build -o $@ -ldflags="$(LD_FLAGS)" ./cmd/...
 
 
