@@ -1,4 +1,4 @@
-.PHONY: help generate test lint fmt dependencies clean check coverage service race .remove_empty_dirs .pre-check-go
+.PHONY: build help generate test lint fmt dependencies clean check coverage service race .remove_empty_dirs .pre-check-go
 
 SRCS = $(patsubst ./%,%,$(shell find . -name "*.go" -not -path "*vendor*" -not -path "*.pb.go"))
 
@@ -11,13 +11,13 @@ VERSION = "dev"
 NAMESPACE = "test"
 
 build: $(SRCS)
-	go build -o $@ -ldflags="$(LD_FLAGS)" ./cmd/...
+	go build -o ./build/$(PROJECT_NAME) -ldflags="$(LD_FLAGS)" ./cmd/...
 
 
 fmt: ## to run `go fmt` on all source code
 	gofmt -s -w $(SRCS)
 
-build-docker:
+build-image:
 	docker build . -f build/Dockerfile --tag $(DOCKER_REPOSITORY)/$(PROJECT_NAME):$(TAG)
 
 kind-load:

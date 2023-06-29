@@ -9,10 +9,11 @@ RUN make build
 
 
 
+
 FROM debian:stable-20220509 as final
 
 WORKDIR /app
 
-COPY --from=base_image /build-app/build/cmd .
+COPY --from=base_image /build-app/build/xds-control-plane .
 
-ENTRYPOINT ["./cmd", "serve"]
+ENTRYPOINT ["./xds-control-plane", "serve"]
