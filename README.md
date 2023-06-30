@@ -24,3 +24,7 @@ go run ./main.go
 (WARN[0010] ADS mode: not responding to request: "kube-prometheus-prometheus:9090" not listed, ResourceNames: [xds-grpc-server-example-headless:8888] )
 - [] Updating snapshot cache on XDS callbacks, cause a lot of requests send from client to XDS server ( Why????)
 - [] With each informer update that is not neccessary, It update snapshot and send redunct update to XDS clients.
+
+## ToDo:
+- generate bootstrap file with tls (look at this https://github.com/mohammadVatandoost/traffic-director-grpc-bootstrap)
+- use kumctl to generate tls files 
