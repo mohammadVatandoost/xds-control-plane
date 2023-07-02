@@ -15,5 +15,7 @@ WORKDIR /app
 
 COPY --from=base_image /build-app/service .
 COPY --from=base_image /build-app/xds_bootstrap.json .
+COPY --from=base_image /build-app/tls .
+
 
 ENTRYPOINT ["./service"]
