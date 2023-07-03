@@ -4,7 +4,7 @@
       "server_uri": "kuma-control-plane.kuma-system.svc.cluster.local:5678",
       "channel_creds": [
         {
-          "type": "tls"
+          "type": "google_default"
         }
       ],
       "server_features": ["xds_v3"]      
