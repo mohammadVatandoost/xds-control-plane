@@ -25,11 +25,11 @@ func serve(cmd *cobra.Command, args []string) error {
 	printVersion()
 
 	conf := loadConfigOrPanic(cmd)
-	configureLoggerOrPanic(conf.Logger)
+	// configureLoggerOrPanic(conf.Logger)
 
-	log := logger.NewLogger()
+	log := logger.WithName("main")
 	log.Infof("XDS control plane config, ADSEnabled: %v, ListenPort: %v", conf.XDS.ADSEnabled, conf.XDS.ListenPort)
-	xdsServer := xds.NewControlPlane(log, &conf.XDS, nil)
+	xdsServer := xds.NewControlPlane(&conf.XDS, nil)
 	err := xdsServer.Run()
 	if err != nil {
 		log.Error(err)

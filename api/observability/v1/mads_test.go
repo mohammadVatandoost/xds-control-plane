@@ -4,8 +4,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	util_proto "github.com/mohammadVatandoost/xds-conrol-plane/pkg/util/proto"
 	. "github.com/mohammadVatandoost/xds-conrol-plane/api/observability/v1"
+	util_proto "github.com/mohammadVatandoost/xds-conrol-plane/pkg/util/proto"
 )
 
 var _ = Describe("Monitoring Assignment Discovery Service", func() {

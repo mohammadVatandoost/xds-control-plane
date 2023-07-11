@@ -1,55 +1,55 @@
 package logger
 
 import (
+	"os"
 	"time"
-
-	"github.com/pkg/errors"
 
 	"github.com/sirupsen/logrus"
 )
 
 type Config struct {
 	Level string
-	//SentryEnabled bool
 }
 
-const (
-	sentryDSN = ""
-)
+var logger *logrus.Logger
 
-func Initialize(config *Config) error {
-	if config.Level != "" {
-		level, err := logrus.ParseLevel(config.Level)
+func init() {
+	logLevel := os.Getenv("LOGGER_LEVEL")
+	if logLevel != "" {
+		level, err := logrus.ParseLevel(logLevel)
 		if err != nil {
-			return errors.WithStack(err)
+			logrus.Errorf("wrong log level, %v", logLevel)
 		}
 		logrus.SetLevel(level)
 	}
-
 	logrus.SetFormatter(&logrus.JSONFormatter{
 		TimestampFormat:  time.RFC3339,
 		DisableTimestamp: false,
 	})
-
-	//if config.SentryEnabled {
-	//	hook, err := logrus_sentry.NewAsyncSentryHook(sentryDSN, []logrus.Level{
-	//		logrus.PanicLevel,
-	//		logrus.FatalLevel,
-	//		logrus.ErrorLevel,
-	//	})
-	//
-	//	if err != nil {
-	//		panic("failed to setup raven!")
-	//	}
-	//
-	//	hook.StacktraceConfiguration.Enable = true
-	//
-	//	logrus.AddHook(hook)
-	//}
-
-	return nil
+	logger = logrus.New()
 }
 
-func NewLogger() *logrus.Logger {
-	return logrus.New()
+// func Initialize(config *Config) error {
+// 	if config.Level != "" {
+// 		level, err := logrus.ParseLevel(config.Level)
+// 		if err != nil {
+// 			return errors.WithStack(err)
+// 		}
+// 		logrus.SetLevel(level)
+// 	}
+
+// 	logrus.SetFormatter(&logrus.JSONFormatter{
+// 		TimestampFormat:  time.RFC3339,
+// 		DisableTimestamp: false,
+// 	})
+
+// 	return nil
+// }
+
+func WithName(name string) *logrus.Logger {
+	return logger.WithField("package", name).Logger
 }
+
+// func NewLogger() *logrus.Logger {
+// 	return logrus.New()
+// }

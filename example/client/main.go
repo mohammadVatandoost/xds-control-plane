@@ -20,9 +20,9 @@ import (
 
 	"google.golang.org/grpc/admin"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/credentials/xds"
 	_ "google.golang.org/grpc/resolver" // use for "dns:///be.cluster.local:50051"
 	_ "google.golang.org/grpc/xds"      // use for xds-experimental:///be-srv
-	"google.golang.org/grpc/credentials/xds"
 )
 
 var (
@@ -95,7 +95,7 @@ func main() {
 		FallbackCreds: insecure.NewCredentials(),
 	})
 
-	conn, err := grpc.Dial(config.Server1Address, 
+	conn, err := grpc.Dial(config.Server1Address,
 		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig": [{"round_robin":{}}]}`), // This sets the initial balancing policy.
 		// grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithTransportCredentials(creds),

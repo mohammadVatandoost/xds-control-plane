@@ -14,7 +14,7 @@ import (
 )
 
 func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
-	
+
 	// clusters := make([]types.Resource, 0)
 	// listeners := make([]types.Resource, 0)
 	// endpoints := make([]types.Resource, 0)
@@ -66,9 +66,7 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 	}
 
 	atomic.AddInt32(&cp.version, 1)
-	
 
-	
 	IDs := cp.snapshotCache.GetStatusKeys()
 	cp.log.Infof("snapshotCache IDs: %v\n", IDs)
 	for _, id := range IDs {

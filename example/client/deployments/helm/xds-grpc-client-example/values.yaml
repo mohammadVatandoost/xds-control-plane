@@ -40,7 +40,7 @@ resources:
 configMap:
   data:
     METRIC_LISTENPORT: 9000
-    LOGGER_LEVEL: "error"
+    LOGGER_LEVEL: "info"
     GRPC_GO_LOG_VERBOSITY_LEVEL: 99
     GRPC_GO_LOG_SEVERITY_LEVEL: "info"
     Server1Address: "xds:///xds-grpc-server-example-headless:8888"

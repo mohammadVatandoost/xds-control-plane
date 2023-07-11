@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/mohammadVatandoost/xds-conrol-plane/internal/config"
-	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/logger"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -27,8 +26,8 @@ func loadConfigOrPanic(cmd *cobra.Command) *config.Config {
 	return conf
 }
 
-func configureLoggerOrPanic(loggerConfig logger.Config) {
-	if err := logger.Initialize(&loggerConfig); err != nil {
-		logrus.WithError(err).Panic("Failed to configure logger")
-	}
-}
+// func configureLoggerOrPanic(loggerConfig logger.Config) {
+// 	if err := logger.Initialize(&loggerConfig); err != nil {
+// 		logrus.WithError(err).Panic("Failed to configure logger")
+// 	}
+// }

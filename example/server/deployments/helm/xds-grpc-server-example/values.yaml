@@ -45,6 +45,6 @@ configMap:
   data:
     METRIC_LISTENPORT: 9000
     REST_LISTENPORT: 8080
-    LOGGER_LEVEL: "error"
+    LOGGER_LEVEL: "info"
     GRPC_LISTENPORT: 8888
     GRPC_TIMEOUT: 5

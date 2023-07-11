@@ -10,7 +10,7 @@ import (
 	api_server_types "github.com/mohammadVatandoost/xds-conrol-plane/pkg/api-server/types"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/access"
-	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/manager"
+	// "github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/manager"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/resources/store"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/rest/errors/types"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core/tokens"
@@ -34,8 +34,8 @@ func HandleError(response *restful.Response, err error, title string) {
 		})
 	case err == store.ErrorInvalidOffset:
 		handleInvalidOffset(title, response)
-	case manager.IsMeshNotFound(err):
-		handleMeshNotFound(title, err.(*manager.MeshNotFoundError), response)
+	// case manager.IsMeshNotFound(err):
+	// 	handleMeshNotFound(title, err.(*manager.MeshNotFoundError), response)
 	case validators.IsValidationError(err):
 		handleValidationError(title, err.(*validators.ValidationError), response)
 	case api_server_types.IsMaxPageSizeExceeded(err):
@@ -116,20 +116,20 @@ func handlePreconditionFailed(title string, response *restful.Response) {
 	writeError(response, kumaErr)
 }
 
-func handleMeshNotFound(title string, err *manager.MeshNotFoundError, response *restful.Response) {
-	kumaErr := types.Error{
-		Status: "400",
-		Title:  title,
-		Detail: "Mesh is not found",
-		InvalidParameters: []types.InvalidParameter{
-			{
-				Field:  "mesh",
-				Reason: fmt.Sprintf("mesh of name %s is not found", err.Mesh),
-			},
-		},
-	}
-	writeError(response, kumaErr)
-}
+// func handleMeshNotFound(title string, err *manager.MeshNotFoundError, response *restful.Response) {
+// 	kumaErr := types.Error{
+// 		Status: "400",
+// 		Title:  title,
+// 		Detail: "Mesh is not found",
+// 		InvalidParameters: []types.InvalidParameter{
+// 			{
+// 				Field:  "mesh",
+// 				Reason: fmt.Sprintf("mesh of name %s is not found", err.Mesh),
+// 			},
+// 		},
+// 	}
+// 	writeError(response, kumaErr)
+// }
 
 func handleValidationError(title string, err *validators.ValidationError, response *restful.Response) {
 	kumaErr := types.Error{
