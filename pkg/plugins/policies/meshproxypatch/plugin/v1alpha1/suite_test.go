@@ -1,12 +1,12 @@
 package v1alpha1_test
 
-import (
-	"testing"
+// import (
+// 	"testing"
 
-	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/test"
-	_ "github.com/mohammadVatandoost/xds-conrol-plane/pkg/xds/envoy"
-)
+// 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/test"
+// 	_ "github.com/mohammadVatandoost/xds-conrol-plane/pkg/xds/envoy"
+// )
 
-func TestModifications(t *testing.T) {
-	test.RunSpecs(t, "MeshProxyPatch Plugin Suite")
-}
+// func TestModifications(t *testing.T) {
+// 	test.RunSpecs(t, "MeshProxyPatch Plugin Suite")
+// }

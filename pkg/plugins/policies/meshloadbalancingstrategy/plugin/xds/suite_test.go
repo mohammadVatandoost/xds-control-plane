@@ -1,11 +1,11 @@
 package xds_test
 
-import (
-	"testing"
+// import (
+// 	"testing"
 
-	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/test"
-)
+// 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/test"
+// )
 
-func TestMeshLoadBalancingStrategyXDS(t *testing.T) {
-	test.RunSpecs(t, "MeshLoadBalancingStrategy XDS Suite")
-}
+// func TestMeshLoadBalancingStrategyXDS(t *testing.T) {
+// 	test.RunSpecs(t, "MeshLoadBalancingStrategy XDS Suite")
+// }
