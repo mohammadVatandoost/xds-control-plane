@@ -13,7 +13,6 @@ import (
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/core/resources/store"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/diagnostics"
 	dns_server "github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/dns-server"
-	dp_server "github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/dp-server"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/intercp"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/mads"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/multizone"
@@ -140,8 +139,6 @@ type Config struct {
 	DNSServer *dns_server.Config `json:"dnsServer,omitempty"`
 	// Diagnostics configuration
 	Diagnostics *diagnostics.DiagnosticsConfig `json:"diagnostics,omitempty"`
-	// Dataplane Server configuration
-	DpServer *dp_server.DpServerConfig `json:"dpServer"`
 	// Access Control configuration
 	Access access.AccessConfig `json:"access"`
 	// Configuration of experimental features
@@ -201,7 +198,6 @@ var DefaultConfig = func() Config {
 		DNSServer:   dns_server.DefaultDNSServerConfig(),
 		Multizone:   multizone.DefaultMultizoneConfig(),
 		Diagnostics: diagnostics.DefaultDiagnosticsConfig(),
-		DpServer:    dp_server.DefaultDpServerConfig(),
 		Access:      access.DefaultAccessConfig(),
 		Experimental: ExperimentalConfig{
 			GatewayAPI:          false,
