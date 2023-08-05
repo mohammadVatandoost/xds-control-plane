@@ -5,12 +5,13 @@ import (
 
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	xds "github.com/envoyproxy/go-control-plane/pkg/server/v3"
+	xdsConfig "github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/xds"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/logger"
 )
 
 var log = logger.NewLoggerWithName("internal/xds")
 
-func NewControlPlane(config *Config, storage cache.Storage) *ControlPlane {
+func NewControlPlane(config *xdsConfig.XDSConfig, storage cache.Storage) *ControlPlane {
 
 	snapshotCache := cache.NewSnapshotCache(config.ADSEnabled, cache.IDHash{}, nil)
 	if storage != nil {

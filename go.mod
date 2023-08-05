@@ -5,12 +5,13 @@ go 1.17
 require (
 	github.com/alicebob/miniredis/v2 v2.30.0
 	github.com/elliotchance/redismock/v8 v8.11.1
-	github.com/envoyproxy/go-control-plane v0.10.2-0.20220325020618-49ff273808a1
+	github.com/envoyproxy/go-control-plane v0.10.3
 	github.com/go-logr/logr v1.2.4
 	github.com/go-logr/zapr v1.2.4
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang/protobuf v1.5.2
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/mohammadVatandoost/interfaces v0.1.2
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.14.0
@@ -18,8 +19,10 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.1
+	go.uber.org/multierr v1.8.0
 	go.uber.org/zap v1.24.0
-	google.golang.org/grpc v1.52.3
+	golang.org/x/net v0.5.0
+	google.golang.org/grpc v1.53.0
 	google.golang.org/protobuf v1.28.1
 	k8s.io/api v0.26.0
 	k8s.io/apimachinery v0.26.0
@@ -30,11 +33,14 @@ require (
 replace github.com/envoyproxy/go-control-plane => github.com/mohammadVatandoost/go-control-plane v0.1.2
 
 require (
+	cloud.google.com/go/compute v1.15.1 // indirect
+	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/cncf/xds/go v0.0.0-20220314180256-7f1daf1720fc // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
+	github.com/cncf/udpa/go v0.0.0-20220112060539-c52dc94e7fbe // indirect
+	github.com/cncf/xds/go v0.0.0-20230105202645-06c439db220b // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
@@ -72,15 +78,13 @@ require (
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/yuin/gopher-lua v0.0.0-20220504180219-658193537a64 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	go.uber.org/multierr v1.8.0 // indirect
-	golang.org/x/net v0.4.0 // indirect
-	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783 // indirect
-	golang.org/x/sys v0.3.0 // indirect
-	golang.org/x/term v0.3.0 // indirect
-	golang.org/x/text v0.5.0 // indirect
+	golang.org/x/oauth2 v0.4.0 // indirect
+	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/term v0.4.0 // indirect
+	golang.org/x/text v0.6.0 // indirect
 	golang.org/x/time v0.1.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20221227171554-f9683d7f8bef // indirect
+	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

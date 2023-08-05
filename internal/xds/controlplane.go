@@ -15,6 +15,7 @@ import (
 	routeservice "github.com/envoyproxy/go-control-plane/envoy/service/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	xds "github.com/envoyproxy/go-control-plane/pkg/server/v3"
+	xdsConfig "github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/xds"
 	"google.golang.org/grpc"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
@@ -31,7 +32,7 @@ type ControlPlane struct {
 	// endpoints         []types.Resource
 	endpointInformers []k8scache.SharedIndexInformer
 	serviceInformers  []k8scache.SharedIndexInformer
-	conf              *Config
+	conf              *xdsConfig.XDSConfig
 	storage           cache.Storage
 	nodes             map[string]*Node
 	mu                sync.RWMutex
@@ -169,7 +170,7 @@ func (cp *ControlPlane) Run() error {
 	// 	}()
 	// }
 
-	lis, err := net.Listen("tcp", ":"+strconv.Itoa(cp.conf.ListenPort))
+	lis, err := net.Listen("tcp", ":"+strconv.Itoa(int(cp.conf.Port)))
 	if err != nil {
 		return err
 	}

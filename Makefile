@@ -9,9 +9,11 @@ HELM_REPO_ADDRESS = "https://mohammadVatandoost.github.io/helm-chart/"
 HELM_REPO_NAME = "myhelmrepo"
 VERSION = "dev"
 NAMESPACE = "test"
+GOOS := $(shell go env GOOS)
+GOARCH := $(shell go env GOARCH)
 
-build: $(SRCS)
-	go build -o ./build/$(PROJECT_NAME) -ldflags="$(LD_FLAGS)" ./cmd/...
+# build: $(SRCS)
+# 	go build -o ./build/$(PROJECT_NAME) -ldflags="$(LD_FLAGS)" ./cmd/...
 
 
 fmt: ## to run `go fmt` on all source code
@@ -40,3 +42,8 @@ helm-ci-cd:
 	helm dependency update ./deployments/helm/$(PROJECT_NAME)
 	helm package --app-version=$(VERSION) ./deployments/helm/$(PROJECT_NAME)
 	helm -n $(NAMESPACE) upgrade -i $(PROJECT_NAME) -f ./deployments/helm/$(PROJECT_NAME)/values.yaml *.tgz
+
+
+include mk/docker.mk
+include mk/kind.mk
+include mk/build.mk
