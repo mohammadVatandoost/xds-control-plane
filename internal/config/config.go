@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/mohammadVatandoost/xds-conrol-plane/internal/xds"
-	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/logger"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/prometheus"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/redis"
 
@@ -17,7 +16,6 @@ import (
 // Config the application's configuration structure
 type Config struct {
 	ConfigFile string
-	Logger     logger.Config
 	XDS        xds.Config
 	Metric     prometheus.Config
 	Redis      redis.Config

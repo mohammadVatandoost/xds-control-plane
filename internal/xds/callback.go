@@ -4,29 +4,27 @@ import (
 	"context"
 	"sync/atomic"
 
-	"github.com/sirupsen/logrus"
-
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 )
 
 func (cp *ControlPlane) Report() {
-	cp.log.WithFields(logrus.Fields{"fetches": cp.fetches, "requests": cp.requests}).Info("cp.Report()  callbacks")
+	log.Info("cp.Report()  callbacks", "fetches", cp.fetches, "requests", cp.requests)
 }
 func (cp *ControlPlane) OnStreamOpen(ctx context.Context, id int64, typ string) error {
-	cp.log.Infof("OnStreamOpen %d open for Type [%s]", id, typ)
+	log.Info("OnStreamOpen", "id", id, "typ", typ)
 	return nil
 }
 func (cp *ControlPlane) OnStreamClosed(id int64, node *core.Node) {
-	cp.log.Infof("OnStreamClosed %d closed, node id: %v, node cluster: %v", id, node.Id, node.Cluster)
+	log.Info("OnStreamClosed", "id", id, "node.Id", node.Id, "node.Cluster", node.Cluster)
 	cp.DeleteNode(node.Id)
 }
 func (cp *ControlPlane) OnStreamRequest(id int64, r *discovery.DiscoveryRequest) error {
 	if r.TypeUrl != resource.ListenerType {
 		return nil
 	}
-	cp.log.Infof("OnStreamRequest %d  Request[%v], ResourceNames: %v", id, r.TypeUrl, r.ResourceNames)
+	log.Info("OnStreamRequest ", "id", id, "TypeUrl", r.TypeUrl, "ResourceNames", r.ResourceNames)
 	node := cp.CreateNode(r.Node.Id)
 	for _, rn := range r.ResourceNames {
 		node.AddWatcher(rn)
@@ -35,32 +33,32 @@ func (cp *ControlPlane) OnStreamRequest(id int64, r *discovery.DiscoveryRequest)
 	return nil
 }
 func (cp *ControlPlane) OnStreamResponse(ctx context.Context, id int64, req *discovery.DiscoveryRequest, resp *discovery.DiscoveryResponse) {
-	cp.log.Infof("OnStreamResponse... %d   Request [%v],  Response[%v]", id, req.TypeUrl, resp.TypeUrl)
+	log.Info("OnStreamResponse... %d   Request [%v],  Response[%v]", id, req.TypeUrl, resp.TypeUrl)
 	cp.Report()
 }
 func (cp *ControlPlane) OnFetchRequest(ctx context.Context, req *discovery.DiscoveryRequest) error {
-	cp.log.Infof("OnFetchRequest... Request [%v]", req.TypeUrl)
+	log.Info("OnFetchRequest... Request [%v]", req.TypeUrl)
 	atomic.AddInt32(&cp.fetches, 1)
 	return nil
 }
 func (cp *ControlPlane) OnFetchResponse(req *discovery.DiscoveryRequest, resp *discovery.DiscoveryResponse) {
-	cp.log.Infof("OnFetchResponse... Resquest[%v],  Response[%v]", req.TypeUrl, resp.TypeUrl)
+	log.Info("OnFetchResponse... Resquest[%v],  Response[%v]", req.TypeUrl, resp.TypeUrl)
 }
 
 func (cp *ControlPlane) OnDeltaStreamClosed(id int64, node *core.Node) {
-	cp.log.Infof("OnDeltaStreamClosed... %v", id)
+	log.Info("OnDeltaStreamClosed... %v", id)
 }
 
 func (cp *ControlPlane) OnDeltaStreamOpen(ctx context.Context, id int64, typ string) error {
-	cp.log.Infof("OnDeltaStreamOpen... %v  of type %s", id, typ)
+	log.Info("OnDeltaStreamOpen... %v  of type %s", id, typ)
 	return nil
 }
 
 func (cp *ControlPlane) OnStreamDeltaRequest(i int64, request *discovery.DeltaDiscoveryRequest) error {
-	cp.log.Infof("OnStreamDeltaRequest... %v  of type %s", i, request)
+	log.Info("OnStreamDeltaRequest... %v  of type %s", i, request)
 	return nil
 }
 
 func (cp *ControlPlane) OnStreamDeltaResponse(i int64, request *discovery.DeltaDiscoveryRequest, response *discovery.DeltaDiscoveryResponse) {
-	cp.log.Infof("OnStreamDeltaResponse... %v  of type %s", i, request)
+	log.Info("OnStreamDeltaResponse... %v  of type %s", i, request)
 }

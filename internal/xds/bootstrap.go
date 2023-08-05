@@ -22,7 +22,6 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/util"
-	"github.com/sirupsen/logrus"
 
 	// "google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -65,7 +64,7 @@ func CreateClusterClient() (kubernetes.Interface, error) {
 	kubeConfigPath := homeDie + "/.kube/config"
 	var config *rest.Config
 	if utils.FileExists(kubeConfigPath) {
-		logrus.Info("kube config file exist")
+		log.Info("kube config file exist")
 		config, err = clientcmd.BuildConfigFromFlags("", kubeConfigPath)
 		if err != nil {
 			return nil, err
@@ -97,10 +96,10 @@ func getAddresses(svcc ServiceConfig) []string {
 
 	cname, rec, err := net.LookupSRV(portName, protocol, fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace))
 	if err != nil {
-		logrus.Errorf("Could not find serviceName: %s, portName: %v, protocol: %v,  err: %v", serviceName, portName, protocol, err.Error())
+		log.Error(err, "Could not find serviceName: %s, portName: %v, protocol: %v,  err: %v", serviceName, portName, protocol, err.Error())
 		return upstreamPorts
 	} else {
-		logrus.Infof("SRV CNAME: %v, rec: %v\n", cname, rec)
+		log.Info("SRV CNAME: %v, rec: %v\n", cname, rec)
 	}
 
 	// var wg sync.WaitGroup
@@ -117,19 +116,19 @@ func getAddresses(svcc ServiceConfig) []string {
 		// 	// ToDo: handle health check later
 		// 	// conn, err := grpc.Dial(address, grpc.WithInsecure())
 		// 	// if err != nil {
-		// 	// 	logrus.Errorf("Could not connect to endpoint %s  %v", address, err.Error())
+		// 	// 	log.Errorf("Could not connect to endpoint %s  %v", address, err.Error())
 		// 	// 	return
 		// 	// }
 		// 	// resp, err := healthpb.NewHealthClient(conn).Check(ctx, &healthpb.HealthCheckRequest{Service: grpcServiceName})
 		// 	// if err != nil {
-		// 	// 	logrus.WithField("address", address).Errorf("HealthCheck failed err: %v, conn: %v", conn, err.Error())
+		// 	// 	log.WithField("address", address).Errorf("HealthCheck failed err: %v, conn: %v", conn, err.Error())
 		// 	// 	// return // ToDo: for testign disable this
 		// 	// }
 		// 	// if resp.GetStatus() != healthpb.HealthCheckResponse_SERVING {
-		// 	// 	logrus.Errorf("Service not healthy %v %v", conn, fmt.Sprintf("service not in serving state: %v", resp.GetStatus().String()))
+		// 	// 	log.Errorf("Service not healthy %v %v", conn, fmt.Sprintf("service not in serving state: %v", resp.GetStatus().String()))
 		// 	// 	// return ToDo: for testign disable this
 		// 	// }
-		// 	// logrus.Infof("RPC HealthChekStatus: for %v %v", address, resp.GetStatus())
+		// 	// log.Info("RPC HealthChekStatus: for %v %v", address, resp.GetStatus())
 		// 	// upstreamPorts = append(upstreamPorts, address)
 		// }(rec[i].Target, strconv.Itoa(int(rec[i].Port)))
 		address := fmt.Sprintf("%s:%s", rec[i].Target, strconv.Itoa(int(rec[i].Port)))
@@ -149,15 +148,15 @@ func (cp *ControlPlane) RunXDSserver(stopCh <-chan struct{}) {
 		default:
 			snapshot, err := cp.makeSnapshot(version)
 			if err != nil {
-				cp.log.Printf(">>>>>>>>>>  Error setting snapshot %v", err)
+				log.Error(err , ">>>>>>>>>>  Error setting snapshot")
 				return
 			}
 			IDs := cp.snapshotCache.GetStatusKeys()
-			cp.log.Infof("snapshotCache IDs: %v\n", IDs)
+			log.Info("snapshotCache IDs: %v\n", IDs)
 			for _, id := range IDs {
 				err = cp.snapshotCache.SetSnapshot(context.Background(), id, snapshot)
 				if err != nil {
-					logrus.Errorf("%v", err)
+					log.Error(err, "coudn't set snapshot")
 				}
 			}
 		}
@@ -183,12 +182,12 @@ func (cp *ControlPlane) makeSnapshot(version int32) (*cachev3.Snapshot, error) {
 	}
 
 	atomic.AddInt32(&version, 1)
-	cp.log.Infof(" creating snapshot Version " + fmt.Sprint(version))
+	log.Info(" creating snapshot Version " + fmt.Sprint(version))
 
-	cp.log.Infof("   snapshot with Listener %v", lsnr)
-	cp.log.Infof("   snapshot with EDS %v", eds)
-	cp.log.Infof("   snapshot with CLS %v", cls)
-	cp.log.Infof("   snapshot with RDS %v", rds)
+	log.Info("   snapshot with Listener %v", lsnr)
+	log.Info("   snapshot with EDS %v", eds)
+	log.Info("   snapshot with CLS %v", cls)
+	log.Info("   snapshot with RDS %v", rds)
 
 	return cachev3.NewSnapshot(fmt.Sprint(version), map[resource.Type][]types.Resource{
 		resource.EndpointType: eds,
@@ -208,7 +207,7 @@ func (cp *ControlPlane) makeXDSConfigFromService(svc ServiceConfig) (*endpoint.C
 	if len(addresses) == 0 {
 		return nil, nil, nil, nil, fmt.Errorf("there is no availabe address for service: %v", svc.ServiceName)
 	}
-	// cp.log.Infof("service: %v, addresses: %v \n", svc.ServiceName, addresses)
+	// log.Info("service: %v, addresses: %v \n", svc.ServiceName, addresses)
 	lbe := makeLBEndpoint(addresses)
 	eds := &endpoint.ClusterLoadAssignment{
 		ClusterName: clusterName,
@@ -234,7 +233,7 @@ func (cp *ControlPlane) makeXDSConfigFromService(svc ServiceConfig) (*endpoint.C
 	}
 
 	// RDS
-	// cp.log.Infof(">>>>>>>>>>>>>>>>>>> creating RDS " + virtualHostName)
+	// log.Info(">>>>>>>>>>>>>>>>>>> creating RDS " + virtualHostName)
 	vh := &route.VirtualHost{
 		Name:    virtualHostName,
 		Domains: []string{svc.ServiceName}, //******************* >> must match what is specified at xds:/// //
@@ -260,7 +259,7 @@ func (cp *ControlPlane) makeXDSConfigFromService(svc ServiceConfig) (*endpoint.C
 	}
 
 	// LISTENER
-	// cp.log.Infof(">>>>>>>>>>>>>>>>>>> creating LISTENER " + svc.ServiceName)
+	// log.Info(">>>>>>>>>>>>>>>>>>> creating LISTENER " + svc.ServiceName)
 	hcRds := &hcm.HttpConnectionManager_Rds{
 		Rds: &hcm.Rds{
 			RouteConfigName: routeConfigName,
@@ -335,11 +334,11 @@ func makeLBEndpoint(addresses []string) []*endpoint.LbEndpoint {
 		backendPort := strings.Split(v, ":")[1]
 		uPort, err := strconv.ParseUint(backendPort, 10, 32)
 		if err != nil {
-			logrus.Errorf("Could not parse port %v", err)
+			log.Error(err, "Could not parse port")
 			break
 		}
 		// ENDPOINT
-		logrus.Infof(">>>>>>>>>>>>>>>>>>> creating ENDPOINT for remoteHost:port %s:%s", backendHostName, backendPort)
+		log.Info(">>>>>>>>>>>>>>>>>>> creating ENDPOINT for remoteHost:port %s:%s", backendHostName, backendPort)
 		hst := &core.Address{Address: &core.Address_SocketAddress{
 			SocketAddress: &core.SocketAddress{
 				Address:  backendHostName,

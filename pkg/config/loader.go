@@ -4,13 +4,12 @@ import (
 	"os"
 
 	"github.com/kelseyhightower/envconfig"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/logger"
 	"github.com/pkg/errors"
 	"sigs.k8s.io/yaml"
-
-	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/core"
 )
 
-var log = logger.WithName("pkg/config")
+var log = logger.NewLoggerWithName("pkg/config")
 
 func Load(file string, cfg Config) error {
 	return LoadWithOption(file, cfg, false, true, true)

@@ -15,7 +15,6 @@ import (
 	routeservice "github.com/envoyproxy/go-control-plane/envoy/service/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	xds "github.com/envoyproxy/go-control-plane/pkg/server/v3"
-	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
@@ -23,7 +22,6 @@ import (
 )
 
 type ControlPlane struct {
-	log           *logrus.Logger
 	version       int32
 	snapshotCache cache.SnapshotCache
 	server        xds.Server
@@ -112,20 +110,20 @@ func (cp *ControlPlane) Run() error {
 	// clusters, _ := CreateBootstrapClients()
 	clusterClient, err := CreateClusterClient()
 	if err != nil {
-		cp.log.WithError(err).Error("can not create cluster client")
+		log.Error(err, "can not create cluster client")
 		return err
 	}
-	cp.log.Info("cluster client created")
+	log.Info("cluster client created")
 	namespaces, err := clusterClient.CoreV1().Namespaces().List(context.Background(), v1.ListOptions{})
 	if err != nil {
-		cp.log.WithError(err).Error("can not get namespaces list")
+		log.Error(err, "can not get namespaces list")
 		return err
 	}
-	cp.log.Infof("cluster number of namespaces: %v", len(namespaces.Items))
+	log.Info("cluster namespaces", "number",len(namespaces.Items))
 	for _, namespace := range namespaces.Items {
-		cp.log.Infof("namespace: %v", namespace.Name)
+		log.Info("namespace: ", namespace.Name)
 	}
-	cp.log.Info("==========")
+	log.Info("==========")
 	stop := make(chan struct{})
 	defer close(stop)
 

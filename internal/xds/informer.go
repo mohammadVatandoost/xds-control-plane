@@ -10,6 +10,7 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
+	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -27,10 +28,10 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 			}
 			k8sService, ok := svc.(*corev1.Service)
 			if !ok {
-				cp.log.Errorf("service type is not match, type is: %v", reflect.TypeOf(svc).Elem().Name())
+				log.Error(errors.Errorf("service type is not match"), "type", reflect.TypeOf(svc).Elem().Name())
 				continue
 			}
-			// cp.log.Info("=============")
+			// log.Info("=============")
 			seviceConfig := ServiceConfig{}
 			// seviceConfig.GRPCServiceName = k8sService.Name
 			seviceConfig.ServiceName = k8sService.Name
@@ -44,17 +45,17 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 					seviceConfig.Zone = "us-central1-a"
 					edsService, clsService, rdsService, lsnrService, err := cp.makeXDSConfigFromService(seviceConfig)
 					if err != nil {
-						cp.log.Errorf("couldn't make service, err: %v", err)
+						log.Error(err, "couldn't make service, err", )
 					}
 					nodes := cp.GetNodesWatchTheResource(seviceConfig.ServiceName)
-					cp.log.Infof("ControlPlane HandleServicesUpdate nodes: %v, serviceName: %s", nodes, seviceConfig.ServiceName)
+					log.Info("ControlPlane HandleServicesUpdate nodes: %v, serviceName: %s", nodes, seviceConfig.ServiceName)
 					for _, n := range nodes {
 						node, err := cp.GetNode(n)
 						if err != nil {
-							cp.log.Errorf("node id: %s is not watched the resource id: %s", n, seviceConfig.ServiceName)
+							log.Error(err, "node id: %s is not watched the resource id: %s", n, seviceConfig.ServiceName)
 							continue
 						}
-						cp.log.Infof("ControlPlane HandleServicesUpdate nodes: %v, serviceName: %s, listeners: %v", nodes, seviceConfig.ServiceName, lsnrService)
+						log.Info("ControlPlane HandleServicesUpdate nodes: %v, serviceName: %s, listeners: %v", nodes, seviceConfig.ServiceName, lsnrService)
 						node.AddCluster(clsService)
 						node.AddEndpoint(edsService)
 						node.AddRoute(rdsService)
@@ -68,11 +69,11 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 	atomic.AddInt32(&cp.version, 1)
 
 	IDs := cp.snapshotCache.GetStatusKeys()
-	cp.log.Infof("snapshotCache IDs: %v\n", IDs)
+	log.Info("snapshotCache IDs: %v\n", IDs)
 	for _, id := range IDs {
 		node, err := cp.GetNode(id)
 		if err != nil {
-			cp.log.Errorf("node id: %s is not exist", id)
+			log.Error(err, "node id: %s is not exist", id)
 			continue
 		}
 		snapshot, err := cachev3.NewSnapshot(fmt.Sprint(cp.version), map[resource.Type][]types.Resource{
@@ -82,14 +83,14 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 			resource.RouteType:    node.GetRoutes(),
 		})
 		if err != nil {
-			cp.log.Printf(">>>>>>>>>>  Error creating snapshot %v", err)
+			log.Error(err, ">>>>>>>>>>  Error creating snapshot %v", err)
 			return
 		}
 		status := cp.snapshotCache.GetStatusInfo(id)
-		cp.log.Infof("snapshotCache ID: %v, node meta data: %v", id, status.GetNode().GetMetadata().String())
+		log.Info("snapshotCache ID: %v, node meta data: %v", id, status.GetNode().GetMetadata().String())
 		err = cp.snapshotCache.SetSnapshot(context.Background(), id, snapshot)
 		if err != nil {
-			cp.log.Errorf("%v", err)
+			log.Error(err, "couldn't set snapshot")
 		}
 		node.ClearResources()
 	}

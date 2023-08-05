@@ -3,10 +3,11 @@ package main
 import (
 	"github.com/mohammadVatandoost/xds-conrol-plane/internal/xds"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/logger"
-	api_server_config "github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/api-server"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
+
+var log = logger.NewLoggerWithName("main")
 
 var serveCmd = &cobra.Command{
 	Use:   "serve",
@@ -24,17 +25,14 @@ func init() {
 
 func serve(cmd *cobra.Command, args []string) error {
 	printVersion()
-    cfg := api_server_config.DefaultConfig()
 	conf := loadConfigOrPanic(cmd)
 	// configureLoggerOrPanic(conf.Logger)
-	apiServer := api_server.NewApiServer()
 
-	log := logger.WithName("main")
-	log.Infof("XDS control plane config, ADSEnabled: %v, ListenPort: %v", conf.XDS.ADSEnabled, conf.XDS.ListenPort)
+	log.Info("XDS control plane config", "ADSEnabled", conf.XDS.ADSEnabled, "ListenPort", conf.XDS.ListenPort)
 	xdsServer := xds.NewControlPlane(&conf.XDS, nil)
 	err := xdsServer.Run()
 	if err != nil {
-		log.Error(err)
+		log.Error(err, "can not run xds server")
 	}
 	return nil
 }

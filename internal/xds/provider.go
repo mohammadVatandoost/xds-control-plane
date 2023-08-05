@@ -8,14 +8,15 @@ import (
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/logger"
 )
 
+var log = logger.NewLoggerWithName("internal/xds")
+
 func NewControlPlane(config *Config, storage cache.Storage) *ControlPlane {
-	log := logger.WithName("internal/xds")
-	snapshotCache := cache.NewSnapshotCache(config.ADSEnabled, cache.IDHash{}, log)
+
+	snapshotCache := cache.NewSnapshotCache(config.ADSEnabled, cache.IDHash{}, nil)
 	if storage != nil {
-		snapshotCache = cache.NewSnapshotCacheWithStorage(config.ADSEnabled, cache.IDHash{}, log, storage)
+		snapshotCache = cache.NewSnapshotCacheWithStorage(config.ADSEnabled, cache.IDHash{}, nil, storage)
 	}
 	cp := &ControlPlane{
-		log:           log,
 		version:       0,
 		snapshotCache: snapshotCache,
 		storage:       storage,
