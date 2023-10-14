@@ -28,3 +28,4 @@ go run ./main.go
 ## ToDo:
 - generate bootstrap file with tls (look at this https://github.com/mohammadVatandoost/traffic-director-grpc-bootstrap)
 - use kumctl to generate tls files 
+- generate k8s resource types (check Kuma resourcetypes)

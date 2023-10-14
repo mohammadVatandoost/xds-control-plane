@@ -16,7 +16,7 @@ TOP := $(shell pwd)
 BUILD_DIR ?= $(TOP)/build
 
 
-BUILD_RELEASE_BINARIES := control-plane example-client example-server 
+BUILD_RELEASE_BINARIES := control-plane cp-example-client cp-example-server 
 
 SUPPORTED_GOARCHES ?= amd64 arm64
 
@@ -56,12 +56,12 @@ define BUILD_TARGET
 build/artifacts-$(1)-$(2)/control-plane:
 	$(Build_Go_Application) ./cmd
 
-.PHONY: build/artifacts-$(1)-$(2)/example-client
-build/artifacts-$(1)-$(2)/example-client:
+.PHONY: build/artifacts-$(1)-$(2)/cp-example-client
+build/artifacts-$(1)-$(2)/cp-example-client:
 	$(Build_Go_Application) ./example/client
 
-.PHONY: build/artifacts-$(1)-$(2)/example-server
-build/artifacts-$(1)-$(2)/example-server:
+.PHONY: build/artifacts-$(1)-$(2)/cp-example-server
+build/artifacts-$(1)-$(2)/cp-example-server:
 	$(Build_Go_Application) ./example/server
 
 endef

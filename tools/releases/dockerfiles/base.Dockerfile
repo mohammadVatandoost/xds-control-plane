@@ -1,8 +1,8 @@
 FROM golang:1.19 
 
-WORKDIR /xds-control-plane
+WORKDIR /control-plane
 
-ADD go.mod go.sum /build-app/
+ADD go.mod go.sum /control-plane/
 RUN go mod download
 COPY . .
-RUN make service
+RUN make build/release

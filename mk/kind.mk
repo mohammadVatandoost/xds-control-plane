@@ -1,5 +1,5 @@
-EXAMPLE_NAMESPACE ?= kuma-example
-KIND_CLUSTER_NAME ?= kuma
+EXAMPLE_NAMESPACE ?= control-plane-example
+KIND_CLUSTER_NAME ?= control-plane
 
 # The e2e tests depend on Kind kubeconfigs being in this directory,
 # so this is location should not be changed by developers.
