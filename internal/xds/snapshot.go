@@ -3,6 +3,7 @@ package xds
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"reflect"
 	"strings"
 	"sync/atomic"
@@ -15,7 +16,7 @@ import (
 
 func (cp *ControlPlane) UpdateCache(nodeID string, resourceNames []string, resourceType string) {
 
-	cp.log.Infof("UpdateCache nodeID: %v, resourceNames: %v\n", nodeID, resourceNames)
+	slog.Info("UpdateCache", "nodeID", nodeID, "resourceNames", resourceNames)
 	clusters := make([]types.Resource, 0)
 	listeners := make([]types.Resource, 0)
 	endpoints := make([]types.Resource, 0)
@@ -32,7 +33,7 @@ func (cp *ControlPlane) UpdateCache(nodeID string, resourceNames []string, resou
 			}
 			k8sService, ok := svc.(*corev1.Service)
 			if !ok {
-				cp.log.Errorf("service type is not match, type is: %v", reflect.TypeOf(svc).Elem().Name())
+				slog.Error("service type is not match", "type", reflect.TypeOf(svc).Elem().Name())
 				continue
 			}
 			// cp.log.Infof("k8sService Name: %v", k8sService.Name)
@@ -52,7 +53,7 @@ func (cp *ControlPlane) UpdateCache(nodeID string, resourceNames []string, resou
 					seviceConfig.Zone = "us-central1-a"
 					edsService, clsService, rdsService, lsnrService, err := cp.makeXDSConfigFromService(seviceConfig)
 					if err != nil {
-						cp.log.Errorf("couldn't make service, err: %v", err)
+						slog.Error("couldn't make service", "error", err)
 					}
 					endpoints = append(endpoints, edsService)
 					clusters = append(clusters, clsService)
@@ -73,12 +74,12 @@ func (cp *ControlPlane) UpdateCache(nodeID string, resourceNames []string, resou
 		resource.RouteType:    routes,
 	})
 	if err != nil {
-		cp.log.Printf(">>>>>>>>>>  Error creating snapshot %v", err)
+		slog.Error(">>>>>>>>>>  Error creating snapshot", "error", err)
 		return
 	}
-	cp.log.Infof("snapshotCache IDs: %v, listeners: %v\n", nodeID, listeners)
+	slog.Info("snapshotCache IDs: %v, listeners: %v\n", nodeID, listeners)
 	err = cp.snapshotCache.SetSnapshot(context.Background(), nodeID, snapshot)
 	if err != nil {
-		cp.log.Errorf("%v", err)
+		slog.Error("couldn't set snapshot", "error", err)
 	}
 }

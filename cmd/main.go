@@ -1,33 +1,37 @@
 package main
 
 import (
-	"fmt"
 	"os"
+	"log/slog"
 
-	"github.com/mohammadVatandoost/xds-conrol-plane/internal/config"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
+	"github.com/mohammadVatandoost/xds-conrol-plane/internal/xds"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/config"
+	controlplaneConfig "github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/app/controlplane"
 )
 
 const serviceName = "xds_control_plane"
 
 func main() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(-1)
-	}
-}
+	exitCode := 0
+	defer func ()  {
+		os.Exit(exitCode)
+	}()
+	// conf := loadConfigOrPanic(cmd)
+	// configureLoggerOrPanic(conf.Logger)
 
-func loadConfigOrPanic(cmd *cobra.Command) *config.Config {
-	conf, err := config.LoadConfig(cmd)
+	conf := controlplaneConfig.DefaultControlPlaneConfig()
+	err := config.Load("", conf)
 	if err != nil {
-		logrus.WithError(err).Panic("Failed to load configurations")
+		slog.Error("couldn't load configs", "error", err)
+		exitCode = -1
+		return
 	}
-	return conf
+
+	slog.Info("XDS control plane config", "XDS.ADSEnabled", conf.XDSConfig.ADSEnabled, "ListenPort", conf.XDSConfig.Port)
+	xdsServer := xds.NewControlPlane(conf.XDSConfig)
+	err = xdsServer.Run()
+	if err != nil {
+		slog.Error("couldn't run xdsServer", "error", err)
+	}
 }
 
-// func configureLoggerOrPanic(loggerConfig logger.Config) {
-// 	if err := logger.Initialize(&loggerConfig); err != nil {
-// 		logrus.WithError(err).Panic("Failed to configure logger")
-// 	}
-// }
