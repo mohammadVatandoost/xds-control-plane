@@ -1,6 +1,6 @@
 module github.com/mohammadVatandoost/xds-conrol-plane
 
-go 1.17
+go 1.21
 
 require (
 	github.com/alicebob/miniredis/v2 v2.30.0
@@ -8,6 +8,7 @@ require (
 	github.com/envoyproxy/go-control-plane v0.10.3
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang/protobuf v1.5.2
+	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/mohammadVatandoost/interfaces v0.1.2
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/pkg/errors v0.9.1
@@ -25,7 +26,7 @@ require (
 	sigs.k8s.io/yaml v1.3.0
 )
 
-replace github.com/envoyproxy/go-control-plane => github.com/mohammadVatandoost/go-control-plane v0.1.2
+// replace github.com/envoyproxy/go-control-plane => github.com/mohammadVatandoost/go-control-plane v0.1.2
 
 require (
 	cloud.google.com/go/compute v1.15.1 // indirect

@@ -3,6 +3,7 @@ package xds
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net"
 	"os"
 	"strconv"
@@ -149,11 +150,11 @@ func (cp *ControlPlane) RunXDSserver(stopCh <-chan struct{}) {
 		default:
 			snapshot, err := cp.makeSnapshot(version)
 			if err != nil {
-				cp.log.Printf(">>>>>>>>>>  Error setting snapshot %v", err)
+				slog.Error(">>>>>>>>>>  Error setting snapshot", "error", err)
 				return
 			}
 			IDs := cp.snapshotCache.GetStatusKeys()
-			cp.log.Infof("snapshotCache IDs: %v\n", IDs)
+			slog.Info("snapshotCache", "IDs", IDs)
 			for _, id := range IDs {
 				err = cp.snapshotCache.SetSnapshot(context.Background(), id, snapshot)
 				if err != nil {
@@ -183,12 +184,12 @@ func (cp *ControlPlane) makeSnapshot(version int32) (*cachev3.Snapshot, error) {
 	}
 
 	atomic.AddInt32(&version, 1)
-	cp.log.Infof(" creating snapshot Version " + fmt.Sprint(version))
+	slog.Info(" creating snapshot Version ", "version", version)
 
-	cp.log.Infof("   snapshot with Listener %v", lsnr)
-	cp.log.Infof("   snapshot with EDS %v", eds)
-	cp.log.Infof("   snapshot with CLS %v", cls)
-	cp.log.Infof("   snapshot with RDS %v", rds)
+	slog.Info("   snapshot", "listner", lsnr)
+	slog.Info("   snapshot with EDS %v", eds)
+	slog.Info("   snapshot with CLS %v", cls)
+	slog.Info("   snapshot with RDS %v", rds)
 
 	return cachev3.NewSnapshot(fmt.Sprint(version), map[resource.Type][]types.Resource{
 		resource.EndpointType: eds,

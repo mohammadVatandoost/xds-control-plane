@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"sync"
 	"time"
+	"log/slog"
 
 	clusterservice "github.com/envoyproxy/go-control-plane/envoy/service/cluster/v3"
 	discoverygrpc "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
@@ -15,15 +16,14 @@ import (
 	routeservice "github.com/envoyproxy/go-control-plane/envoy/service/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	xds "github.com/envoyproxy/go-control-plane/pkg/server/v3"
-	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	k8scache "k8s.io/client-go/tools/cache"
+	xdsConfig "github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/xds"
 )
 
 type ControlPlane struct {
-	log           *logrus.Logger
 	version       int32
 	snapshotCache cache.SnapshotCache
 	server        xds.Server
@@ -33,8 +33,7 @@ type ControlPlane struct {
 	// endpoints         []types.Resource
 	endpointInformers []k8scache.SharedIndexInformer
 	serviceInformers  []k8scache.SharedIndexInformer
-	conf              *Config
-	storage           cache.Storage
+	conf              *xdsConfig.XDSConfig
 	nodes             map[string]*Node
 	mu                sync.RWMutex
 	resources         map[string]map[string]struct{} // A resource is watched by which nodes
@@ -112,20 +111,20 @@ func (cp *ControlPlane) Run() error {
 	// clusters, _ := CreateBootstrapClients()
 	clusterClient, err := CreateClusterClient()
 	if err != nil {
-		cp.log.WithError(err).Error("can not create cluster client")
+		slog.Error("can not create cluster client", "error", err)
 		return err
 	}
-	cp.log.Info("cluster client created")
+	slog.Info("cluster client created")
 	namespaces, err := clusterClient.CoreV1().Namespaces().List(context.Background(), v1.ListOptions{})
 	if err != nil {
-		cp.log.WithError(err).Error("can not get namespaces list")
+		slog.Error("can not get namespaces list", "error", err)
 		return err
 	}
-	cp.log.Infof("cluster number of namespaces: %v", len(namespaces.Items))
+	slog.Info("cluster", "NamespacesNum", len(namespaces.Items))
 	for _, namespace := range namespaces.Items {
-		cp.log.Infof("namespace: %v", namespace.Name)
+		slog.Info("", "namespace", namespace.Name)
 	}
-	cp.log.Info("==========")
+	slog.Info("==========")
 	stop := make(chan struct{})
 	defer close(stop)
 
@@ -171,7 +170,7 @@ func (cp *ControlPlane) Run() error {
 	// 	}()
 	// }
 
-	lis, err := net.Listen("tcp", ":"+strconv.Itoa(cp.conf.ListenPort))
+	lis, err := net.Listen("tcp", ":"+strconv.Itoa(int(cp.conf.Port)))
 	if err != nil {
 		return err
 	}
