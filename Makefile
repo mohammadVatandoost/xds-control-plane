@@ -9,16 +9,19 @@ HELM_REPO_ADDRESS = "https://mohammadVatandoost.github.io/helm-chart/"
 HELM_REPO_NAME = "myhelmrepo"
 VERSION = "dev"
 NAMESPACE = "test"
-
-build: $(SRCS)
-	go build -o ./build/$(PROJECT_NAME) -ldflags="$(LD_FLAGS)" ./cmd/...
+GOOS := $(shell go env GOOS)
+GOARCH := $(shell go env GOARCH)
+CONTROL_PLANE_DIR ?= .
+TOOLS_DIR = $(CONTROL_PLANE_DIR)/tools
+# Important to use `:=` to only run the script once per make invocation!
+BUILD_INFO := $(shell $(TOOLS_DIR)/releases/version.sh)
+BUILD_INFO_VERSION = $(word 1, $(BUILD_INFO))
+# build: $(SRCS)
+# 	go build -o ./build/$(PROJECT_NAME) -ldflags="$(LD_FLAGS)" ./cmd/...
 
 
 fmt: ## to run `go fmt` on all source code
 	gofmt -s -w $(SRCS)
-
-build-image:
-	docker build . -f build/Dockerfile --tag $(DOCKER_REPOSITORY)/$(PROJECT_NAME):$(TAG)
 
 kind-load:
 	kind load docker-image $(DOCKER_REPOSITORY)/$(PROJECT_NAME):$(TAG)	
@@ -40,3 +43,9 @@ helm-ci-cd:
 	helm dependency update ./deployments/helm/$(PROJECT_NAME)
 	helm package --app-version=$(VERSION) ./deployments/helm/$(PROJECT_NAME)
 	helm -n $(NAMESPACE) upgrade -i $(PROJECT_NAME) -f ./deployments/helm/$(PROJECT_NAME)/values.yaml *.tgz
+
+
+
+include mk/build.mk
+include mk/docker.mk
+include mk/kind.mk
