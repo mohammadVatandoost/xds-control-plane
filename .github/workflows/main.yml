@@ -30,32 +30,30 @@ jobs:
     - name: Docker login
       run: docker login  -u $DOCKER_REPOSITORY_NAME -p $DOCKER_REPOSITORY_ACCESS_TOKEN
 
-    - name: Build Example client
-      working-directory: ./example/client
+    # - name: Build Example client
+    #   working-directory: ./example/client
+    #   run: |
+    #       docker build . --tag $DOCKER_REPOSITORY_NAME/xds-grpc-client-example:$IMAGE_TAG
+    #       sed -i -e "s/tag.*/tag: $IMAGE_TAG/g" ./deployments/helm/xds-grpc-client-example/values.yaml
+    #       # sed -i "s~latest~$IMAGE_TAG~g" ./deployments/helm/xds-grpc-client-example/values.yaml
+
+    # - name: Push Example Client
+    #   run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-client-example:$IMAGE_TAG
+
+    - name: Build Docker images
       run: |
-          docker build . --tag $DOCKER_REPOSITORY_NAME/xds-grpc-client-example:$IMAGE_TAG
-          sed -i -e "s/tag.*/tag: $IMAGE_TAG/g" ./deployments/helm/xds-grpc-client-example/values.yaml
-          # sed -i "s~latest~$IMAGE_TAG~g" ./deployments/helm/xds-grpc-client-example/values.yaml
+          make images
 
-    - name: Push Example Client
-      run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-client-example:$IMAGE_TAG
+    # - name: Push Example Server
+    #   run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-server-example:$IMAGE_TAG
 
-    - name: Build Example Server
-      working-directory: ./example/server
-      run: |
-          docker build . --tag $DOCKER_REPOSITORY_NAME/xds-grpc-server-example:$IMAGE_TAG
-          sed -i -e "s/tag.*/tag: $IMAGE_TAG/g" ./deployments/helm/xds-grpc-server-example/values.yaml
+    - name: Push docker images
+      run: make docker/push
 
-    - name: Push Example Server
-      run: docker push $DOCKER_REPOSITORY_NAME/xds-grpc-server-example:$IMAGE_TAG
-
-    - name: Build XDS control plane
-      run: docker build . -f build/Dockerfile --tag $DOCKER_REPOSITORY_NAME/xds-control-plane:$IMAGE_TAG
-
-    - name: Push XDS control plane
-      run: |
-          docker push $DOCKER_REPOSITORY_NAME/xds-control-plane:$IMAGE_TAG
-          sed -i -e "s/tag.*/tag: $IMAGE_TAG/g" ./deployments/helm/xds-control-plane/values.yaml
+    # - name: Push XDS control plane
+    #   run: |
+    #       docker push $DOCKER_REPOSITORY_NAME/xds-control-plane:$IMAGE_TAG
+    #       sed -i -e "s/tag.*/tag: $IMAGE_TAG/g" ./deployments/helm/xds-control-plane/values.yaml
 
     - name: Commit and push changes
       uses: devops-infra/action-commit-push@v0.3
