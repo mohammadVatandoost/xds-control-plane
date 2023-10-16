@@ -45,7 +45,8 @@ helm-ci-cd:
 	helm -n $(NAMESPACE) upgrade -i $(PROJECT_NAME) -f ./deployments/helm/$(PROJECT_NAME)/values.yaml *.tgz
 
 
-
+include mk/dev.mk
 include mk/build.mk
 include mk/docker.mk
 include mk/kind.mk
+
