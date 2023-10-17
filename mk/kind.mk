@@ -1,4 +1,5 @@
 EXAMPLE_NAMESPACE ?= control-plane-example
+CONTROL_PLANE_NAMESPACE ?= control-plane
 KIND_CLUSTER_NAME ?= control-plane
 
 # The e2e tests depend on Kind kubeconfigs being in this directory,
@@ -37,12 +38,12 @@ CI_KUBERNETES_VERSION ?= v1.22.9@sha256:8135260b959dfe320206eb36b3aeda9cffcb262f
 KUMA_MODE ?= standalone
 KUMA_NAMESPACE ?= kuma-system
 
+
 .PHONY: kind/start
 kind/start: ${KUBECONFIG_DIR}
 	@$(KIND) get clusters | grep $(KIND_CLUSTER_NAME) >/dev/null 2>&1 && echo "Kind cluster already running." && exit 0 || \
 		($(KIND) create cluster \
 			--name "$(KIND_CLUSTER_NAME)" \
-			--config "$(KIND_CONFIG)" \
 			--image=kindest/node:$(CI_KUBERNETES_VERSION) \
 			--kubeconfig $(KIND_KUBECONFIG) \
 			--quiet --wait 120s && \
@@ -55,6 +56,7 @@ kind/start: ${KUBECONFIG_DIR}
 	@echo
 	@echo '<<< ------------------------------------------------------------- <<<'
 	@echo
+
 
 .PHONY: kind/wait
 kind/wait:
@@ -91,6 +93,25 @@ kind/deploy/kuma: build/kumactl kind/load
       echo "Waiting for the cluster to come up" && sleep 1; \
     done
 
+
+.PHONY: kind/deploy/control-plane
+kind/deploy/control-plane: kind/load
+	KUBECONFIG=$(KIND_KUBECONFIG) helm upgrade --install --namespace $(CONTROL_PLANE_NAMESPACE) --create-namespace \
+                --set global.image.registry="$(DOCKER_REGISTRY)" \
+                --set global.image.tag="$(BUILD_INFO_VERSION)-${GOARCH}" \
+				xds-control-plane ./deployments/helm/xds-control-plane
+	KUBECONFIG=$(KIND_KUBECONFIG) helm upgrade --install --namespace $(EXAMPLE_NAMESPACE) --create-namespace \
+                --set global.image.registry="$(DOCKER_REGISTRY)" \
+                --set global.image.tag="$(BUILD_INFO_VERSION)-${GOARCH}" \
+				xds-grpc-client-example ./example/client/deployments/helm/xds-grpc-client-example
+	KUBECONFIG=$(KIND_KUBECONFIG) helm upgrade --install --namespace $(EXAMPLE_NAMESPACE) --create-namespace \
+                --set global.image.registry="$(DOCKER_REGISTRY)" \
+                --set global.image.tag="$(BUILD_INFO_VERSION)-${GOARCH}" \
+				xds-grpc-server-example ./example/server/deployments/helm/xds-grpc-server-example						
+
+
+
+
 .PHONY: kind/deploy/helm
 kind/deploy/helm: kind/load
 	KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) delete namespace $(KUMA_NAMESPACE) | true
@@ -104,9 +125,9 @@ kind/deploy/helm: kind/load
                 --set cni.binDir=/opt/cni/bin \
                 --set cni.confName=10-kindnet.conflist \
                  --set controlPlane.envVars.KUMA_RUNTIME_KUBERNETES_INJECTOR_BUILTIN_DNS_ENABLED=true \
-                kuma ./deployments/charts/kuma
-	KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) wait --timeout=60s --for=condition=Available -n $(KUMA_NAMESPACE) deployment/kuma-control-plane
-	KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) wait --timeout=60s --for=condition=Ready -n $(KUMA_NAMESPACE) pods -l app=kuma-control-plane
+                xds-control-plane ./deployments/charts/helm/xds-control-plane
+	KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) wait --timeout=60s --for=condition=Available -n $(KUMA_NAMESPACE) deployment/xds-control-plane
+	KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) wait --timeout=60s --for=condition=Ready -n $(KUMA_NAMESPACE) pods -l app=xds-control-plane
 
 .PHONY: kind/deploy/kuma/global
 kind/deploy/kuma/global: KUMA_MODE=global
@@ -130,12 +151,13 @@ kind/deploy/metrics-server:
 
 .PHONY: kind/deploy/example-app
 kind/deploy/example-app:
-	@KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) apply -n $(EXAMPLE_NAMESPACE) -f dev/examples/k8s/meshes/no-passthrough.yaml
-	@KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) apply -n $(EXAMPLE_NAMESPACE) -f dev/examples/k8s/external-services/httpbin.yaml
-	@KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) apply -n $(EXAMPLE_NAMESPACE) -f dev/examples/k8s/external-services/mockbin.yaml
+	# @KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) apply -n $(EXAMPLE_NAMESPACE) -f dev/examples/k8s/meshes/no-passthrough.yaml
+	# @KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) apply -n $(EXAMPLE_NAMESPACE) -f dev/examples/k8s/external-services/httpbin.yaml
+	# @KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) apply -n $(EXAMPLE_NAMESPACE) -f dev/examples/k8s/external-services/mockbin.yaml
 	@KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) create namespace $(EXAMPLE_NAMESPACE) || true
-	@KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) annotate namespace $(EXAMPLE_NAMESPACE) kuma.io/sidecar-injection=enabled --overwrite
-	@KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) apply -n $(EXAMPLE_NAMESPACE) -f dev/examples/k8s/example-app/example-app.yaml
+	# @KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) annotate namespace $(EXAMPLE_NAMESPACE) kuma.io/sidecar-injection=enabled --overwrite
+	@KUBECONFIG=$(KIND_KUBECONFIG) helm install -n $(EXAMPLE_NAMESPACE) client ./example/client/deployments/helm
+	@KUBECONFIG=$(KIND_KUBECONFIG) helm install -n $(EXAMPLE_NAMESPACE) server ./example/server/deployments/helm
 
 .PHONY: run/k8s
 run/k8s: build/kuma-cp generate/builtin-crds ## Dev: Run Control Plane locally in Kubernetes mode
