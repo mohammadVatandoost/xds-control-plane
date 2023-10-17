@@ -4,12 +4,23 @@
 
 replicaCount: 1
 
-image:
-  repository: mvatandoost/xds-grpc-client-example
-  pullPolicy: IfNotPresent
-  tag: 886210
+global:
+  image:
+    # -- Default registry for all control plane Images
+    registry: "mvatandoost"
+    # -- The default tag for all Kuma images, which itself defaults to .Chart.AppVersion
+    tag: 886210
+    pullPolicy: IfNotPresent
+  # -- Add `imagePullSecrets` to all the service accounts used for Kuma components
+  imagePullSecrets: [name: registry-secret, name: mvatandoost]
+
+clientExample:
+  imageName: "xds-grpc-client-example"
+
 
 imagePullSecrets: [name: registry-secret, name: mvatandoost]
+
+
 nameOverride: ""
 fullnameOverride: ""
 

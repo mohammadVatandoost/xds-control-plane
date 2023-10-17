@@ -95,10 +95,20 @@ kind/deploy/kuma: build/kumactl kind/load
 
 
 .PHONY: kind/deploy/control-plane
-kind/deploy/helm: kind/load
-	KUBECONFIG=$(KIND_KUBECONFIG) helm install --namespace $(CONTROL_PLANE_NAMESPACE) \
+kind/deploy/control-plane: kind/load
+	KUBECONFIG=$(KIND_KUBECONFIG) helm upgrade --install --namespace $(CONTROL_PLANE_NAMESPACE) --create-namespace \
                 --set global.image.registry="$(DOCKER_REGISTRY)" \
                 --set global.image.tag="$(BUILD_INFO_VERSION)-${GOARCH}" \
+				xds-control-plane ./deployments/helm/xds-control-plane
+	KUBECONFIG=$(KIND_KUBECONFIG) helm upgrade --install --namespace $(EXAMPLE_NAMESPACE) --create-namespace \
+                --set global.image.registry="$(DOCKER_REGISTRY)" \
+                --set global.image.tag="$(BUILD_INFO_VERSION)-${GOARCH}" \
+				xds-grpc-client-example ./example/client/deployments/helm/xds-grpc-client-example
+	KUBECONFIG=$(KIND_KUBECONFIG) helm upgrade --install --namespace $(EXAMPLE_NAMESPACE) --create-namespace \
+                --set global.image.registry="$(DOCKER_REGISTRY)" \
+                --set global.image.tag="$(BUILD_INFO_VERSION)-${GOARCH}" \
+				xds-grpc-server-example ./example/server/deployments/helm/xds-grpc-server-example						
+
 
 
 
