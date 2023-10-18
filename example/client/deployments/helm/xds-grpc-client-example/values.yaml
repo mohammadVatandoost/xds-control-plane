@@ -15,7 +15,7 @@ global:
   imagePullSecrets: [name: registry-secret, name: mvatandoost]
 
 clientExample:
-  imageName: "xds-grpc-client-example"
+  imageName: "cp-example-client"
 
 
 imagePullSecrets: [name: registry-secret, name: mvatandoost]

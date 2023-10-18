@@ -44,7 +44,6 @@ kind/start: ${KUBECONFIG_DIR}
 	@$(KIND) get clusters | grep $(KIND_CLUSTER_NAME) >/dev/null 2>&1 && echo "Kind cluster already running." && exit 0 || \
 		($(KIND) create cluster \
 			--name "$(KIND_CLUSTER_NAME)" \
-			--image=kindest/node:$(CI_KUBERNETES_VERSION) \
 			--kubeconfig $(KIND_KUBECONFIG) \
 			--quiet --wait 120s && \
 		KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) scale deployment --replicas 1 coredns --namespace kube-system && \
@@ -76,7 +75,7 @@ kind/stop/all:
 
 .PHONY: kind/load/images
 kind/load/images:
-	for image in ${KUMA_IMAGES}; do $(KIND) load docker-image $$image --name=$(KIND_CLUSTER_NAME); done
+	for image in ${CONTROL_PLANE_IMAGES}; do $(KIND) load docker-image $$image --name=$(KIND_CLUSTER_NAME); done
 
 .PHONY: kind/load
 kind/load: images docker/tag kind/load/images
@@ -98,18 +97,25 @@ kind/deploy/kuma: build/kumactl kind/load
 kind/deploy/control-plane: kind/load
 	KUBECONFIG=$(KIND_KUBECONFIG) helm upgrade --install --namespace $(CONTROL_PLANE_NAMESPACE) --create-namespace \
                 --set global.image.registry="$(DOCKER_REGISTRY)" \
-                --set global.image.tag="$(BUILD_INFO_VERSION)-${GOARCH}" \
+                --set global.image.tag="$(BUILD_INFO_VERSION)" \
 				xds-control-plane ./deployments/helm/xds-control-plane
 	KUBECONFIG=$(KIND_KUBECONFIG) helm upgrade --install --namespace $(EXAMPLE_NAMESPACE) --create-namespace \
                 --set global.image.registry="$(DOCKER_REGISTRY)" \
-                --set global.image.tag="$(BUILD_INFO_VERSION)-${GOARCH}" \
+                --set global.image.tag="$(BUILD_INFO_VERSION)" \
 				xds-grpc-client-example ./example/client/deployments/helm/xds-grpc-client-example
 	KUBECONFIG=$(KIND_KUBECONFIG) helm upgrade --install --namespace $(EXAMPLE_NAMESPACE) --create-namespace \
                 --set global.image.registry="$(DOCKER_REGISTRY)" \
-                --set global.image.tag="$(BUILD_INFO_VERSION)-${GOARCH}" \
+                --set global.image.tag="$(BUILD_INFO_VERSION)" \
 				xds-grpc-server-example ./example/server/deployments/helm/xds-grpc-server-example						
 
 
+.PHONY: kind/delete/control-plane
+kind/delete/control-plane:
+	KUBECONFIG=$(KIND_KUBECONFIG) helm uninstall --namespace $(CONTROL_PLANE_NAMESPACE) xds-control-plane 
+	KUBECONFIG=$(KIND_KUBECONFIG) helm uninstall  --namespace $(EXAMPLE_NAMESPACE) xds-grpc-client-example
+	KUBECONFIG=$(KIND_KUBECONFIG) helm uninstall --namespace $(EXAMPLE_NAMESPACE) xds-grpc-server-example
+	KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) delete namespace $(CONTROL_PLANE_NAMESPACE) | true
+	KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) delete namespace $(EXAMPLE_NAMESPACE) | true	
 
 
 .PHONY: kind/deploy/helm

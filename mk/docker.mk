@@ -2,7 +2,8 @@ BUILD_DOCKER_IMAGES_DIR ?= $(BUILD_DIR)/docker-images-${GOARCH}
 CONTROL_PLANE_VERSION ?= master
 
 DOCKER_SERVER ?= docker.io
-DOCKER_REGISTRY ?= $(DOCKER_SERVER)/mvatandoost
+# DOCKER_REGISTRY ?= $(DOCKER_SERVER)/mvatandoost
+DOCKER_REGISTRY ?= mvatandoost
 DOCKER_USERNAME ?=
 DOCKER_API_KEY ?=
 
@@ -75,6 +76,10 @@ docker/%/manifest:
 
 # add targets like `docker/save` with dependencies all `ENABLED_GOARCHES`
 ALL_RELEASE_WITH_ARCH=$(foreach arch,$(ENABLED_GOARCHES),$(patsubst %,%/$(arch),$(IMAGES_RELEASE)))
+
+test:
+	echo $(patsubst %,docker/%/tag,$(ALL_RELEASE_WITH_ARCH))
+
 ALL_TEST_WITH_ARCH=$(foreach arch,$(ENABLED_GOARCHES),$(patsubst %,%/$(arch),$(IMAGES_TEST)))
 .PHONY: docker/save
 docker/save: $(patsubst %,docker/%/save,$(ALL_RELEASE_WITH_ARCH) $(ALL_TEST_WITH_ARCH))

@@ -16,7 +16,7 @@ global:
   imagePullSecrets: [name: registry-secret, name: mvatandoost]
 
 serverExample:
-  imageName: "xds-grpc-server-example"
+  imageName: "cp-example-server"
 
 
 nameOverride: ""
