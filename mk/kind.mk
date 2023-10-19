@@ -111,9 +111,9 @@ kind/deploy/control-plane: kind/load
 
 .PHONY: kind/delete/control-plane
 kind/delete/control-plane:
-	KUBECONFIG=$(KIND_KUBECONFIG) helm uninstall --namespace $(CONTROL_PLANE_NAMESPACE) xds-control-plane 
-	KUBECONFIG=$(KIND_KUBECONFIG) helm uninstall  --namespace $(EXAMPLE_NAMESPACE) xds-grpc-client-example
-	KUBECONFIG=$(KIND_KUBECONFIG) helm uninstall --namespace $(EXAMPLE_NAMESPACE) xds-grpc-server-example
+	KUBECONFIG=$(KIND_KUBECONFIG) helm uninstall --namespace $(CONTROL_PLANE_NAMESPACE) xds-control-plane | true
+	KUBECONFIG=$(KIND_KUBECONFIG) helm uninstall  --namespace $(EXAMPLE_NAMESPACE) xds-grpc-client-example | true
+	KUBECONFIG=$(KIND_KUBECONFIG) helm uninstall --namespace $(EXAMPLE_NAMESPACE) xds-grpc-server-example | true
 	KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) delete namespace $(CONTROL_PLANE_NAMESPACE) | true
 	KUBECONFIG=$(KIND_KUBECONFIG) $(KUBECTL) delete namespace $(EXAMPLE_NAMESPACE) | true	
 

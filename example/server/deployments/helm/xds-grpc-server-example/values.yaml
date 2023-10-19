@@ -57,3 +57,4 @@ configMap:
     LOGGER_LEVEL: "info"
     GRPC_LISTENPORT: 8888
     GRPC_TIMEOUT: 5
+    XDS_PORT: 5678

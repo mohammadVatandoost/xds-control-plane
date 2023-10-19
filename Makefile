@@ -49,4 +49,5 @@ include mk/dev.mk
 include mk/build.mk
 include mk/docker.mk
 include mk/kind.mk
+include mk/microk8s.mk
 

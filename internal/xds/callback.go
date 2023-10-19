@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"sync/atomic"
 
-	// core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
+	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	discovery "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 )
@@ -17,9 +17,9 @@ func (cp *ControlPlane) OnStreamOpen(ctx context.Context, id int64, typ string) 
 	slog.Info("OnStreamOpen open for Type", "id", id, "type", typ)
 	return nil
 }
-func (cp *ControlPlane) OnStreamClosed(id int64) {
+func (cp *ControlPlane) OnStreamClosed(id int64, node *core.Node) {
 	slog.Info("OnStreamClosed closed", "id", id)
-	// cp.DeleteNode(id)
+	cp.DeleteNode(node.Id)
 }
 func (cp *ControlPlane) OnStreamRequest(id int64, r *discovery.DiscoveryRequest) error {
 	if r.TypeUrl != resource.ListenerType {
@@ -46,7 +46,7 @@ func (cp *ControlPlane) OnFetchResponse(req *discovery.DiscoveryRequest, resp *d
 	slog.Info("OnFetchResponse... Resquest[%v],  Response[%v]", "request", req.TypeUrl, "response", resp.TypeUrl)
 }
 
-func (cp *ControlPlane) OnDeltaStreamClosed(id int64) {
+func (cp *ControlPlane) OnDeltaStreamClosed(id int64, node *core.Node) {
 	slog.Info("OnDeltaStreamClosed...", "id", id)
 }
 

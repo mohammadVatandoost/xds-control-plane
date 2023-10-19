@@ -7,5 +7,5 @@ WORKDIR /control-plane
 COPY ./build/artifacts-linux-${ARCH}/cp-example-client/cp-example-client /usr/bin
 COPY ./example/client/xds_bootstrap.json /usr/bin
 COPY ./example/client/xds_bootstrap_local.json /usr/bin
-
-ENTRYPOINT ["/usr/bin/example-client"]
+WORKDIR /usr/bin
+ENTRYPOINT ["./cp-example-client"]
