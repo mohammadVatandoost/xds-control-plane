@@ -45,7 +45,7 @@ spec:
       affinity:
       {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: xds-control-plane-service-account
+      serviceAccountName: control-plane-service-account
       {{- with .Values.tolerations }}
       # automountServiceAccountToken: false
       tolerations:

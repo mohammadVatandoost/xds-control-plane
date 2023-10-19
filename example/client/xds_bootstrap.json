@@ -1,7 +1,7 @@
 {
   "xds_servers": [
     {
-      "server_uri": "kuma-control-plane.kuma-system.svc.cluster.local:5678",
+      "server_uri": "control-plane.control-plane.svc.cluster.local:5678",
       "channel_creds": [
         {
           "type": "google_default"
