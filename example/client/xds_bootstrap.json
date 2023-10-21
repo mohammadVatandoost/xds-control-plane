@@ -1,25 +1,15 @@
 {
   "xds_servers": [
     {
-      "server_uri": "control-plane.control-plane.svc.cluster.local:5678",
+      "server_uri": "xds-control-plane-headless.control-plane.svc.cluster.local:8888",
       "channel_creds": [
         {
-          "type": "google_default"
+          "type": "insecure"
         }
       ],
       "server_features": ["xds_v3"]      
     }
   ],
-  "certificate_providers": {
-    "kuma": { 
-      "plugin_name": "file_watcher", 
-      "config": {                    
-        "certificate_file": "./tls/cert.pem",
-        "private_key_file": "./tls/key.pem",
-        "refresh_interval": "60s"
-      }
-    }
-  },
   "node": {
     "id": "b7f9c818-fb46-43ca-8662-d3bdbcf7ec18~10.0.0.1",
     "metadata": {

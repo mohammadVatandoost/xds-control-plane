@@ -20,7 +20,7 @@ import (
 
 	"google.golang.org/grpc/admin"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/credentials/xds"
+	// "google.golang.org/grpc/credentials/xds"
 	_ "google.golang.org/grpc/resolver" // use for "dns:///be.cluster.local:50051"
 	_ "google.golang.org/grpc/xds"      // use for xds-experimental:///be-srv
 )
@@ -91,14 +91,14 @@ func main() {
 	}()
 
 	logger.Printf("Connectting to server: %v ", config.Server1Address)
-	creds, err := xds.NewClientCredentials(xds.ClientOptions{
-		FallbackCreds: insecure.NewCredentials(),
-	})
+	// creds, err := xds.NewClientCredentials(xds.ClientOptions{
+	// 	FallbackCreds: insecure.NewCredentials(),
+	// })
 
 	conn, err := grpc.Dial(config.Server1Address,
 		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig": [{"round_robin":{}}]}`), // This sets the initial balancing policy.
-		// grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithTransportCredentials(creds),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		// grpc.WithTransportCredentials(creds),
 	)
 	if err != nil {
 		logger.Fatalf("did not connect: %v", err)

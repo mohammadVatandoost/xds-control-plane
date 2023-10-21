@@ -1,9 +1,13 @@
 ARG ARCH
-FROM control-plane/base-nossl-debian11:no-push-$ARCH
+FROM control-plane/base-nossl-debian11:no-push-$ARCH as base_image
 ARG ARCH
 
-WORKDIR /control-plane
+FROM debian:stable-20220509 as final
+ARG ARCH
 
-COPY ./build/artifacts-linux-${ARCH}/control-plane/control-plane /usr/bin
 
-ENTRYPOINT ["/usr/bin/control-plane"]
+COPY --from=base_image /control-plane/build/artifacts-linux-${ARCH}/control-plane/control-plane /usr/bin
+
+WORKDIR /usr/bin
+
+ENTRYPOINT ["./control-plane"]
