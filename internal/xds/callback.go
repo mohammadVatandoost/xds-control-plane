@@ -2,6 +2,7 @@ package xds
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"sync/atomic"
 
@@ -14,12 +15,16 @@ func (cp *ControlPlane) Report() {
 	slog.Info("cp.Report()  callbacks", "fetches", cp.fetches, "requests", cp.requests)
 }
 func (cp *ControlPlane) OnStreamOpen(ctx context.Context, id int64, typ string) error {
-	slog.Info("OnStreamOpen open for Type", "id", id, "type", typ)
+	slog.Info("OnStreamOpen open for Type", "stream_id", id, "type_url", typ)
 	return nil
 }
 func (cp *ControlPlane) OnStreamClosed(id int64, node *core.Node) {
-	slog.Info("OnStreamClosed closed", "id", id)
-	cp.DeleteNode(node.Id)
+	log := slog.With("stream_id", id)
+	if node != nil {
+		log = log.With("node_id", node.Id)
+		cp.DeleteNode(node.Id)
+	}
+	log.Info("OnStreamClosed closed")
 }
 func (cp *ControlPlane) OnStreamRequest(id int64, r *discovery.DiscoveryRequest) error {
 	if r.TypeUrl != resource.ListenerType {
@@ -56,7 +61,22 @@ func (cp *ControlPlane) OnDeltaStreamOpen(ctx context.Context, id int64, typ str
 }
 
 func (cp *ControlPlane) OnStreamDeltaRequest(i int64, request *discovery.DeltaDiscoveryRequest) error {
-	slog.Info("OnStreamDeltaRequest... ", "id", i, "request", request)
+	log := slog.With("id", i).With("response_nonce", request.ResponseNonce)
+	if request.Node != nil {
+		log = log.With("node_id", request.Node.Id)
+
+		if bv := request.Node.GetUserAgentBuildVersion(); bv != nil && bv.Version != nil {
+			log = log.With("node_version", fmt.Sprintf("v%d.%d.%d", bv.Version.MajorNumber, bv.Version.MinorNumber, bv.Version.Patch))
+		}
+	}
+
+	if status := request.ErrorDetail; status != nil {
+		log.With("code", status.Code).Error(status.Message)
+	}
+
+	log = log.With("resource_names_subscribe", request.ResourceNamesSubscribe).With("type_url", request.GetTypeUrl())
+
+	log.Info("handling v3 xDS resource request")
 	return nil
 }
 

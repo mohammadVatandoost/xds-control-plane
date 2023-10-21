@@ -1,0 +1,11 @@
+.idea
+*.tgz
+vendor
+vendor/*
+
+build
+build/*
+mvatandoost
+mvatandoost/*
+.github
+.github/*
