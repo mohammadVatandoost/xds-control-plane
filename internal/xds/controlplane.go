@@ -3,11 +3,11 @@ package xds
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net"
 	"strconv"
 	"sync"
 	"time"
-	"log/slog"
 
 	clusterservice "github.com/envoyproxy/go-control-plane/envoy/service/cluster/v3"
 	discoverygrpc "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
@@ -16,11 +16,12 @@ import (
 	routeservice "github.com/envoyproxy/go-control-plane/envoy/service/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	xds "github.com/envoyproxy/go-control-plane/pkg/server/v3"
+	"github.com/mohammadVatandoost/xds-conrol-plane/internal/node"
+	xdsConfig "github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/xds"
 	"google.golang.org/grpc"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/informers"
 	k8scache "k8s.io/client-go/tools/cache"
-	xdsConfig "github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/xds"
 )
 
 type ControlPlane struct {
@@ -34,26 +35,24 @@ type ControlPlane struct {
 	endpointInformers []k8scache.SharedIndexInformer
 	serviceInformers  []k8scache.SharedIndexInformer
 	conf              *xdsConfig.XDSConfig
-	nodes             map[string]*Node
+	nodes             map[string]*node.Node
 	mu                sync.RWMutex
 	resources         map[string]map[string]struct{} // A resource is watched by which nodes
 	muResource        sync.RWMutex
 }
 
-func (cp *ControlPlane) CreateNode(id string) *Node {
+func (cp *ControlPlane) CreateNode(id string) *node.Node {
 	cp.mu.Lock()
 	defer cp.mu.Unlock()
-	node, ok := cp.nodes[id]
+	n, ok := cp.nodes[id]
 	if !ok {
-		node = &Node{
-			watchers: make(map[string]struct{}),
-		}
+		n = node.NewNode()
 	}
-	cp.nodes[id] = node
-	return node
+	cp.nodes[id] = n
+	return n
 }
 
-func (cp *ControlPlane) GetNode(id string) (*Node, error) {
+func (cp *ControlPlane) GetNode(id string) (*node.Node, error) {
 	cp.mu.RLock()
 	defer cp.mu.RUnlock()
 	node, ok := cp.nodes[id]
