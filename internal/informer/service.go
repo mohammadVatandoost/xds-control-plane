@@ -10,9 +10,13 @@ import (
 
 type ServiceInformer struct {
 	cache cache.SharedIndexInformer
+	handler ServiceEventHandler
 }
 
 type ServiceEventHandler interface {
+	OnAddSerivce(key string, serviceObj *v1.Service)
+	OnDeleteService(key string, serviceObj *v1.Service)
+	OnUpdateService(newKey string, newServiceObj *v1.Service, oldKey string, oldServiceObj *v1.Service)
 }
 
 func NewServiceInformer(factory informers.SharedInformerFactory) *ServiceInformer {
@@ -31,6 +35,10 @@ func getServiceKey(service *v1.Service) string {
 	return service.Namespace + "." + service.Name
 }
 
+func (si *ServiceInformer) Run(stop <-chan) {
+	informerServices.Run(stop)
+}
+
 func (si *ServiceInformer) OnAdd(obj interface{}) {
 	service, ok := obj.(*v1.Service)
 	if !ok {
@@ -39,7 +47,7 @@ func (si *ServiceInformer) OnAdd(obj interface{}) {
 	}
 
 	key := getServiceKey(service)
-	si.OnAddSerivce(key, service)
+	si.handler.OnAddSerivce(key, service)
 }
 
 func (si *ServiceInformer) OnUpdate(oldObj, newObj interface{}) {
@@ -55,7 +63,7 @@ func (si *ServiceInformer) OnUpdate(oldObj, newObj interface{}) {
 	}
 	newKey := getServiceKey(newService)
 	oldKey := getServiceKey(oldService)
-	si.OnUpdateService(newKey, newService, oldKey, oldService)
+	si.handler.OnUpdateService(newKey, newService, oldKey, oldService)
 }
 
 func (si *ServiceInformer) OnDelete(obj interface{}) {
@@ -66,5 +74,5 @@ func (si *ServiceInformer) OnDelete(obj interface{}) {
 	}
 
 	key := getServiceKey(service)
-	si.OnDeleteService(key, service)
+	si.handler.OnDeleteService(key, service)
 }

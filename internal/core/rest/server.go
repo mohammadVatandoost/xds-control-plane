@@ -11,7 +11,7 @@ type Server struct {
 }
 
 func (s *Server) Run() error {
-	
+	return nil
 }
 
 func NewServer(conf	*rest.RestAPIConfig) *Server {
