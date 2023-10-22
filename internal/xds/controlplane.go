@@ -39,6 +39,7 @@ type ControlPlane struct {
 	mu                sync.RWMutex
 	resources         map[string]map[string]struct{} // A resource is watched by which nodes
 	muResource        sync.RWMutex
+	app App
 }
 
 func (cp *ControlPlane) CreateNode(id string) *node.Node {
