@@ -35,8 +35,8 @@ func getServiceKey(service *v1.Service) string {
 	return service.Namespace + "." + service.Name
 }
 
-func (si *ServiceInformer) Run(stop <-chan) {
-	informerServices.Run(stop)
+func (si *ServiceInformer) Run(stopCh <-chan struct{}) {
+	si.cache.Run(stopCh)
 }
 
 func (si *ServiceInformer) OnAdd(obj interface{}) {

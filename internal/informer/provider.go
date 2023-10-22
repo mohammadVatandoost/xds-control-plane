@@ -1,23 +1,32 @@
 package informer
 
 import (
+	"sync"
 	"time"
 
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
-	k8scache "k8s.io/client-go/tools/cache"
 )
 
 type RunTime struct {
 	client kubernetes.Interface
+	informers []Informer
+	mu sync.Mutex
 }
 
 
-func (rt *RunTime) AddInformer(informer k8scache.ResourceEventHandler) {
-	
-	// informerServices.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
-	// 	UpdateFunc: cp.HandleServicesUpdate,
-	// })
+func (rt *RunTime) AddInformer(informer Informer) {
+	rt.mu.Lock()
+	defer rt.mu.Unlock()
+	rt.informers = append(rt.informers, informer)
+}
+
+func (rt *RunTime) RunInformers(stopCh <- chan struct{}) {
+	rt.mu.Lock()
+	defer rt.mu.Unlock()
+	for _, informer := range rt.informers {
+		go informer.Run(stopCh)
+	}
 }
 
 

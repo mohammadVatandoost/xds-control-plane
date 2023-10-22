@@ -15,6 +15,8 @@ var _ config.Config = &ControlPlaneConfig{}
 type ControlPlaneConfig struct {
 	RestAPIConfig *rest.RestAPIConfig `restAPIConfig:"port" `
 	XDSConfig *xds.XDSConfig `json:"xdsConfig" `
+	Region string `json:"region" envconfig:"REGION"`
+	Zone   string `json:"zone" envconfig:"ZONE"`
 }
 
 func (c *ControlPlaneConfig) Validate() error {
@@ -35,5 +37,7 @@ func DefaultControlPlaneConfig() *ControlPlaneConfig {
 	return &ControlPlaneConfig{
 		RestAPIConfig: rest.DefaultRestApiConfig(),
 		XDSConfig: xds.DefaultXDSConfig(),
+		Region: "us-central1",
+		Zone: "us-central1-a",
 	}
 }
