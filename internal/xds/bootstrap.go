@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
-	"os"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -22,16 +21,12 @@ import (
 	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	"github.com/golang/protobuf/ptypes"
-	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/util"
 	"github.com/sirupsen/logrus"
 
 	// "google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 
 	// healthpb "google.golang.org/grpc/health/grpc_health_v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 type ServiceConfig struct {
@@ -56,36 +51,6 @@ func getServices() []ServiceConfig {
 			Region:          "us-central1",
 		},
 	}
-}
-
-func CreateClusterClient() (kubernetes.Interface, error) {
-	homeDie, err := os.UserHomeDir()
-	if err != nil {
-		return nil, err
-	}
-	kubeConfigPath := homeDie + "/.kube/config"
-	var config *rest.Config
-	if utils.FileExists(kubeConfigPath) {
-		logrus.Info("kube config file exist")
-		config, err = clientcmd.BuildConfigFromFlags("", kubeConfigPath)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		// creates the in-cluster config
-		config, err = rest.InClusterConfig()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// creates the clientset
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-	// dynamic.NewForConfig()
-	return clientset, nil
 }
 
 func getAddresses(svcc ServiceConfig) []string {
