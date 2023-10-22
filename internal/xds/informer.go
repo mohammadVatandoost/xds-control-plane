@@ -3,16 +3,31 @@ package xds
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"reflect"
 	"strings"
 	"sync/atomic"
-	"log/slog"
 
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 )
+
+func (cp *ControlPlane) OnAddSerivce(key string, serviceObj *v1.Service) {
+
+}
+
+func (cp *ControlPlane) OnDeleteService(key string, serviceObj *v1.Service) {
+
+}
+
+func (cp *ControlPlane) OnUpdateService(newKey string, newServiceObj *v1.Service, oldKey string, oldServiceObj *v1.Service) {
+	
+}
+
+
 
 func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 
