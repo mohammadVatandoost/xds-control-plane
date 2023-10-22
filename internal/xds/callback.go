@@ -23,6 +23,7 @@ func (cp *ControlPlane) OnStreamClosed(id int64, node *core.Node) {
 	if node != nil {
 		log = log.With("node_id", node.Id)
 		cp.DeleteNode(node.Id)
+		cp.app.StreamClosed(node.Id)
 	}
 	log.Info("OnStreamClosed closed")
 }
@@ -31,6 +32,8 @@ func (cp *ControlPlane) OnStreamRequest(id int64, r *discovery.DiscoveryRequest)
 		return nil
 	}
 	slog.Info("OnStreamRequest", "id", id, "request", r.TypeUrl, "ResourceNames", r.ResourceNames)
+	cp.app.NewStreamRequest(r.Node.Id)
+
 	node := cp.CreateNode(r.Node.Id)
 	for _, rn := range r.ResourceNames {
 		node.AddWatcher(rn)
