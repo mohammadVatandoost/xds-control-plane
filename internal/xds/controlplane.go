@@ -16,6 +16,7 @@ import (
 	routeservice "github.com/envoyproxy/go-control-plane/envoy/service/route/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	xds "github.com/envoyproxy/go-control-plane/pkg/server/v3"
+	"github.com/mohammadVatandoost/xds-conrol-plane/internal/k8s"
 	"github.com/mohammadVatandoost/xds-conrol-plane/internal/node"
 	xdsConfig "github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/xds"
 	"google.golang.org/grpc"
@@ -109,7 +110,7 @@ func (cp *ControlPlane) Run() error {
 	listenerservice.RegisterListenerDiscoveryServiceServer(grpcServer, cp.server)
 
 	// clusters, _ := CreateBootstrapClients()
-	clusterClient, err := CreateClusterClient()
+	clusterClient, err := k8s.CreateClusterClient()
 	if err != nil {
 		slog.Error("can not create cluster client", "error", err)
 		return err
