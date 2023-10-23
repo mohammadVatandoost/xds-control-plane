@@ -9,7 +9,7 @@ import (
 	xdsConfig "github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/xds"
 )
 
-func NewControlPlane(config *xdsConfig.XDSConfig) *ControlPlane {
+func NewControlPlane(config *xdsConfig.XDSConfig, app App) *ControlPlane {
 	snapshotCache := cache.NewSnapshotCache(config.ADSEnabled, cache.IDHash{}, nil)
 
 	cp := &ControlPlane{
@@ -18,6 +18,7 @@ func NewControlPlane(config *xdsConfig.XDSConfig) *ControlPlane {
 		conf:          config,
 		nodes:         make(map[string]*node.Node),
 		resources:     make(map[string]map[string]struct{}),
+		app: app,
 	}
 	// callBacks := newCallBack(log, cp)
 	// cp.callBacks = callBacks

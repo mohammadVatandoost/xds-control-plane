@@ -50,7 +50,7 @@ func main() {
 	runTimeInformer.RunInformers(serverContext.Done())
 
 	slog.Info("XDS control plane config", "XDS.ADSEnabled", conf.XDSConfig.ADSEnabled, "ListenPort", conf.XDSConfig.Port)
-	xdsServer := xds.NewControlPlane(conf.XDSConfig)
+	xdsServer := xds.NewControlPlane(conf.XDSConfig, app)
 	err = xdsServer.Run()
 	if err != nil {
 		slog.Error("couldn't run xdsServer", "error", err)

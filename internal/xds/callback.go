@@ -32,7 +32,7 @@ func (cp *ControlPlane) OnStreamRequest(id int64, r *discovery.DiscoveryRequest)
 		return nil
 	}
 	slog.Info("OnStreamRequest", "id", id, "request", r.TypeUrl, "ResourceNames", r.ResourceNames)
-	cp.app.NewStreamRequest(r.Node.Id)
+	cp.app.NewStreamRequest(r.Node.Id, r.ResourceNames)
 
 	node := cp.CreateNode(r.Node.Id)
 	for _, rn := range r.ResourceNames {
