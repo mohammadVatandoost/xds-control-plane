@@ -37,6 +37,6 @@ func CreateClusterClient() (kubernetes.Interface, error) {
 	if err != nil {
 		return nil, err
 	}
-	// dynamic.NewForConfig()
+
 	return clientset, nil
 }
