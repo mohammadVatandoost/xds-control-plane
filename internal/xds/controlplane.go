@@ -42,7 +42,7 @@ type ControlPlane struct {
 	muResource        sync.RWMutex
 	app App
 }
-
+// ToDo: Remove: Begin
 func (cp *ControlPlane) CreateNode(id string) *node.Node {
 	cp.mu.Lock()
 	defer cp.mu.Unlock()
@@ -100,6 +100,8 @@ func (cp *ControlPlane) GetNodesWatchTheResource(resource string) []string {
 	return nodesArray
 }
 
+// ToDo: Remove: End
+
 func (cp *ControlPlane) Run() error {
 	grpcServer := grpc.NewServer()
 
@@ -153,23 +155,6 @@ func (cp *ControlPlane) Run() error {
 		informerServices.Run(stop)
 	}()
 
-	// go cp.RunXDSserver(stop)
-
-	// for _, cluster := range clusters {
-	// 	stop := make(chan struct{})
-	// 	defer close(stop)
-	// 	factory := informers.NewSharedInformerFactoryWithOptions(cluster, time.Second*10, informers.WithNamespace("demo"))
-	// 	informer := factory.Core().V1().Endpoints().Informer()
-	// 	cp.endpointInformers = append(cp.endpointInformers, informer)
-
-	// 	informer.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
-	// 		UpdateFunc: cp.HandleEndpointsUpdate,
-	// 	})
-
-	// 	go func() {
-	// 		informer.Run(stop)
-	// 	}()
-	// }
 
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(int(cp.conf.Port)))
 	if err != nil {

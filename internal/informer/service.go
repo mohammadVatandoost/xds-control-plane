@@ -19,11 +19,12 @@ type ServiceEventHandler interface {
 	OnUpdateService(newKey string, newServiceObj *v1.Service, oldKey string, oldServiceObj *v1.Service)
 }
 
-func NewServiceInformer(factory informers.SharedInformerFactory) *ServiceInformer {
+func NewServiceInformer(factory informers.SharedInformerFactory, handler ServiceEventHandler) *ServiceInformer {
 	sharedCache := factory.Core().V1().Services().Informer()
 
 	si := &ServiceInformer{
 		cache: sharedCache,
+		handler: handler,
 	}
 
 	sharedCache.AddEventHandler(si)

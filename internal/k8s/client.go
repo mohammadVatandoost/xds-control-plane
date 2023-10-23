@@ -7,8 +7,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/util"
-
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/utils"
 )
 
 func CreateClusterClient() (kubernetes.Interface, error) {
@@ -37,6 +36,6 @@ func CreateClusterClient() (kubernetes.Interface, error) {
 	if err != nil {
 		return nil, err
 	}
-	// dynamic.NewForConfig()
+
 	return clientset, nil
 }

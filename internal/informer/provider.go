@@ -33,3 +33,10 @@ func (rt *RunTime) RunInformers(stopCh <- chan struct{}) {
 func (rt *RunTime) GetInformerFactory() informers.SharedInformerFactory {
 	return informers.NewSharedInformerFactoryWithOptions(rt.client, time.Second*10, informers.WithNamespace(""))
 }
+
+
+func NewRunTime(client kubernetes.Interface) *RunTime {
+	return &RunTime{
+		client: client,
+	}
+}
