@@ -20,7 +20,6 @@ Deploy xds-control-plane with server and client example servoce to k8s
 make kind/deploy/control-plane
 ```
 
-
 ### Issues
 - [] for ADS, the request names must match the snapshot names, if they do not, then the watch is never responded, and it is expected that envoy makes another request. So we can only add service names to the snapshot that client exactly watch. this is wierld. It means if client watch xds-grpc-server-example-headless resource, you can only send listner for this resource (you couldn't resolve all the k8s services)
 (WARN[0010] ADS mode: not responding to request: "kube-prometheus-prometheus:9090" not listed, ResourceNames: [xds-grpc-server-example-headless:8888] )
