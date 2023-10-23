@@ -25,13 +25,3 @@ func NewControlPlane(config *xdsConfig.XDSConfig) *ControlPlane {
 	return cp
 }
 
-// func newCallBack(log *logrus.Logger, eventsHandler EventsHandler) *callbacks {
-// 	signal := make(chan struct{})
-// 	return &callbacks{
-// 		log:           log,
-// 		signal:        signal,
-// 		fetches:       0,
-// 		requests:      0,
-// 		eventsHandler: eventsHandler,
-// 	}
-// }

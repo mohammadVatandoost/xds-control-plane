@@ -1,5 +1,5 @@
-KUMA_DIR ?= .
-TOOLS_DIR = $(KUMA_DIR)/tools
+CONTROL_PLANE_DIR ?= .
+TOOLS_DIR = $(CONTROL_PLANE_DIR)/tools
 # Important to use `:=` to only run the script once per make invocation!
 BUILD_INFO := $(shell $(TOOLS_DIR)/releases/version.sh)
 BUILD_INFO_VERSION = $(word 1, $(BUILD_INFO))
@@ -8,18 +8,18 @@ GIT_COMMIT = $(word 3, $(BUILD_INFO))
 BUILD_DATE = $(word 4, $(BUILD_INFO))
 ENVOY_VERSION = $(word 5, $(BUILD_INFO))
 CI_TOOLS_VERSION = $(word 6, $(BUILD_INFO))
-KUMA_CHARTS_URL ?= https://kumahq.github.io/charts
-CHART_REPO_NAME ?= kuma
-PROJECT_NAME ?= kuma
+CONTROL_PLANE_CHARTS_URL ?= https://github.com/mohammadVatandoost/xds-control-plane/tree/main/deployments/helm/xds-control-plane
+CHART_REPO_NAME ?= control-plane
+PROJECT_NAME ?= control-plane
 
 ifdef CI
         # tools version is irrelevant on CI as we checkout only 1 branch at a time.
 	CI_TOOLS_VERSION=ci
 endif
 
-CI_TOOLS_DIR ?= ${HOME}/.kuma-dev/${PROJECT_NAME}-${CI_TOOLS_VERSION}
+CI_TOOLS_DIR ?= ${HOME}/.${PROJECT_NAME}-dev/${PROJECT_NAME}-${CI_TOOLS_VERSION}
 ifdef XDG_DATA_HOME
-	CI_TOOLS_DIR := ${XDG_DATA_HOME}/kuma-dev/${PROJECT_NAME}-${CI_TOOLS_VERSION}
+	CI_TOOLS_DIR := ${XDG_DATA_HOME}/${PROJECT_NAME}-dev/${PROJECT_NAME}-${CI_TOOLS_VERSION}
 endif
 CI_TOOLS_BIN_DIR=$(CI_TOOLS_DIR)/bin
 
@@ -57,7 +57,6 @@ CONTAINER_STRUCTURE_TEST=$(CI_TOOLS_BIN_DIR)/container-structure-test
 PROTOC_GEN_GO=$(CI_TOOLS_BIN_DIR)/protoc-gen-go
 PROTOC_GEN_GO_GRPC=$(CI_TOOLS_BIN_DIR)/protoc-gen-go-grpc
 PROTOC_GEN_VALIDATE=$(CI_TOOLS_BIN_DIR)/protoc-gen-validate
-PROTOC_GEN_KUMADOC=$(CI_TOOLS_BIN_DIR)/protoc-gen-kumadoc
 PROTOC_GEN_JSONSCHEMA=$(CI_TOOLS_BIN_DIR)/protoc-gen-jsonschema
 GINKGO=$(CI_TOOLS_BIN_DIR)/ginkgo
 GOLANGCI_LINT=$(CI_TOOLS_BIN_DIR)/golangci-lint
@@ -65,9 +64,9 @@ HELM_DOCS=$(CI_TOOLS_BIN_DIR)/helm-docs
 KUBE_LINTER=$(CI_TOOLS_BIN_DIR)/kube-linter
 HADOLINT=$(CI_TOOLS_BIN_DIR)/hadolint
 
-TOOLS_DEPS_DIRS=$(KUMA_DIR)/mk/dependencies
+TOOLS_DEPS_DIRS=$(CONTROL_PLANE_DIR)/mk/dependencies
 TOOLS_DEPS_LOCK_FILE=mk/dependencies/deps.lock
-TOOLS_MAKEFILE=$(KUMA_DIR)/mk/dev.mk
+TOOLS_MAKEFILE=$(CONTROL_PLANE_DIR)/mk/dev.mk
 
 # Install all dependencies on tools and protobuf files
 # We add one script per tool in the `mk/dependencies` folder. Add a VARIABLE for each binary and use this everywhere in Makefiles
@@ -89,38 +88,13 @@ $(KUBECONFIG_DIR):
 # config files (because then the integration tests have the wrong current
 # context). So we create this as a place for kubectl to write the interactive
 # current context.
-$(KUBECONFIG_DIR)/kind-kuma-current: $(KUBECONFIG_DIR)
+$(KUBECONFIG_DIR)/kind-${PROJECT_NAME}-current: $(KUBECONFIG_DIR)
 	@touch $@
 
-# Generate a .envrc that prepends e2e test suite configs to whatever
-# KUBECONFIG currently has, and stores CI tooling in .tools.
-.PHONY: dev/enrc
-dev/envrc: $(KUBECONFIG_DIR)/kind-kuma-current ## Generate .envrc
-	@echo 'export CI_TOOLS_DIR=$$(expand_path .tools)' > .envrc
-	@for c in $(patsubst %,$(KUBECONFIG_DIR)/kind-%-config,kuma $(K8SCLUSTERS)) $(KUBECONFIG_DIR)/kind-kuma-current ; do \
-		echo "path_add KUBECONFIG $$c" ; \
-	done >> .envrc
-	@echo 'export KUBECONFIG' >> .envrc
-	@for prog in $(BUILD_RELEASE_BINARIES) $(BUILD_TEST_BINARIES) ; do \
-		echo "PATH_add $(BUILD_ARTIFACTS_DIR)/$$prog" ; \
-	done >> .envrc
-	@echo 'export KUBEBUILDER_ASSETS=$(KUBEBUILDER_ASSETS)' >> .envrc
-	@direnv allow
 
-.PHONY: dev/sync-demo
-dev/sync-demo:
-	rm app/kumactl/data/install/k8s/demo/*.yaml
-	curl -s --fail https://raw.githubusercontent.com/kumahq/kuma-counter-demo/master/demo.yaml | \
-		sed 's/"local"/"{{ .Zone }}"/g' | \
-		sed 's/\([^/]\)kuma-demo/\1{{ .Namespace }}/g' \
-		> app/kumactl/data/install/k8s/demo/demo.yaml
-	curl -s --fail https://raw.githubusercontent.com/kumahq/kuma-counter-demo/master/gateway.yaml | \
-		sed 's/\([^/]\)kuma-demo/\1{{ .Namespace }}/g' \
-		> app/kumactl/data/install/k8s/demo/gateway.yaml
-
-.PHONY: dev/set-kuma-helm-repo
-dev/set-kuma-helm-repo:
-	${CI_TOOLS_BIN_DIR}/helm repo add ${CHART_REPO_NAME} ${KUMA_CHARTS_URL}
+.PHONY: dev/set-${PROJECT_NAME}-helm-repo
+dev/set-control-plane-helm-repo:
+	${CI_TOOLS_BIN_DIR}/helm repo add ${CHART_REPO_NAME} ${CONTROL_PLANE_CHARTS_URL}
 
 .PHONY: clean
 clean: clean/build clean/generated clean/docs ## Dev: Clean
