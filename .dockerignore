@@ -3,6 +3,8 @@
 vendor
 vendor/*
 
+deployments
+deployments/*
 build
 build/*
 mvatandoost

@@ -5,10 +5,16 @@ A proxy-less service mesh for grpc services in kubernetes.
 Use argoCD yaml files or Helm charts to deploy on K8s
 
 ### Running Locally by Kind
+Setup dev tools
+```shell
+make dev/tools
+```
+
 Setup local k8s
 ```shell
 make kind/start
 ```
+
 Deploy xds-control-plane with server and client example servoce to k8s
 ```shell
 make kind/deploy/control-plane
