@@ -3,11 +3,11 @@ package controlplane
 import "log/slog"
 
 
-func (a *App) NewStreamRequest(id string, resourceNames []string) {
+func (a *App) NewStreamRequest(id string, resourceNames []string, typeURL string) {
 	node := a.CreateNode(id)
 	for _, rn := range resourceNames {
 		node.AddWatcher(rn)
-		a.AddResourceWatchToNode(id, rn)
+		a.AddResourceWatchToNode(id, rn, typeURL)
 	}
 }
 

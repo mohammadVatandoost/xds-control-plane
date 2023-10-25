@@ -2,8 +2,10 @@ package controlplane
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/mohammadVatandoost/xds-conrol-plane/internal/node"
+	"github.com/mohammadVatandoost/xds-conrol-plane/internal/resource"
 )
 
 func (a *App) GetServices() {
@@ -41,26 +43,27 @@ func (a *App) DeleteNode(id string) error {
 	return nil
 }
 
-func (a *App) AddResourceWatchToNode(id string, resource string) {
+func (a *App) AddResourceWatchToNode(id string, resourceName string, typeURL string) {
 	a.muResource.Lock()
 	defer a.muResource.Unlock()
-	nodes, ok := a.resources[resource]
+	resourceInstance, ok := a.resources[resourceName]
 	if !ok {
-		nodes = make(map[string]struct{})
-		a.resources[resource] = nodes
+		slog.Info("AddResourceWatchToNode, resource does not exist in the DB, creating", "name", resourceName, "nodeID", id, "typeURL", typeURL)
+		resourceInstance = resource.NewResource(resourceName, "1", "", typeURL, resourceName)
+		a.resources[resourceName] = resourceInstance
 	}
-	nodes[id] = struct{}{}
+	resourceInstance.Watchers[id] = struct{}{}
 }
 
 func (a *App) GetNodesWatchTheResource(resource string) []string {
 	a.muResource.RLock()
 	defer a.muResource.RUnlock()
 	nodesArray := make([]string, 0)
-	nodes, ok := a.resources[resource]
+	resourceInstance, ok := a.resources[resource]
 	if !ok {
 		return nodesArray
 	}
-	for n := range nodes {
+	for n := range resourceInstance.Watchers {
 		nodesArray = append(nodesArray, n)
 	}
 	return nodesArray
