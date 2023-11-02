@@ -13,7 +13,7 @@ func (a *App) OnAddSerivce(key string, serviceObj *v1.Service) {
 	slog.Info("OnAddSerivce", "key", key, "name", serviceObj.Name, "Namespace", serviceObj.Namespace, "Labels", serviceObj.Labels)
 	resourceInstance, ok := a.resources[key]
 	if !ok {
-		resourceInstance = resource.NewResource(serviceObj.Name, serviceObj.APIVersion, "", "service", key)
+		resourceInstance = resource.NewResource(serviceObj.Name, serviceObj.APIVersion, "", "service", key, serviceObj)
 	}
 	resourceInstance.Name = serviceObj.Name
 	resourceInstance.Version = serviceObj.APIVersion
@@ -43,10 +43,11 @@ func (a *App) OnUpdateService(newKey string, newServiceObj *v1.Service, oldKey s
 	if !ok {
 		slog.Error("OnUpdateService resource doesn't exist in DB", "key", oldKey, "name", oldServiceObj.Name,
 		 "Namespace", oldServiceObj.Namespace, "Labels", oldServiceObj.Labels)
-		resourceInstance = resource.NewResource(newServiceObj.Name, newServiceObj.APIVersion, "", "service", newKey)
+		resourceInstance = resource.NewResource(newServiceObj.Name, newServiceObj.APIVersion, "", "service", newKey, newServiceObj)
 	}
 	delete(a.resources, oldKey)
 	resourceInstance.Name = newServiceObj.Name
 	resourceInstance.Version = newServiceObj.APIVersion
+	resourceInstance.ServiceObj = newServiceObj
 	a.resources[newKey] = resourceInstance
 }

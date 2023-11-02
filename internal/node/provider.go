@@ -8,7 +8,7 @@ import (
 
 func NewNode() *Node {
 	return &Node{
-		watchers:  map[string]struct{}{},
+		watching:  map[string]struct{}{},
 		clusters:  make([]types.Resource, 0),
 		listeners: make([]types.Resource, 0),
 		endpoints: make([]types.Resource, 0),
@@ -17,7 +17,7 @@ func NewNode() *Node {
 }
 
 type Node struct {
-	watchers  map[string]struct{}
+	watching  map[string]struct{}
 	mu        sync.RWMutex
 	clusters  []types.Resource
 	listeners []types.Resource

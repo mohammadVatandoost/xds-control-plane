@@ -22,6 +22,7 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/sirupsen/logrus"
+	kube_core "k8s.io/api/core/v1"
 
 	// "google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/wrapperspb"
@@ -52,56 +53,29 @@ func getServices() []ServiceConfig {
 		},
 	}
 }
-
-func getAddresses(svcc ServiceConfig) []string {
+// key is servicename.namespace
+func getAddresses(key string, portName string) []string {
 	var upstreamPorts []string
-	serviceName := svcc.ServiceName //"be-srv"
-	namespace := svcc.Namespace     //"default"
-	portName := svcc.PortName       //"grpc"
-	protocol := svcc.Protocol       //"tcp"
+	// serviceName := svcc.ServiceName //"be-srv"
+	// namespace := svcc.Namespace     //"default"
+	// portName := svcc.PortName       //"grpc"
+	protocol := kube_core.ProtocolTCP      //"tcp"
 	// grpcServiceName := svcc.GRPCServiceName //"echo.EchoServer"
-
-	cname, rec, err := net.LookupSRV(portName, protocol, fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace))
+	// name := fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
+	// name := fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
+	name := fmt.Sprintf("%s.svc.cluster.local", key)
+	cname, rec, err := net.LookupSRV(portName, string(protocol), name)
 	if err != nil {
-		logrus.Errorf("Could not find serviceName: %s, portName: %v, protocol: %v,  err: %v", serviceName, portName, protocol, err.Error())
+		slog.Error("Could not find the address", "key", key, "portName", portName, "err", err.Error())
 		return upstreamPorts
 	} else {
-		logrus.Infof("SRV CNAME: %v, rec: %v\n", cname, rec)
+		slog.Info("address found", "cname", cname, "rec", rec)
 	}
 
-	// var wg sync.WaitGroup
-
 	for i := range rec {
-		// wg.Add(1)
-		// go func(host string, port string) {
-		// 	defer wg.Done()
-		// 	address := fmt.Sprintf("%s:%s", host, port)
-
-		// 	ctx := context.Background()
-		// 	ctx, cancel := context.WithTimeout(ctx, 30*time.Millisecond)
-		// 	defer cancel()
-		// 	// ToDo: handle health check later
-		// 	// conn, err := grpc.Dial(address, grpc.WithInsecure())
-		// 	// if err != nil {
-		// 	// 	logrus.Errorf("Could not connect to endpoint %s  %v", address, err.Error())
-		// 	// 	return
-		// 	// }
-		// 	// resp, err := healthpb.NewHealthClient(conn).Check(ctx, &healthpb.HealthCheckRequest{Service: grpcServiceName})
-		// 	// if err != nil {
-		// 	// 	logrus.WithField("address", address).Errorf("HealthCheck failed err: %v, conn: %v", conn, err.Error())
-		// 	// 	// return // ToDo: for testign disable this
-		// 	// }
-		// 	// if resp.GetStatus() != healthpb.HealthCheckResponse_SERVING {
-		// 	// 	logrus.Errorf("Service not healthy %v %v", conn, fmt.Sprintf("service not in serving state: %v", resp.GetStatus().String()))
-		// 	// 	// return ToDo: for testign disable this
-		// 	// }
-		// 	// logrus.Infof("RPC HealthChekStatus: for %v %v", address, resp.GetStatus())
-		// 	// upstreamPorts = append(upstreamPorts, address)
-		// }(rec[i].Target, strconv.Itoa(int(rec[i].Port)))
 		address := fmt.Sprintf("%s:%s", rec[i].Target, strconv.Itoa(int(rec[i].Port)))
 		upstreamPorts = append(upstreamPorts, address)
 	}
-	// wg.Wait()
 
 	return upstreamPorts
 }
@@ -170,7 +144,7 @@ func (cp *ControlPlane) makeXDSConfigFromService(svc ServiceConfig) (*endpoint.C
 	virtualHostName := svc.ServiceName + "-vs"
 	region := svc.Region //"us-central1"
 	zone := svc.Zone     // us-central1-a
-	addresses := getAddresses(svc)
+	addresses := getAddresses(fmt.Sprintf("%s.%s", svc.ServiceName, svc.PortName), svc.PortName)
 	if len(addresses) == 0 {
 		return nil, nil, nil, nil, fmt.Errorf("there is no availabe address for service: %v", svc.ServiceName)
 	}
