@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/mohammadVatandoost/xds-conrol-plane/internal/resource"
+	"github.com/mohammadVatandoost/xds-conrol-plane/internal/xds"
 )
 
 // *** callbacks
@@ -29,10 +30,24 @@ func (a *App) UpdateNodeCache(nodeID string) {
 	if !ok {
 		slog.Error("UpdateNodeCache, node doesn't exist", "nodeID", nodeID)
 	}
-	resources := node.
+	resources := node.GetWatchings()
+	node.ClearResources()
 	slog.Info("UpdateCache", "nodeID", nodeID)
-	clusters := make([]types.Resource, 0)
-	listeners := make([]types.Resource, 0)
-	endpoints := make([]types.Resource, 0)
-	routes := make([]types.Resource, 0)
+	for _, rn := range resources {
+		resource, ok := a.resources[rn]
+		if !ok {
+			slog.Error("UpdateCache, resource doesn't exist", "resource", rn, "nodeID", nodeID)
+			continue
+		}
+		//ToDo: later fix loop through each port name
+		endPoint, cluster, listner, route, err := xds.MakeXDSResource(resource, a.conf.Region, a.conf.Zone, resource.ServiceObj.Spec.Ports[0].Name)
+		if err != nil {
+			slog.Error("UpdateCache, failed to Make XDS Resource", "error", err, "resource", rn, "nodeID", nodeID)
+			continue
+		}
+		node.AddCluster(cluster)
+		node.AddListener(listner)
+		node.AddEndpoint(endPoint)
+		node.AddRoute(route)
+	}
 }

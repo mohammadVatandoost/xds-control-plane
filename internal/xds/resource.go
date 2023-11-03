@@ -4,19 +4,25 @@ import (
 	"fmt"
 
 	cluster "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
+	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	endpoint "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
 	listener "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
 	route "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
+	v3routerpb "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
+	hcm "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 	"github.com/mohammadVatandoost/xds-conrol-plane/internal/resource"
+	"google.golang.org/protobuf/types/known/anypb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-func (cp *ControlPlane) makeXDSResource(resourceInfo *resource.Resource, region string, zone string) (*endpoint.ClusterLoadAssignment, *cluster.Cluster, *route.RouteConfiguration, *listener.Listener, error) {
+func MakeXDSResource(resourceInfo *resource.Resource, region string, 
+	zone string, portName string) (*endpoint.ClusterLoadAssignment, *cluster.Cluster, *route.RouteConfiguration, *listener.Listener, error) {
 	routeConfigName := resourceInfo.Name + "-route"
 	clusterName := resourceInfo.Name + "-cluster"
 	virtualHostName := resourceInfo.Name + "-vs"
-	addresses := getAddresses(resourceInfo.Key)
+	addresses := getAddresses(resourceInfo.Key, portName)
 	if len(addresses) == 0 {
-		return nil, nil, nil, nil, fmt.Errorf("there is no availabe address for service: %v", svc.ServiceName)
+		return nil, nil, nil, nil, fmt.Errorf("there is no availabe address for service: %v", resourceInfo.Key)
 	}
 	// cp.log.Infof("service: %v, addresses: %v \n", svc.ServiceName, addresses)
 	lbe := makeLBEndpoint(addresses)
@@ -47,7 +53,7 @@ func (cp *ControlPlane) makeXDSResource(resourceInfo *resource.Resource, region 
 	// cp.log.Infof(">>>>>>>>>>>>>>>>>>> creating RDS " + virtualHostName)
 	vh := &route.VirtualHost{
 		Name:    virtualHostName,
-		Domains: []string{svc.ServiceName}, //******************* >> must match what is specified at xds:/// //
+		Domains: []string{resourceInfo.Key}, //******************* >> must match what is specified at xds:/// //
 
 		Routes: []*route.Route{{
 			Match: &route.RouteMatch{
@@ -82,9 +88,10 @@ func (cp *ControlPlane) makeXDSResource(resourceInfo *resource.Resource, region 
 		},
 	}
 
-	filterPbst, err := ptypes.MarshalAny(&v3routerpb.Router{})
+	filterPbst, err := anypb.New(&v3routerpb.Router{})
 	if err != nil {
-		panic(err)
+		return nil, nil, nil, nil, fmt.Errorf("failed to marshal the router, key: %v, err: %v", 
+		resourceInfo.Key, err)
 	}
 	// RouterHTTPFilter := hcm.HTTPFilter("router", &v3routerpb.Router{})
 	RouterHTTPFilter := &hcm.HttpFilter{
@@ -103,13 +110,14 @@ func (cp *ControlPlane) makeXDSResource(resourceInfo *resource.Resource, region 
 		HttpFilters:    filters,
 	}
 
-	pbst, err := ptypes.MarshalAny(manager)
+	pbst, err := anypb.New(manager)
 	if err != nil {
-		panic(err)
+		return nil, nil, nil, nil, fmt.Errorf("failed to marshal the manager message, key: %v, err: %v", 
+		resourceInfo.Key, err)
 	}
 
 	lsnr := &listener.Listener{
-		Name: svc.ServiceName,
+		Name: resourceInfo.Key,
 		ApiListener: &listener.ApiListener{
 			ApiListener: pbst,
 		},

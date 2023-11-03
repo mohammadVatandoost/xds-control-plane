@@ -20,7 +20,11 @@ func (n *Node) IsWatched(resource string) bool {
 func (n *Node) GetWatchings() []string {
 	n.mu.RLock()
 	defer n.mu.RUnlock()
-	return 
+	watchings := make([]string, 0)
+	for w := range n.watching {
+		watchings = append(watchings, w)
+	}
+	return watchings
 }
 
 func (n *Node) ClearResources() {

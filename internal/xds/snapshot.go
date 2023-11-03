@@ -15,6 +15,14 @@ import (
 )
 
 func (cp *ControlPlane) UpdateCache(nodeID string, resources []*resource.Resource) {
+	atomic.AddInt32(&cp.version, 1)
+
+	snapshot, err := cachev3.NewSnapshot(fmt.Sprint(cp.version), map[resource.Type][]types.Resource{
+		resource.EndpointType: endpoints,
+		resource.ClusterType:  clusters,
+		resource.ListenerType: listeners,
+		resource.RouteType:    routes,
+	})
 }
 
 // func (cp *ControlPlane) UpdateCache(nodeID string, resourceNames []string, resourceType string) {
@@ -68,14 +76,14 @@ func (cp *ControlPlane) UpdateCache(nodeID string, resources []*resource.Resourc
 // 		}
 // 	}
 
-// 	atomic.AddInt32(&cp.version, 1)
+	// atomic.AddInt32(&cp.version, 1)
 
-// 	snapshot, err := cachev3.NewSnapshot(fmt.Sprint(cp.version), map[resource.Type][]types.Resource{
-// 		resource.EndpointType: endpoints,
-// 		resource.ClusterType:  clusters,
-// 		resource.ListenerType: listeners,
-// 		resource.RouteType:    routes,
-// 	})
+	// snapshot, err := cachev3.NewSnapshot(fmt.Sprint(cp.version), map[resource.Type][]types.Resource{
+	// 	resource.EndpointType: endpoints,
+	// 	resource.ClusterType:  clusters,
+	// 	resource.ListenerType: listeners,
+	// 	resource.RouteType:    routes,
+	// })
 // 	if err != nil {
 // 		slog.Error(">>>>>>>>>>  Error creating snapshot", "error", err)
 // 		return
