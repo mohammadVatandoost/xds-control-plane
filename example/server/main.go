@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math/rand"
 	"net"
 	"net/http"
 	"strconv"
@@ -100,11 +101,14 @@ func main() {
 	sopts := []grpc.ServerOption{grpc.MaxConcurrentStreams(10), grpc.Creds(creds)}
 	// s := xds.NewGRPCServer(sopts...)
 	s := grpc.NewServer(sopts...)
+    // Generate a random number between 0 and 100.
+    randomNumber := rand.Intn(101)
+    name := config.ServerName+"-"+strconv.Itoa(randomNumber)
 
-	echo.RegisterEchoServerServer(s, &server{ServerName: config.ServerName})
+	echo.RegisterEchoServerServer(s, &server{ServerName: name})
 
 	healthpb.RegisterHealthServer(s, &healthServer{})
-	logrus.Infof("Starting grpcServer on Port: %v with servername: %v", config.GRPCPort, config.ServerName)
+	logrus.Infof("Starting grpcServer on Port: %v with servername: %v", config.GRPCPort, name)
 	s.Serve(lis)
 
 }
