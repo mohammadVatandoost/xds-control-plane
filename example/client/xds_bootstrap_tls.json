@@ -11,7 +11,7 @@
       }
     ],
     "certificate_providers": {
-      "kuma": { 
+      "mvs": { 
         "plugin_name": "file_watcher", 
         "config": {                    
           "certificate_file": "./tls/cert.pem",
