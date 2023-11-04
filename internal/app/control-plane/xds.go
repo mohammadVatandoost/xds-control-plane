@@ -1,9 +1,10 @@
 package controlplane
 
 import (
+	"context"
+	"fmt"
 	"log/slog"
 
-	"github.com/mohammadVatandoost/xds-conrol-plane/internal/resource"
 	"github.com/mohammadVatandoost/xds-conrol-plane/internal/xds"
 )
 
@@ -23,6 +24,7 @@ func (a *App) StreamClosed(id string) {
 		slog.Error("app stream closed", "error", err, "id", id)
 	}
 }
+
 // ***
 
 func (a *App) UpdateNodeCache(nodeID string) {
@@ -50,4 +52,18 @@ func (a *App) UpdateNodeCache(nodeID string) {
 		node.AddEndpoint(endPoint)
 		node.AddRoute(route)
 	}
+
+	cache, err := xds.NewSnapshot(
+		fmt.Sprintf("%d", node.GetVersion()),
+		node.GetEndpoints(),
+		node.GetClusters(),
+		node.GetListeners(),
+		node.GetRoutes(),
+	)
+	if err != nil {
+		slog.Error("UpdateCache, failed to update cache", "error", err, "nodeID", nodeID)
+		return
+	}
+	a.snapshotCache.UpdateCache(context.Background(), nodeID, cache)
+	node.IncreaseVersion()
 }

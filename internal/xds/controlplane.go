@@ -7,30 +7,27 @@ import (
 	"net"
 	"strconv"
 	"sync"
-	"time"
 
 	clusterservice "github.com/envoyproxy/go-control-plane/envoy/service/cluster/v3"
 	discoverygrpc "github.com/envoyproxy/go-control-plane/envoy/service/discovery/v3"
 	endpointservice "github.com/envoyproxy/go-control-plane/envoy/service/endpoint/v3"
 	listenerservice "github.com/envoyproxy/go-control-plane/envoy/service/listener/v3"
 	routeservice "github.com/envoyproxy/go-control-plane/envoy/service/route/v3"
-	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	xds "github.com/envoyproxy/go-control-plane/pkg/server/v3"
 	"github.com/mohammadVatandoost/xds-conrol-plane/internal/k8s"
 	"github.com/mohammadVatandoost/xds-conrol-plane/internal/node"
 	xdsConfig "github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/xds"
 	"google.golang.org/grpc"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/informers"
 	k8scache "k8s.io/client-go/tools/cache"
 )
 
 type ControlPlane struct {
-	version       int32
-	snapshotCache cache.SnapshotCache
-	server        xds.Server
-	fetches       int32
-	requests      int32
+	version  int32
+	cache    *XDSSnapshotCache
+	server   xds.Server
+	fetches  int32
+	requests int32
 	// callBacks         *callbacks
 	// endpoints         []types.Resource
 	endpointInformers []k8scache.SharedIndexInformer
@@ -40,8 +37,9 @@ type ControlPlane struct {
 	mu                sync.RWMutex
 	resources         map[string]map[string]struct{} // A resource is watched by which nodes
 	muResource        sync.RWMutex
-	app App
+	app               App
 }
+
 // ToDo: Remove: Begin
 func (cp *ControlPlane) CreateNode(id string) *node.Node {
 	cp.mu.Lock()
@@ -131,30 +129,29 @@ func (cp *ControlPlane) Run() error {
 	stop := make(chan struct{})
 	defer close(stop)
 
-	factory := informers.NewSharedInformerFactoryWithOptions(clusterClient, time.Second*10, informers.WithNamespace(""))
+	// factory := informers.NewSharedInformerFactoryWithOptions(clusterClient, time.Second*10, informers.WithNamespace(""))
 
-	informerEndpoints := factory.Core().V1().Endpoints().Informer()
-	cp.endpointInformers = append(cp.endpointInformers, informerEndpoints)
+	// informerEndpoints := factory.Core().V1().Endpoints().Informer()
+	// cp.endpointInformers = append(cp.endpointInformers, informerEndpoints)
 
-	informerServices := factory.Core().V1().Services().Informer()
-	cp.serviceInformers = append(cp.endpointInformers, informerServices)
+	// informerServices := factory.Core().V1().Services().Informer()
+	// cp.serviceInformers = append(cp.endpointInformers, informerServices)
 
 	// informerEndpoints.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
 	// 	UpdateFunc: cp.HandleEndpointsUpdate,
 	// })
 
-	informerServices.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
-		UpdateFunc: cp.HandleServicesUpdate,
-	})
+	// informerServices.AddEventHandler(k8scache.ResourceEventHandlerFuncs{
+	// 	UpdateFunc: cp.HandleServicesUpdate,
+	// })
 
 	// go func() {
 	// 	informerEndpoints.Run(stop)
 	// }()
 
-	go func() {
-		informerServices.Run(stop)
-	}()
-
+	// go func() {
+	// 	informerServices.Run(stop)
+	// }()
 
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(int(cp.conf.Port)))
 	if err != nil {

@@ -9,7 +9,6 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-
 func Load(file string, cfg Config) error {
 	return LoadWithOption(file, cfg, false, true, true)
 }

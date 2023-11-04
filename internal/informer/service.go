@@ -9,7 +9,7 @@ import (
 )
 
 type ServiceInformer struct {
-	cache cache.SharedIndexInformer
+	cache   cache.SharedIndexInformer
 	handler ServiceEventHandler
 }
 
@@ -23,7 +23,7 @@ func NewServiceInformer(factory informers.SharedInformerFactory, handler Service
 	sharedCache := factory.Core().V1().Services().Informer()
 
 	si := &ServiceInformer{
-		cache: sharedCache,
+		cache:   sharedCache,
 		handler: handler,
 	}
 

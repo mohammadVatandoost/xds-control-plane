@@ -15,7 +15,7 @@ import (
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-func MakeXDSResource(resourceInfo *resource.Resource, region string, 
+func MakeXDSResource(resourceInfo *resource.Resource, region string,
 	zone string, portName string) (*endpoint.ClusterLoadAssignment, *cluster.Cluster, *route.RouteConfiguration, *listener.Listener, error) {
 	routeConfigName := resourceInfo.Name + "-route"
 	clusterName := resourceInfo.Name + "-cluster"
@@ -90,8 +90,8 @@ func MakeXDSResource(resourceInfo *resource.Resource, region string,
 
 	filterPbst, err := anypb.New(&v3routerpb.Router{})
 	if err != nil {
-		return nil, nil, nil, nil, fmt.Errorf("failed to marshal the router, key: %v, err: %v", 
-		resourceInfo.Key, err)
+		return nil, nil, nil, nil, fmt.Errorf("failed to marshal the router, key: %v, err: %v",
+			resourceInfo.Key, err)
 	}
 	// RouterHTTPFilter := hcm.HTTPFilter("router", &v3routerpb.Router{})
 	RouterHTTPFilter := &hcm.HttpFilter{
@@ -112,8 +112,8 @@ func MakeXDSResource(resourceInfo *resource.Resource, region string,
 
 	pbst, err := anypb.New(manager)
 	if err != nil {
-		return nil, nil, nil, nil, fmt.Errorf("failed to marshal the manager message, key: %v, err: %v", 
-		resourceInfo.Key, err)
+		return nil, nil, nil, nil, fmt.Errorf("failed to marshal the manager message, key: %v, err: %v",
+			resourceInfo.Key, err)
 	}
 
 	lsnr := &listener.Listener{

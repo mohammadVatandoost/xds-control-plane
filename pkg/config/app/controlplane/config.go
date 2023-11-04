@@ -3,20 +3,18 @@ package controlplane
 import (
 	"errors"
 
-	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/xds"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/config"
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/rest"
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/xds"
 )
-
-
 
 var _ config.Config = &ControlPlaneConfig{}
 
 type ControlPlaneConfig struct {
 	RestAPIConfig *rest.RestAPIConfig `restAPIConfig:"port" `
-	XDSConfig *xds.XDSConfig `json:"xdsConfig" `
-	Region string `json:"region" envconfig:"REGION"`
-	Zone   string `json:"zone" envconfig:"ZONE"`
+	XDSConfig     *xds.XDSConfig      `json:"xdsConfig" `
+	Region        string              `json:"region" envconfig:"REGION"`
+	Zone          string              `json:"zone" envconfig:"ZONE"`
 }
 
 func (c *ControlPlaneConfig) Validate() error {
@@ -36,8 +34,8 @@ func (c *ControlPlaneConfig) Sanitize() {
 func DefaultControlPlaneConfig() *ControlPlaneConfig {
 	return &ControlPlaneConfig{
 		RestAPIConfig: rest.DefaultRestApiConfig(),
-		XDSConfig: xds.DefaultXDSConfig(),
-		Region: "us-central1",
-		Zone: "us-central1-a",
+		XDSConfig:     xds.DefaultXDSConfig(),
+		Region:        "us-central1",
+		Zone:          "us-central1-a",
 	}
 }

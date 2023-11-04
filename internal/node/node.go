@@ -83,3 +83,15 @@ func (n *Node) AddRoute(r types.Resource) {
 	defer n.mu.Unlock()
 	n.routes = append(n.routes, r)
 }
+
+func (n *Node) GetVersion() uint64 {
+	n.mu.RLock()
+	defer n.mu.RUnlock()
+	return n.version
+}
+
+func (n *Node) IncreaseVersion() {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+	n.version++
+}

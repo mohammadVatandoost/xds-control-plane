@@ -13,6 +13,7 @@ func NewNode() *Node {
 		listeners: make([]types.Resource, 0),
 		endpoints: make([]types.Resource, 0),
 		routes:    make([]types.Resource, 0),
+		version:   0,
 	}
 }
 
@@ -23,4 +24,5 @@ type Node struct {
 	listeners []types.Resource
 	endpoints []types.Resource
 	routes    []types.Resource
+	version   uint64
 }

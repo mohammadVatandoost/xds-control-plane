@@ -7,8 +7,6 @@ import (
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/config"
 )
 
-
-
 var _ config.Config = &RestAPIConfig{}
 
 type RestAPIConfig struct {

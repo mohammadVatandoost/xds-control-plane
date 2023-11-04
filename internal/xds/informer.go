@@ -14,9 +14,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-
-
-
 func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 
 	// clusters := make([]types.Resource, 0)
@@ -58,7 +55,7 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 							slog.Error("node is not watching the resource", "nodeID", n, "resourceID", seviceConfig.ServiceName)
 							continue
 						}
-						slog.Info("ControlPlane HandleServicesUpdate", "nodes", nodes, 
+						slog.Info("ControlPlane HandleServicesUpdate", "nodes", nodes,
 							"serviceName", seviceConfig.ServiceName, "listeners", lsnrService)
 						node.AddCluster(clsService)
 						node.AddEndpoint(edsService)
@@ -72,7 +69,7 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 
 	atomic.AddInt32(&cp.version, 1)
 
-	IDs := cp.snapshotCache.GetStatusKeys()
+	IDs := cp.cache.GetStatusKeys()
 	slog.Info("snapshotCache", "IDs", IDs)
 	for _, id := range IDs {
 		node, err := cp.GetNode(id)
@@ -90,9 +87,9 @@ func (cp *ControlPlane) HandleServicesUpdate(oldObj, newObj interface{}) {
 			slog.Error(">>>>>>>>>>  Error creating snapshot", "error", err)
 			return
 		}
-		status := cp.snapshotCache.GetStatusInfo(id)
+		status := cp.cache.GetStatusInfo(id)
 		slog.Info("snapshotCache info", "id", id, "metadata", status.GetNode().GetMetadata().String())
-		err = cp.snapshotCache.SetSnapshot(context.Background(), id, snapshot)
+		err = cp.cache.SetSnapshot(context.Background(), id, snapshot)
 		if err != nil {
 			slog.Error("couldn't set snapshot", "error", err)
 		}
