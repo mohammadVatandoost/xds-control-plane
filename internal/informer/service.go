@@ -33,7 +33,7 @@ func NewServiceInformer(factory informers.SharedInformerFactory, handler Service
 }
 
 func getServiceKey(service *v1.Service) string {
-	return service.Namespace + "." + service.Name
+	return service.Name + "." + service.Namespace
 }
 
 func (si *ServiceInformer) Run(stopCh <-chan struct{}) {

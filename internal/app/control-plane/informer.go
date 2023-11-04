@@ -35,8 +35,8 @@ func (a *App) OnDeleteService(key string, serviceObj *v1.Service) {
 }
 
 func (a *App) OnUpdateService(newKey string, newServiceObj *v1.Service, oldKey string, oldServiceObj *v1.Service) {
-	slog.Info("OnUpdateService", "newKey", newKey, "newServiceName", newServiceObj.Name, "newServiceNamespace", newServiceObj.Namespace,
-		"oldKey", oldKey, "oleServiceName", oldServiceObj.Name, "oldServiceNamespace", oldServiceObj.Namespace)
+	// slog.Info("OnUpdateService", "newKey", newKey, "newServiceName", newServiceObj.Name, "newServiceNamespace", newServiceObj.Namespace,
+	// 	"oldKey", oldKey, "oleServiceName", oldServiceObj.Name, "oldServiceNamespace", oldServiceObj.Namespace)
 	a.muResource.Lock()
 	defer a.muResource.Unlock()
 	resourceInstance, ok := a.resources[oldKey]
@@ -51,3 +51,6 @@ func (a *App) OnUpdateService(newKey string, newServiceObj *v1.Service, oldKey s
 	resourceInstance.ServiceObj = newServiceObj
 	a.resources[newKey] = resourceInstance
 }
+
+
+// xds-grpc-server-example-headless.control-plane-example
