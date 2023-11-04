@@ -4,10 +4,10 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/utils"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/utils"
 )
 
 func CreateClusterClient() (kubernetes.Interface, error) {

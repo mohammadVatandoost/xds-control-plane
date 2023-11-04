@@ -1,19 +1,16 @@
 package xds
 
-
 import (
 	"errors"
 
 	"github.com/mohammadVatandoost/xds-conrol-plane/pkg/config"
 )
 
-
-
 var _ config.Config = &XDSConfig{}
 
 type XDSConfig struct {
-	Port uint32 `json:"port" envconfig:"XDS_PORT"`
-	ADSEnabled bool `json:"adsEnable" envconfig:"ADS_ENABLE"`
+	Port       uint32 `json:"port" envconfig:"XDS_PORT"`
+	ADSEnabled bool   `json:"adsEnable" envconfig:"ADS_ENABLE"`
 }
 
 func (c *XDSConfig) Validate() error {
@@ -29,7 +26,7 @@ func (c *XDSConfig) Sanitize() {
 
 func DefaultXDSConfig() *XDSConfig {
 	return &XDSConfig{
-		Port: 8765,
+		Port:       8765,
 		ADSEnabled: true,
 	}
 }

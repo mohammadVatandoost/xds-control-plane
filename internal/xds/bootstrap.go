@@ -1,14 +1,11 @@
 package xds
 
 import (
-	"context"
 	"fmt"
 	"log/slog"
 	"net"
 	"strconv"
 	"strings"
-	"sync/atomic"
-	"time"
 
 	cluster "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
@@ -17,15 +14,16 @@ import (
 	route "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	v3routerpb "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
 	hcm "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
-	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
-	cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
-	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
-	"github.com/golang/protobuf/ptypes"
+
+	// "github.com/envoyproxy/go-control-plane/pkg/cache/types"
+	// cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
+	// "github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	"github.com/sirupsen/logrus"
+	kube_core "k8s.io/api/core/v1"
 
 	// "google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
-
 	// healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
@@ -39,130 +37,90 @@ type ServiceConfig struct {
 	Region          string
 }
 
-func getServices() []ServiceConfig {
-	return []ServiceConfig{
-		{
-			ServiceName:     "xds-grpc-server-example-headless",
-			Namespace:       "test",
-			PortName:        "grpc",
-			GRPCServiceName: "echo.EchoServer",
-			Protocol:        "tcp",
-			Zone:            "us-central1-a",
-			Region:          "us-central1",
-		},
-	}
-}
-
-func getAddresses(svcc ServiceConfig) []string {
+// key is servicename.namespace
+func getAddresses(key string, portName string) []string {
 	var upstreamPorts []string
-	serviceName := svcc.ServiceName //"be-srv"
-	namespace := svcc.Namespace     //"default"
-	portName := svcc.PortName       //"grpc"
-	protocol := svcc.Protocol       //"tcp"
+	// serviceName := svcc.ServiceName //"be-srv"
+	// namespace := svcc.Namespace     //"default"
+	// portName := svcc.PortName       //"grpc"
+	protocol := kube_core.ProtocolTCP //"tcp"
 	// grpcServiceName := svcc.GRPCServiceName //"echo.EchoServer"
-
-	cname, rec, err := net.LookupSRV(portName, protocol, fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace))
+	// name := fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
+	// name := fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
+	name := fmt.Sprintf("%s.svc.cluster.local", key)
+	cname, rec, err := net.LookupSRV(portName, string(protocol), name)
 	if err != nil {
-		logrus.Errorf("Could not find serviceName: %s, portName: %v, protocol: %v,  err: %v", serviceName, portName, protocol, err.Error())
+		slog.Error("Could not find the address", "key", key, "portName", portName, "err", err.Error())
 		return upstreamPorts
 	} else {
-		logrus.Infof("SRV CNAME: %v, rec: %v\n", cname, rec)
+		slog.Info("address found", "cname", cname, "rec", rec)
 	}
 
-	// var wg sync.WaitGroup
-
 	for i := range rec {
-		// wg.Add(1)
-		// go func(host string, port string) {
-		// 	defer wg.Done()
-		// 	address := fmt.Sprintf("%s:%s", host, port)
-
-		// 	ctx := context.Background()
-		// 	ctx, cancel := context.WithTimeout(ctx, 30*time.Millisecond)
-		// 	defer cancel()
-		// 	// ToDo: handle health check later
-		// 	// conn, err := grpc.Dial(address, grpc.WithInsecure())
-		// 	// if err != nil {
-		// 	// 	logrus.Errorf("Could not connect to endpoint %s  %v", address, err.Error())
-		// 	// 	return
-		// 	// }
-		// 	// resp, err := healthpb.NewHealthClient(conn).Check(ctx, &healthpb.HealthCheckRequest{Service: grpcServiceName})
-		// 	// if err != nil {
-		// 	// 	logrus.WithField("address", address).Errorf("HealthCheck failed err: %v, conn: %v", conn, err.Error())
-		// 	// 	// return // ToDo: for testign disable this
-		// 	// }
-		// 	// if resp.GetStatus() != healthpb.HealthCheckResponse_SERVING {
-		// 	// 	logrus.Errorf("Service not healthy %v %v", conn, fmt.Sprintf("service not in serving state: %v", resp.GetStatus().String()))
-		// 	// 	// return ToDo: for testign disable this
-		// 	// }
-		// 	// logrus.Infof("RPC HealthChekStatus: for %v %v", address, resp.GetStatus())
-		// 	// upstreamPorts = append(upstreamPorts, address)
-		// }(rec[i].Target, strconv.Itoa(int(rec[i].Port)))
 		address := fmt.Sprintf("%s:%s", rec[i].Target, strconv.Itoa(int(rec[i].Port)))
 		upstreamPorts = append(upstreamPorts, address)
 	}
-	// wg.Wait()
 
 	return upstreamPorts
 }
 
-func (cp *ControlPlane) RunXDSserver(stopCh <-chan struct{}) {
-	var version int32
-	for {
-		select {
-		case <-stopCh:
-			return
-		default:
-			snapshot, err := cp.makeSnapshot(version)
-			if err != nil {
-				slog.Error(">>>>>>>>>>  Error setting snapshot", "error", err)
-				return
-			}
-			IDs := cp.snapshotCache.GetStatusKeys()
-			slog.Info("snapshotCache", "IDs", IDs)
-			for _, id := range IDs {
-				err = cp.snapshotCache.SetSnapshot(context.Background(), id, snapshot)
-				if err != nil {
-					logrus.Errorf("%v", err)
-				}
-			}
-		}
-		time.Sleep(time.Duration(10) * time.Second)
-	}
-}
+// func (cp *ControlPlane) RunXDSserver(stopCh <-chan struct{}) {
+// 	var version int32
+// 	for {
+// 		select {
+// 		case <-stopCh:
+// 			return
+// 		default:
+// 			snapshot, err := cp.makeSnapshot(version)
+// 			if err != nil {
+// 				slog.Error(">>>>>>>>>>  Error setting snapshot", "error", err)
+// 				return
+// 			}
+// 			IDs := cp.snapshotCache.GetStatusKeys()
+// 			slog.Info("snapshotCache", "IDs", IDs)
+// 			for _, id := range IDs {
+// 				err = cp.snapshotCache.SetSnapshot(context.Background(), id, snapshot)
+// 				if err != nil {
+// 					logrus.Errorf("%v", err)
+// 				}
+// 			}
+// 		}
+// 		time.Sleep(time.Duration(10) * time.Second)
+// 	}
+// }
 
-func (cp *ControlPlane) makeSnapshot(version int32) (*cachev3.Snapshot, error) {
-	services := getServices()
-	eds := []types.Resource{}
-	cls := []types.Resource{}
-	rds := []types.Resource{}
-	lsnr := []types.Resource{}
-	for _, svc := range services {
-		edsService, clsService, rdsService, lsnrService, err := cp.makeXDSConfigFromService(svc)
-		if err != nil {
-			continue
-		}
-		eds = append(eds, edsService)
-		cls = append(cls, clsService)
-		rds = append(rds, rdsService)
-		lsnr = append(lsnr, lsnrService)
-	}
+// func (cp *ControlPlane) makeSnapshot(version int32) (*cachev3.Snapshot, error) {
+// 	services := getServices()
+// 	eds := []types.Resource{}
+// 	cls := []types.Resource{}
+// 	rds := []types.Resource{}
+// 	lsnr := []types.Resource{}
+// 	for _, svc := range services {
+// 		edsService, clsService, rdsService, lsnrService, err := cp.makeXDSConfigFromService(svc)
+// 		if err != nil {
+// 			continue
+// 		}
+// 		eds = append(eds, edsService)
+// 		cls = append(cls, clsService)
+// 		rds = append(rds, rdsService)
+// 		lsnr = append(lsnr, lsnrService)
+// 	}
 
-	atomic.AddInt32(&version, 1)
-	slog.Info(" creating snapshot Version ", "version", version)
+// 	atomic.AddInt32(&version, 1)
+// 	slog.Info(" creating snapshot Version ", "version", version)
 
-	slog.Info("   snapshot", "listner", lsnr)
-	slog.Info("   snapshot with EDS %v", eds)
-	slog.Info("   snapshot with CLS %v", cls)
-	slog.Info("   snapshot with RDS %v", rds)
+// 	slog.Info("   snapshot", "listner", lsnr)
+// 	slog.Info("   snapshot with EDS %v", eds)
+// 	slog.Info("   snapshot with CLS %v", cls)
+// 	slog.Info("   snapshot with RDS %v", rds)
 
-	return cachev3.NewSnapshot(fmt.Sprint(version), map[resource.Type][]types.Resource{
-		resource.EndpointType: eds,
-		resource.ClusterType:  cls,
-		resource.ListenerType: lsnr,
-		resource.RouteType:    rds,
-	})
-}
+// 	return cachev3.NewSnapshot(fmt.Sprint(version), map[resource.Type][]types.Resource{
+// 		resource.EndpointType: eds,
+// 		resource.ClusterType:  cls,
+// 		resource.ListenerType: lsnr,
+// 		resource.RouteType:    rds,
+// 	})
+// }
 
 func (cp *ControlPlane) makeXDSConfigFromService(svc ServiceConfig) (*endpoint.ClusterLoadAssignment, *cluster.Cluster, *route.RouteConfiguration, *listener.Listener, error) {
 	routeConfigName := svc.ServiceName + "-route"
@@ -170,7 +128,7 @@ func (cp *ControlPlane) makeXDSConfigFromService(svc ServiceConfig) (*endpoint.C
 	virtualHostName := svc.ServiceName + "-vs"
 	region := svc.Region //"us-central1"
 	zone := svc.Zone     // us-central1-a
-	addresses := getAddresses(svc)
+	addresses := getAddresses(fmt.Sprintf("%s.%s", svc.ServiceName, svc.PortName), svc.PortName)
 	if len(addresses) == 0 {
 		return nil, nil, nil, nil, fmt.Errorf("there is no availabe address for service: %v", svc.ServiceName)
 	}
@@ -238,7 +196,7 @@ func (cp *ControlPlane) makeXDSConfigFromService(svc ServiceConfig) (*endpoint.C
 		},
 	}
 
-	filterPbst, err := ptypes.MarshalAny(&v3routerpb.Router{})
+	filterPbst, err := anypb.New(&v3routerpb.Router{})
 	if err != nil {
 		panic(err)
 	}
@@ -259,7 +217,7 @@ func (cp *ControlPlane) makeXDSConfigFromService(svc ServiceConfig) (*endpoint.C
 		HttpFilters:    filters,
 	}
 
-	pbst, err := ptypes.MarshalAny(manager)
+	pbst, err := anypb.New(manager)
 	if err != nil {
 		panic(err)
 	}

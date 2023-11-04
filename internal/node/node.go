@@ -4,17 +4,27 @@ import (
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 )
 
-func (n *Node) AddWatcher(resource string) {
+func (n *Node) AddWatching(resource string) {
 	n.mu.Lock()
 	defer n.mu.Unlock()
-	n.watchers[resource] = struct{}{}
+	n.watching[resource] = struct{}{}
 }
 
 func (n *Node) IsWatched(resource string) bool {
 	n.mu.RLock()
 	defer n.mu.RUnlock()
-	_, ok := n.watchers[resource]
+	_, ok := n.watching[resource]
 	return ok
+}
+
+func (n *Node) GetWatchings() []string {
+	n.mu.RLock()
+	defer n.mu.RUnlock()
+	watchings := make([]string, 0)
+	for w := range n.watching {
+		watchings = append(watchings, w)
+	}
+	return watchings
 }
 
 func (n *Node) ClearResources() {
@@ -72,4 +82,16 @@ func (n *Node) AddRoute(r types.Resource) {
 	n.mu.Lock()
 	defer n.mu.Unlock()
 	n.routes = append(n.routes, r)
+}
+
+func (n *Node) GetVersion() uint64 {
+	n.mu.RLock()
+	defer n.mu.RUnlock()
+	return n.version
+}
+
+func (n *Node) IncreaseVersion() {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+	n.version++
 }

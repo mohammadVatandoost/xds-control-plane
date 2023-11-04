@@ -7,14 +7,14 @@ type App interface {
 }
 
 type Server struct {
-	conf	*rest.RestAPIConfig		
+	conf *rest.RestAPIConfig
 }
 
 func (s *Server) Run() error {
 	return nil
 }
 
-func NewServer(conf	*rest.RestAPIConfig) *Server {
+func NewServer(conf *rest.RestAPIConfig) *Server {
 	return &Server{
 		conf: conf,
 	}

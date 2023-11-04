@@ -9,11 +9,10 @@ import (
 )
 
 type RunTime struct {
-	client kubernetes.Interface
+	client    kubernetes.Interface
 	informers []Informer
-	mu sync.Mutex
+	mu        sync.Mutex
 }
-
 
 func (rt *RunTime) AddInformer(informer Informer) {
 	rt.mu.Lock()
@@ -21,7 +20,7 @@ func (rt *RunTime) AddInformer(informer Informer) {
 	rt.informers = append(rt.informers, informer)
 }
 
-func (rt *RunTime) RunInformers(stopCh <- chan struct{}) {
+func (rt *RunTime) RunInformers(stopCh <-chan struct{}) {
 	rt.mu.Lock()
 	defer rt.mu.Unlock()
 	for _, informer := range rt.informers {
@@ -29,11 +28,9 @@ func (rt *RunTime) RunInformers(stopCh <- chan struct{}) {
 	}
 }
 
-
 func (rt *RunTime) GetInformerFactory() informers.SharedInformerFactory {
 	return informers.NewSharedInformerFactoryWithOptions(rt.client, time.Second*10, informers.WithNamespace(""))
 }
-
 
 func NewRunTime(client kubernetes.Interface) *RunTime {
 	return &RunTime{

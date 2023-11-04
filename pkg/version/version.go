@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	Product     = "control-plane"
-	version     = "unknown"
-	gitTag      = "unknown"
-	gitCommit   = "unknown"
-	buildDate   = "unknown"
+	Product   = "control-plane"
+	version   = "unknown"
+	gitTag    = "unknown"
+	gitCommit = "unknown"
+	buildDate = "unknown"
 )
 
 type BuildInfo struct {
@@ -40,10 +40,10 @@ var Build BuildInfo
 
 func init() {
 	Build = BuildInfo{
-		Product:     Product,
-		Version:     version,
-		GitTag:      gitTag,
-		GitCommit:   gitCommit,
-		BuildDate:   buildDate,
+		Product:   Product,
+		Version:   version,
+		GitTag:    gitTag,
+		GitCommit: gitCommit,
+		BuildDate: buildDate,
 	}
 }

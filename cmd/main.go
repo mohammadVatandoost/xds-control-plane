@@ -20,7 +20,7 @@ const serviceName = "xds_control_plane"
 func main() {
 	slog.Info("Initializing", "service", serviceName, "information", version.Build.FormatDetailedProductInfo())
 	exitCode := 0
-	defer func ()  {
+	defer func() {
 		os.Exit(exitCode)
 	}()
 
@@ -42,7 +42,9 @@ func main() {
 		return
 	}
 
-	app := controlplane.NewApp(conf)
+	cache := xds.NewSnapshotCache(conf.XDSConfig.ADSEnabled)
+
+	app := controlplane.NewApp(conf, cache)
 
 	runTimeInformer := informer.NewRunTime(k8sClient)
 	serviceInformer := informer.NewServiceInformer(runTimeInformer.GetInformerFactory(), app)
@@ -50,7 +52,7 @@ func main() {
 	runTimeInformer.RunInformers(serverContext.Done())
 
 	slog.Info("XDS control plane config", "XDS.ADSEnabled", conf.XDSConfig.ADSEnabled, "ListenPort", conf.XDSConfig.Port)
-	xdsServer := xds.NewControlPlane(conf.XDSConfig, app)
+	xdsServer := xds.NewControlPlane(conf.XDSConfig, app, cache)
 	err = xdsServer.Run()
 	if err != nil {
 		slog.Error("couldn't run xdsServer", "error", err)
