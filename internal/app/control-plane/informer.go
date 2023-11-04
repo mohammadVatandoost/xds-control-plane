@@ -52,5 +52,3 @@ func (a *App) OnUpdateService(newKey string, newServiceObj *v1.Service, oldKey s
 	a.resources[newKey] = resourceInstance
 }
 
-
-// xds-grpc-server-example-headless.control-plane-example

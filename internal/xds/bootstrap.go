@@ -37,20 +37,6 @@ type ServiceConfig struct {
 	Region          string
 }
 
-//	func getServices() []ServiceConfig {
-//		return []ServiceConfig{
-//			{
-//				ServiceName:     "xds-grpc-server-example-headless",
-//				Namespace:       "test",
-//				PortName:        "grpc",
-//				GRPCServiceName: "echo.EchoServer",
-//				Protocol:        "tcp",
-//				Zone:            "us-central1-a",
-//				Region:          "us-central1",
-//			},
-//		}
-//	}
-//
 // key is servicename.namespace
 func getAddresses(key string, portName string) []string {
 	var upstreamPorts []string
