@@ -14,7 +14,7 @@ CHARTS_INDEX_FILE="index.yaml"
 GH_PAGES_BRANCH="gh-pages"
 
 # This updates Chart.yaml with:
-#  appVersion equal to the kuma version
+#  appVersion equal to the version
 #  version:
 #    using version.sh logic
 #  dependencies (with non-empty first argument):

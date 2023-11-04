@@ -19,7 +19,6 @@ type BuildInfo struct {
 	GitTag      string
 	GitCommit   string
 	BuildDate   string
-	BasedOnKuma string
 }
 
 func (b BuildInfo) FormatDetailedProductInfo() string {

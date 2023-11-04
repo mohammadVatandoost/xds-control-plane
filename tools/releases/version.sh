@@ -53,7 +53,7 @@ function base_branch_name() {
 }
 
 function version_info() {
-  # Kuma version info has the following format:
+  # version info has the following format:
   # version git-tag git-commit build-date envoy-version
 
   # version is built as follows:
