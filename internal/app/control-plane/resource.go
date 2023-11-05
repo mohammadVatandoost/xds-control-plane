@@ -8,9 +8,6 @@ import (
 	"github.com/mohammadVatandoost/xds-conrol-plane/internal/resource"
 )
 
-func (a *App) GetServices() {
-}
-
 func (a *App) CreateNode(id string) *node.Node {
 	a.mu.Lock()
 	defer a.mu.Unlock()

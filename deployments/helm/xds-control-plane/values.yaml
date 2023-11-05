@@ -36,6 +36,10 @@ service:
     port: 8888
     targetPort: 8888
     protocol: TCP
+  - name: api
+    port: 8080
+    targetPort: 8080
+    protocol: TCP  
   - name: metrics
     port: 9000
     targetPort: 9000
@@ -56,3 +60,4 @@ configMap:
     LOGGER_LEVEL: "info"
     XDS_PORT: 8888
     GRPC_TIMEOUT: 5
+    

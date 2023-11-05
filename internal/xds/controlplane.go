@@ -21,17 +21,17 @@ import (
 )
 
 type ControlPlane struct {
-	version  int32
-	cache    *XDSSnapshotCache
-	server   xds.Server
-	fetches  int32
-	requests int32
-	conf              *xdsConfig.XDSConfig
-	nodes             map[string]*node.Node
-	mu                sync.RWMutex
-	resources         map[string]map[string]struct{} // A resource is watched by which nodes
-	muResource        sync.RWMutex
-	app               App
+	version    int32
+	cache      *XDSSnapshotCache
+	server     xds.Server
+	fetches    int32
+	requests   int32
+	conf       *xdsConfig.XDSConfig
+	nodes      map[string]*node.Node
+	mu         sync.RWMutex
+	resources  map[string]map[string]struct{} // A resource is watched by which nodes
+	muResource sync.RWMutex
+	app        App
 }
 
 func (cp *ControlPlane) Run() error {

@@ -1,21 +1,17 @@
 package rest
 
-import "github.com/mohammadVatandoost/xds-conrol-plane/pkg/config/rest"
+import (
+	"log/slog"
+	"net/http"
+)
 
 type App interface {
-	GetServices()
-}
-
-type Server struct {
-	conf *rest.RestAPIConfig
+	GetNodes() ([]byte, error)
+	GetResources() ([]byte, error)
 }
 
 func (s *Server) Run() error {
-	return nil
-}
-
-func NewServer(conf *rest.RestAPIConfig) *Server {
-	return &Server{
-		conf: conf,
-	}
+	s.routes()
+	slog.Info("running rest api server", "address", s.conf.String())
+	return http.ListenAndServe(s.conf.String(), s.mux)
 }
