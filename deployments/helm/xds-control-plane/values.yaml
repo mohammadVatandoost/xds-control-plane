@@ -60,4 +60,5 @@ configMap:
     LOGGER_LEVEL: "info"
     XDS_PORT: 8888
     GRPC_TIMEOUT: 5
-    
+    REST_API_HTTP_PORT: 8080
+
