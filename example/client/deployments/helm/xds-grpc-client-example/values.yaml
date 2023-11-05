@@ -30,7 +30,6 @@ podAnnotations: {}
 service:
   labels:
     monitoring-app: xds-apps
-    xds: active
   type: clusterIP
   headless: true
   ports:

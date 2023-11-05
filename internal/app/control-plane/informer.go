@@ -31,12 +31,17 @@ func (a *App) OnDeleteService(key string, serviceObj *v1.Service) {
 		return
 	}
 	delete(a.resources, key)
+}
 
+func (a *App) DeleteService(key string) {
+	a.muResource.Lock()
+	defer a.muResource.Unlock()
+	delete(a.resources, key)
 }
 
 func (a *App) OnUpdateService(newKey string, newServiceObj *v1.Service, oldKey string, oldServiceObj *v1.Service) {
-	// slog.Info("OnUpdateService", "newKey", newKey, "newServiceName", newServiceObj.Name, "newServiceNamespace", newServiceObj.Namespace,
-	// 	"oldKey", oldKey, "oleServiceName", oldServiceObj.Name, "oldServiceNamespace", oldServiceObj.Namespace)
+	slog.Info("OnUpdateService", "newKey", newKey, "newServiceName", newServiceObj.Name, "newServiceNamespace", newServiceObj.Namespace,
+		"oldKey", oldKey, "oleServiceName", oldServiceObj.Name, "oldServiceNamespace", oldServiceObj.Namespace)
 	a.muResource.Lock()
 	defer a.muResource.Unlock()
 	resourceInstance, ok := a.resources[oldKey]

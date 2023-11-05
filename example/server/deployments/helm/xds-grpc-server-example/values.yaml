@@ -28,7 +28,7 @@ podAnnotations: {}
 service:
   labels:
     monitoring-app: xds-apps
-    xds: active
+    xds/portName: grpc
   type: clusterIP
   headless: true
   ports:
