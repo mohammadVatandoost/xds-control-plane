@@ -8,21 +8,21 @@ import (
 
 func NewNode() *Node {
 	return &Node{
-		watching:  map[string]struct{}{},
-		clusters:  make([]types.Resource, 0),
-		listeners: make([]types.Resource, 0),
-		endpoints: make([]types.Resource, 0),
-		routes:    make([]types.Resource, 0),
-		version:   0,
+		Watching:  map[string]struct{}{},
+		Clusters:  make([]types.Resource, 0),
+		Listeners: make([]types.Resource, 0),
+		Endpoints: make([]types.Resource, 0),
+		Routes:    make([]types.Resource, 0),
+		Version:   0,
 	}
 }
 
 type Node struct {
-	watching  map[string]struct{}
+	Watching  map[string]struct{} `json:"Watching"`
 	mu        sync.RWMutex
-	clusters  []types.Resource
-	listeners []types.Resource
-	endpoints []types.Resource
-	routes    []types.Resource
-	version   uint64
+	Clusters  []types.Resource `json:"Clusters"`
+	Listeners []types.Resource `json:"Listeners"`
+	Endpoints []types.Resource `json:"Endpoints"`
+	Routes    []types.Resource `json:"Routes"`
+	Version   uint64           `json:"Version"`
 }

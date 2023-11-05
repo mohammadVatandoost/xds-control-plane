@@ -51,4 +51,3 @@ func (a *App) OnUpdateService(newKey string, newServiceObj *v1.Service, oldKey s
 	resourceInstance.ServiceObj = newServiceObj
 	a.resources[newKey] = resourceInstance
 }
-

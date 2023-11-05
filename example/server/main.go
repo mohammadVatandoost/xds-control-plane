@@ -101,9 +101,9 @@ func main() {
 	sopts := []grpc.ServerOption{grpc.MaxConcurrentStreams(10), grpc.Creds(creds)}
 	// s := xds.NewGRPCServer(sopts...)
 	s := grpc.NewServer(sopts...)
-    // Generate a random number between 0 and 100.
-    randomNumber := rand.Intn(101)
-    name := config.ServerName+"-"+strconv.Itoa(randomNumber)
+	// Generate a random number between 0 and 100.
+	randomNumber := rand.Intn(101)
+	name := config.ServerName + "-" + strconv.Itoa(randomNumber)
 
 	echo.RegisterEchoServerServer(s, &server{ServerName: name})
 

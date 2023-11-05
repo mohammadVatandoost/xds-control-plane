@@ -21,6 +21,14 @@ Deploy xds-control-plane with server and client example servoce to k8s
 make kind/deploy/control-plane
 ```
 
+### REST API
+You can see the nodes and resources list on port 8080
+```shell
+kubectl port-forward svc/xds-control-plane-headless -n control-plane 8080:8080
+```
+Nodes: http://localhost:8080/nodes
+Nodes: http://localhost:8080/resources
+
 ### ToDo:
 - generate bootstrap file with tls (look at this https://github.com/mohammadVatandoost/traffic-director-grpc-bootstrap)
 - reconcile GAMMA resources to config the traffic

@@ -14,11 +14,11 @@ var (
 )
 
 type BuildInfo struct {
-	Product     string
-	Version     string
-	GitTag      string
-	GitCommit   string
-	BuildDate   string
+	Product   string
+	Version   string
+	GitTag    string
+	GitCommit string
+	BuildDate string
 }
 
 func (b BuildInfo) FormatDetailedProductInfo() string {

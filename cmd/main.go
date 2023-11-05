@@ -6,6 +6,7 @@ import (
 	"os"
 
 	controlplane "github.com/mohammadVatandoost/xds-conrol-plane/internal/app/control-plane"
+	"github.com/mohammadVatandoost/xds-conrol-plane/internal/core/rest"
 	"github.com/mohammadVatandoost/xds-conrol-plane/internal/informer"
 	"github.com/mohammadVatandoost/xds-conrol-plane/internal/k8s"
 	"github.com/mohammadVatandoost/xds-conrol-plane/internal/xds"
@@ -46,6 +47,16 @@ func main() {
 
 	app := controlplane.NewApp(conf, cache)
 
+	restAPIServer := rest.NewServer(conf.RestAPIConfig, app)
+	go func() {
+		err := restAPIServer.Run()
+		if err != nil {
+			slog.Error("couldn't run rest API server", "error", err)
+			exitCode = -1
+		}
+
+	}()
+
 	runTimeInformer := informer.NewRunTime(k8sClient)
 	serviceInformer := informer.NewServiceInformer(runTimeInformer.GetInformerFactory(), app)
 	runTimeInformer.AddInformer(serviceInformer)
@@ -59,4 +70,3 @@ func main() {
 		exitCode = -1
 	}
 }
-

@@ -23,7 +23,7 @@ func (a *App) NewStreamRequest(id string, resourceNames []string, typeURL string
 	}
 	if isUpdateNeeded {
 		a.UpdateNodeCache(id)
-	} 
+	}
 }
 
 func (a *App) StreamClosed(id string) {
@@ -58,7 +58,7 @@ func (a *App) UpdateNodeCache(nodeID string) {
 		slog.Info("UpdateCache, resource", "resource", rn, "nodeID", nodeID, "endPoint", endPoint)
 		slog.Info("UpdateCache, resource", "resource", rn, "nodeID", nodeID, "cluster", cluster)
 		slog.Info("UpdateCache, resource", "resource", rn, "nodeID", nodeID, "listner", listner)
-		slog.Info("UpdateCache, resource", "resource", rn, "nodeID", nodeID, "route",route)
+		slog.Info("UpdateCache, resource", "resource", rn, "nodeID", nodeID, "route", route)
 		node.AddCluster(cluster)
 		node.AddListener(listner)
 		node.AddEndpoint(endPoint)
