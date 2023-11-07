@@ -47,13 +47,14 @@ func getAddresses(key string, portName string) []string {
 	// grpcServiceName := svcc.GRPCServiceName //"echo.EchoServer"
 	// name := fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
 	// name := fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
-	name := fmt.Sprintf("%s.svc.cluster.local", key)
+	// name := fmt.Sprintf("%s.svc.cluster.local", key)
+	name := key
 	cname, rec, err := net.LookupSRV(portName, string(protocol), name)
 	if err != nil {
 		slog.Error("Could not find the address", "key", key, "portName", portName, "err", err.Error())
 		return upstreamPorts
 	} else {
-		slog.Info("address found", "cname", cname, "rec", rec)
+		slog.Info("addresses found", "cname", cname, "rec", rec, "key", key, "name", name)
 	}
 
 	for i := range rec {

@@ -49,7 +49,8 @@ func isXDSService(service *v1.Service) (string, bool) {
 func getServiceKey(service *v1.Service, portName string) (string, error) {
 	for _, port := range service.Spec.Ports {
 		if port.Name == portName {
-			return service.Name + "." + service.Namespace + ":" + portName, nil
+			return fmt.Sprintf("%s.%s.svc.cluster.local:%d", 
+			service.Name, service.Namespace, port.Port), nil
 		}
 	}
 	return "", fmt.Errorf("couldn't find the port name, portName: %s, serviceName: %s, namespace: %s", 
