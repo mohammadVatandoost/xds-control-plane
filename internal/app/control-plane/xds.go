@@ -39,6 +39,7 @@ func (a *App) UpdateNodeCache(nodeID string) {
 	node, ok := a.nodes[nodeID]
 	if !ok {
 		slog.Error("UpdateNodeCache, node doesn't exist", "nodeID", nodeID)
+		return
 	}
 	resources := node.GetWatchings()
 	node.ClearResources()
@@ -49,8 +50,9 @@ func (a *App) UpdateNodeCache(nodeID string) {
 			slog.Error("UpdateCache, resource doesn't exist", "resource", rn, "nodeID", nodeID)
 			continue
 		}
+		// resource.ServiceObj.Spec.Ports[0].Name
 		//ToDo: later fix loop through each port name
-		endPoint, cluster, route, listner, err := xds.MakeXDSResource(resource, a.conf.Region, a.conf.Zone, resource.ServiceObj.Spec.Ports[0].Name)
+		endPoint, cluster, route, listner, err := xds.MakeXDSResource(resource, a.conf.Region, a.conf.Zone)
 		if err != nil {
 			slog.Error("UpdateCache, failed to Make XDS Resource", "error", err, "resource", rn, "nodeID", nodeID)
 			continue

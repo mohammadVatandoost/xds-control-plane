@@ -16,11 +16,12 @@ import (
 )
 
 func MakeXDSResource(resourceInfo *resource.Resource, region string,
-	zone string, portName string) (*endpoint.ClusterLoadAssignment, *cluster.Cluster, *route.RouteConfiguration, *listener.Listener, error) {
+	zone string) (*endpoint.ClusterLoadAssignment, *cluster.Cluster, *route.RouteConfiguration, *listener.Listener, error) {
 	routeConfigName := resourceInfo.Name + "-route"
 	clusterName := resourceInfo.Name + "-cluster"
 	virtualHostName := resourceInfo.Name + "-vs"
-	addresses := getAddresses(resourceInfo.Key, portName)
+	addresses := getAddresses(resourceInfo.ServiceObj.Name, resourceInfo.PortName,
+		 resourceInfo.ServiceObj.Namespace)
 	if len(addresses) == 0 {
 		return nil, nil, nil, nil, fmt.Errorf("there is no availabe address for service: %v", resourceInfo.Key)
 	}
