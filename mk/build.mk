@@ -59,9 +59,13 @@ build/artifacts-$(1)-$(2)/control-plane:
 build/artifacts-$(1)-$(2)/cp-example-client:
 	$(Build_Go_Application) ./example/client
 
-.PHONY: build/artifacts-$(1)-$(2)/cp-example-server
-build/artifacts-$(1)-$(2)/cp-example-server:
-	$(Build_Go_Application) ./example/server
+.PHONY: build/artifacts-$(1)-$(2)/cp-example-server-1
+build/artifacts-$(1)-$(2)/cp-example-server-1:
+	$(Build_Go_Application) ./example/server1
+
+.PHONY: build/artifacts-$(1)-$(2)/cp-example-server-2
+build/artifacts-$(1)-$(2)/cp-example-server-2:
+	$(Build_Go_Application) ./example/server2	
 
 endef
 $(foreach goos,$(SUPPORTED_GOOSES),$(foreach goarch,$(SUPPORTED_GOARCHES),$(eval $(call BUILD_TARGET,$(goos),$(goarch)))))

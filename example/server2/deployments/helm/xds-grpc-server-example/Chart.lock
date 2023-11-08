@@ -1,0 +1,6 @@
+dependencies:
+- name: common
+  repository: s3://helm-charts/divar
+  version: 0.1.0
+digest: sha256:b6175141b45595a2c62f2a1e38f47d9a7bcf37a845f2ba3f9fdc64da92618118
+generated: "2022-03-02T09:22:26.132202454+03:30"
