@@ -1,7 +1,7 @@
 apiVersion: v2
 # Name of the chart, aka service
-name: xds-grpc-server-example
-description: xds-grpc-server-example service
+name: xds-grpc-server-example-2
+description: xds-grpc-server-example-2 service
 # Version of the chart
 version: 0.1.0
 # This should be equal to your service image version.

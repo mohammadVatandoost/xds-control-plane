@@ -82,7 +82,11 @@ kind/deploy/control-plane: kind/load
 	KUBECONFIG=$(KIND_KUBECONFIG) helm upgrade --install --namespace $(EXAMPLE_NAMESPACE) --create-namespace \
                 --set global.image.registry="$(DOCKER_REGISTRY)" \
                 --set global.image.tag="$(BUILD_INFO_VERSION)" \
-				xds-grpc-server-example ./example/server/deployments/helm/xds-grpc-server-example						
+				xds-grpc-server-example-1 ./example/server1/deployments/helm/xds-grpc-server-example
+	KUBECONFIG=$(KIND_KUBECONFIG) helm upgrade --install --namespace $(EXAMPLE_NAMESPACE) --create-namespace \
+                --set global.image.registry="$(DOCKER_REGISTRY)" \
+                --set global.image.tag="$(BUILD_INFO_VERSION)" \
+				xds-grpc-server-example-2 ./example/server2/deployments/helm/xds-grpc-server-example									
 
 
 .PHONY: kind/delete/control-plane

@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: xds-grpc-server-example
+  name: xds-grpc-server-example-1
   namespace: argocd
   finalizers:
   - resources-finalizer.argocd.argoproj.io
@@ -11,7 +11,7 @@ spec:
     server: "https://kubernetes.default.svc"
   project: xds-control-plane
   source:
-    path: example/server/deployments/helm/xds-grpc-server-example
+    path: example/server1/deployments/helm/xds-grpc-server-example
     repoURL: https://github.com/mohammadVatandoost/xds-control-plane
     targetRevision: HEAD
     helm:
