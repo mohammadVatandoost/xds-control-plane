@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/mohammadVatandoost/xds-conrol-plane/internal/resource"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/tools/cache"
@@ -17,9 +18,8 @@ type ServiceInformer struct {
 }
 
 type ServiceEventHandler interface {
-	OnAddSerivce(key string, serviceObj *v1.Service)
-	OnDeleteService(key string, serviceObj *v1.Service)
-	OnUpdateService(newKey string, newServiceObj *v1.Service, oldKey string, oldServiceObj *v1.Service)
+	OnAddSerivce(res *resource.Resource)
+	OnUpdateService(newRes *resource.Resource, oldRes *resource.Resource)
 	DeleteService(key string)
 }
 
@@ -49,11 +49,11 @@ func isXDSService(service *v1.Service) (string, bool) {
 func getServiceKey(service *v1.Service, portName string) (string, error) {
 	for _, port := range service.Spec.Ports {
 		if port.Name == portName {
-			return fmt.Sprintf("%s.%s.svc.cluster.local:%d", 
-			service.Name, service.Namespace, port.Port), nil
+			return fmt.Sprintf("%s.%s.svc.cluster.local:%d",
+				service.Name, service.Namespace, port.Port), nil
 		}
 	}
-	return "", fmt.Errorf("couldn't find the port name, portName: %s, serviceName: %s, namespace: %s", 
+	return "", fmt.Errorf("couldn't find the port name, portName: %s, serviceName: %s, namespace: %s",
 		portName, service.Name, service.Namespace)
 }
 
@@ -76,7 +76,8 @@ func (si *ServiceInformer) OnAdd(obj interface{}) {
 		slog.Error("couldn't get service key ", "err", err)
 		return
 	}
-	si.handler.OnAddSerivce(key, service)
+	res := resource.NewResource(service.Name, service.APIVersion, "", "service", key, portName, service)
+	si.handler.OnAddSerivce(res)
 }
 
 func (si *ServiceInformer) OnUpdate(oldObj, newObj interface{}) {
@@ -100,7 +101,8 @@ func (si *ServiceInformer) OnUpdate(oldObj, newObj interface{}) {
 				slog.Error("couldn't get service key ", "err", err)
 				return
 			}
-			si.handler.OnAddSerivce(key, newService)
+			res := resource.NewResource(newService.Name, newService.APIVersion, "", "service", key, portNameNew, newService)
+			si.handler.OnAddSerivce(res)
 		}
 		return
 	}
@@ -127,7 +129,9 @@ func (si *ServiceInformer) OnUpdate(oldObj, newObj interface{}) {
 		slog.Error("couldn't get newService key ", "err", err)
 		return
 	}
-	si.handler.OnUpdateService(newKey, newService, oldKey, oldService)
+	newRes := resource.NewResource(newService.Name, newService.APIVersion, "", "service", newKey, portNameNew, newService)
+	oldRes := resource.NewResource(oldService.Name, oldService.APIVersion, "", "service", oldKey, portNameOld, oldService)
+	si.handler.OnUpdateService(newRes, oldRes)
 }
 
 func (si *ServiceInformer) OnDelete(obj interface{}) {
@@ -147,5 +151,5 @@ func (si *ServiceInformer) OnDelete(obj interface{}) {
 		return
 	}
 
-	si.handler.OnDeleteService(key, service)
+	si.handler.DeleteService(key)
 }

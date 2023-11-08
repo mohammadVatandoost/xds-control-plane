@@ -4,34 +4,28 @@ import (
 	"log/slog"
 
 	"github.com/mohammadVatandoost/xds-conrol-plane/internal/resource"
-	v1 "k8s.io/api/core/v1"
 )
 
-func (a *App) OnAddSerivce(key string, serviceObj *v1.Service) {
+func (a *App) OnAddSerivce(res *resource.Resource) {
 	a.muResource.Lock()
 	defer a.muResource.Unlock()
-	slog.Info("OnAddSerivce", "key", key, "name", serviceObj.Name, "Namespace", serviceObj.Namespace, "Labels", serviceObj.Labels)
-	resourceInstance, ok := a.resources[key]
-	if !ok {
-		resourceInstance = resource.NewResource(serviceObj.Name, serviceObj.APIVersion, "", "service", key, serviceObj)
-	}
-	resourceInstance.Name = serviceObj.Name
-	resourceInstance.Version = serviceObj.APIVersion
-	a.resources[key] = resourceInstance
+	slog.Info("OnAddSerivce", "key", res.Key, "name", res.ServiceObj.Name,
+		"Namespace", res.ServiceObj.Namespace, "Labels", res.ServiceObj.Labels)
+	a.resources[res.Key] = res
 }
 
-func (a *App) OnDeleteService(key string, serviceObj *v1.Service) {
-	a.muResource.Lock()
-	defer a.muResource.Unlock()
-	slog.Info("OnDeleteService", "key", key, "name", serviceObj.Name, "Namespace", serviceObj.Namespace, "Labels", serviceObj.Labels)
+// func (a *App) OnDeleteService(key string, serviceObj *v1.Service) {
+// 	a.muResource.Lock()
+// 	defer a.muResource.Unlock()
+// 	slog.Info("OnDeleteService", "key", key, "name", serviceObj.Name, "Namespace", serviceObj.Namespace, "Labels", serviceObj.Labels)
 
-	_, ok := a.resources[key]
-	if !ok {
-		slog.Error("OnDeleteService resource doesn't exist in DB", "key", key, "name", serviceObj.Name, "Namespace", serviceObj.Namespace, "Labels", serviceObj.Labels)
-		return
-	}
-	delete(a.resources, key)
-}
+// 	_, ok := a.resources[key]
+// 	if !ok {
+// 		slog.Error("OnDeleteService resource doesn't exist in DB", "key", key, "name", serviceObj.Name, "Namespace", serviceObj.Namespace, "Labels", serviceObj.Labels)
+// 		return
+// 	}
+// 	delete(a.resources, key)
+// }
 
 func (a *App) DeleteService(key string) {
 	a.muResource.Lock()
@@ -39,20 +33,16 @@ func (a *App) DeleteService(key string) {
 	delete(a.resources, key)
 }
 
-func (a *App) OnUpdateService(newKey string, newServiceObj *v1.Service, oldKey string, oldServiceObj *v1.Service) {
+func (a *App) OnUpdateService(newRes *resource.Resource, oldRes *resource.Resource) {
 	// slog.Info("OnUpdateService", "newKey", newKey, "newServiceName", newServiceObj.Name, "newServiceNamespace", newServiceObj.Namespace,
 	// 	"oldKey", oldKey, "oleServiceName", oldServiceObj.Name, "oldServiceNamespace", oldServiceObj.Namespace)
 	a.muResource.Lock()
 	defer a.muResource.Unlock()
-	resourceInstance, ok := a.resources[oldKey]
+	_, ok := a.resources[oldRes.Key]
 	if !ok {
-		slog.Error("OnUpdateService resource doesn't exist in DB", "key", oldKey, "name", oldServiceObj.Name,
-			"Namespace", oldServiceObj.Namespace, "Labels", oldServiceObj.Labels)
-		resourceInstance = resource.NewResource(newServiceObj.Name, newServiceObj.APIVersion, "", "service", newKey, newServiceObj)
+		slog.Error("OnUpdateService resource doesn't exist in DB", "key", oldRes.Key, "name", oldRes.ServiceObj.Name,
+			"Namespace", oldRes.ServiceObj.Namespace, "Labels", oldRes.ServiceObj.Labels)
 	}
-	delete(a.resources, oldKey)
-	resourceInstance.Name = newServiceObj.Name
-	resourceInstance.Version = newServiceObj.APIVersion
-	resourceInstance.ServiceObj = newServiceObj
-	a.resources[newKey] = resourceInstance
+	delete(a.resources, oldRes.Key)
+	a.resources[newRes.Key] = newRes
 }

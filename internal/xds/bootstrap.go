@@ -7,23 +7,15 @@ import (
 	"strconv"
 	"strings"
 
-	cluster "github.com/envoyproxy/go-control-plane/envoy/config/cluster/v3"
 	core "github.com/envoyproxy/go-control-plane/envoy/config/core/v3"
 	endpoint "github.com/envoyproxy/go-control-plane/envoy/config/endpoint/v3"
-	listener "github.com/envoyproxy/go-control-plane/envoy/config/listener/v3"
-	route "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
-	v3routerpb "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
-	hcm "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
 
 	// "github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	// cachev3 "github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	// "github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	"github.com/sirupsen/logrus"
 	kube_core "k8s.io/api/core/v1"
-
 	// "google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/anypb"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 	// healthpb "google.golang.org/grpc/health/grpc_health_v1"
 )
 
@@ -38,7 +30,7 @@ type ServiceConfig struct {
 }
 
 // key is servicename.namespace
-func getAddresses(key string, portName string) []string {
+func getAddresses(serviceName string, portName string, namespace string) []string {
 	var upstreamPorts []string
 	// serviceName := svcc.ServiceName //"be-srv"
 	// namespace := svcc.Namespace     //"default"
@@ -46,15 +38,16 @@ func getAddresses(key string, portName string) []string {
 	protocol := kube_core.ProtocolTCP //"tcp"
 	// grpcServiceName := svcc.GRPCServiceName //"echo.EchoServer"
 	// name := fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
-	// name := fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
+	name := fmt.Sprintf("%s.%s.svc.cluster.local", serviceName, namespace)
 	// name := fmt.Sprintf("%s.svc.cluster.local", key)
-	name := key
+	// name := key
+
 	cname, rec, err := net.LookupSRV(portName, string(protocol), name)
 	if err != nil {
-		slog.Error("Could not find the address", "key", key, "portName", portName, "err", err.Error())
+		slog.Error("Could not find the address", "name", name, "portName", portName, "err", err.Error())
 		return upstreamPorts
 	} else {
-		slog.Info("addresses found", "cname", cname, "rec", rec, "key", key, "name", name)
+		slog.Info("addresses found", "cname", cname, "rec", rec, "name", name)
 	}
 
 	for i := range rec {
@@ -123,115 +116,115 @@ func getAddresses(key string, portName string) []string {
 // 	})
 // }
 
-func (cp *ControlPlane) makeXDSConfigFromService(svc ServiceConfig) (*endpoint.ClusterLoadAssignment, *cluster.Cluster, *route.RouteConfiguration, *listener.Listener, error) {
-	routeConfigName := svc.ServiceName + "-route"
-	clusterName := svc.ServiceName + "-cluster"
-	virtualHostName := svc.ServiceName + "-vs"
-	region := svc.Region //"us-central1"
-	zone := svc.Zone     // us-central1-a
-	addresses := getAddresses(fmt.Sprintf("%s.%s", svc.ServiceName, svc.PortName), svc.PortName)
-	if len(addresses) == 0 {
-		return nil, nil, nil, nil, fmt.Errorf("there is no availabe address for service: %v", svc.ServiceName)
-	}
-	// cp.log.Infof("service: %v, addresses: %v \n", svc.ServiceName, addresses)
-	lbe := makeLBEndpoint(addresses)
-	eds := &endpoint.ClusterLoadAssignment{
-		ClusterName: clusterName,
-		Endpoints: []*endpoint.LocalityLbEndpoints{{
-			Locality: &core.Locality{
-				Region: region,
-				Zone:   zone,
-			},
-			Priority:            0,
-			LoadBalancingWeight: &wrapperspb.UInt32Value{Value: uint32(1000)},
-			LbEndpoints:         lbe,
-		}},
-	}
-	cls := &cluster.Cluster{
-		Name:                 clusterName,
-		LbPolicy:             cluster.Cluster_ROUND_ROBIN,
-		ClusterDiscoveryType: &cluster.Cluster_Type{Type: cluster.Cluster_EDS},
-		EdsClusterConfig: &cluster.Cluster_EdsClusterConfig{
-			EdsConfig: &core.ConfigSource{
-				ConfigSourceSpecifier: &core.ConfigSource_Ads{},
-			},
-		},
-	}
+// func (cp *ControlPlane) makeXDSConfigFromService(svc ServiceConfig) (*endpoint.ClusterLoadAssignment, *cluster.Cluster, *route.RouteConfiguration, *listener.Listener, error) {
+// 	routeConfigName := svc.ServiceName + "-route"
+// 	clusterName := svc.ServiceName + "-cluster"
+// 	virtualHostName := svc.ServiceName + "-vs"
+// 	region := svc.Region //"us-central1"
+// 	zone := svc.Zone     // us-central1-a
+// 	addresses := getAddresses(fmt.Sprintf("%s.%s", svc.ServiceName, svc.PortName), svc.PortName)
+// 	if len(addresses) == 0 {
+// 		return nil, nil, nil, nil, fmt.Errorf("there is no availabe address for service: %v", svc.ServiceName)
+// 	}
+// 	// cp.log.Infof("service: %v, addresses: %v \n", svc.ServiceName, addresses)
+// 	lbe := makeLBEndpoint(addresses)
+// 	eds := &endpoint.ClusterLoadAssignment{
+// 		ClusterName: clusterName,
+// 		Endpoints: []*endpoint.LocalityLbEndpoints{{
+// 			Locality: &core.Locality{
+// 				Region: region,
+// 				Zone:   zone,
+// 			},
+// 			Priority:            0,
+// 			LoadBalancingWeight: &wrapperspb.UInt32Value{Value: uint32(1000)},
+// 			LbEndpoints:         lbe,
+// 		}},
+// 	}
+// 	cls := &cluster.Cluster{
+// 		Name:                 clusterName,
+// 		LbPolicy:             cluster.Cluster_ROUND_ROBIN,
+// 		ClusterDiscoveryType: &cluster.Cluster_Type{Type: cluster.Cluster_EDS},
+// 		EdsClusterConfig: &cluster.Cluster_EdsClusterConfig{
+// 			EdsConfig: &core.ConfigSource{
+// 				ConfigSourceSpecifier: &core.ConfigSource_Ads{},
+// 			},
+// 		},
+// 	}
 
-	// RDS
-	// cp.log.Infof(">>>>>>>>>>>>>>>>>>> creating RDS " + virtualHostName)
-	vh := &route.VirtualHost{
-		Name:    virtualHostName,
-		Domains: []string{svc.ServiceName}, //******************* >> must match what is specified at xds:/// //
+// 	// RDS
+// 	// cp.log.Infof(">>>>>>>>>>>>>>>>>>> creating RDS " + virtualHostName)
+// 	vh := &route.VirtualHost{
+// 		Name:    virtualHostName,
+// 		Domains: []string{svc.ServiceName}, //******************* >> must match what is specified at xds:/// //
 
-		Routes: []*route.Route{{
-			Match: &route.RouteMatch{
-				PathSpecifier: &route.RouteMatch_Prefix{
-					Prefix: "",
-				},
-			},
-			Action: &route.Route_Route{
-				Route: &route.RouteAction{
-					ClusterSpecifier: &route.RouteAction_Cluster{
-						Cluster: clusterName,
-					},
-				},
-			},
-		}}}
+// 		Routes: []*route.Route{{
+// 			Match: &route.RouteMatch{
+// 				PathSpecifier: &route.RouteMatch_Prefix{
+// 					Prefix: "",
+// 				},
+// 			},
+// 			Action: &route.Route_Route{
+// 				Route: &route.RouteAction{
+// 					ClusterSpecifier: &route.RouteAction_Cluster{
+// 						Cluster: clusterName,
+// 					},
+// 				},
+// 			},
+// 		}}}
 
-	rds := &route.RouteConfiguration{
-		Name:         routeConfigName,
-		VirtualHosts: []*route.VirtualHost{vh},
-	}
+// 	rds := &route.RouteConfiguration{
+// 		Name:         routeConfigName,
+// 		VirtualHosts: []*route.VirtualHost{vh},
+// 	}
 
-	// LISTENER
-	// cp.log.Infof(">>>>>>>>>>>>>>>>>>> creating LISTENER " + svc.ServiceName)
-	hcRds := &hcm.HttpConnectionManager_Rds{
-		Rds: &hcm.Rds{
-			RouteConfigName: routeConfigName,
-			ConfigSource: &core.ConfigSource{
-				ConfigSourceSpecifier: &core.ConfigSource_Ads{
-					Ads: &core.AggregatedConfigSource{},
-				},
-			},
-		},
-	}
+// 	// LISTENER
+// 	// cp.log.Infof(">>>>>>>>>>>>>>>>>>> creating LISTENER " + svc.ServiceName)
+// 	hcRds := &hcm.HttpConnectionManager_Rds{
+// 		Rds: &hcm.Rds{
+// 			RouteConfigName: routeConfigName,
+// 			ConfigSource: &core.ConfigSource{
+// 				ConfigSourceSpecifier: &core.ConfigSource_Ads{
+// 					Ads: &core.AggregatedConfigSource{},
+// 				},
+// 			},
+// 		},
+// 	}
 
-	filterPbst, err := anypb.New(&v3routerpb.Router{})
-	if err != nil {
-		panic(err)
-	}
-	// RouterHTTPFilter := hcm.HTTPFilter("router", &v3routerpb.Router{})
-	RouterHTTPFilter := &hcm.HttpFilter{
-		Name: "router",
-		ConfigType: &hcm.HttpFilter_TypedConfig{
-			TypedConfig: filterPbst,
-		},
-	}
-	filters := []*hcm.HttpFilter{
-		RouterHTTPFilter,
-	}
+// 	filterPbst, err := anypb.New(&v3routerpb.Router{})
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	// RouterHTTPFilter := hcm.HTTPFilter("router", &v3routerpb.Router{})
+// 	RouterHTTPFilter := &hcm.HttpFilter{
+// 		Name: "router",
+// 		ConfigType: &hcm.HttpFilter_TypedConfig{
+// 			TypedConfig: filterPbst,
+// 		},
+// 	}
+// 	filters := []*hcm.HttpFilter{
+// 		RouterHTTPFilter,
+// 	}
 
-	manager := &hcm.HttpConnectionManager{
-		CodecType:      hcm.HttpConnectionManager_AUTO,
-		RouteSpecifier: hcRds,
-		HttpFilters:    filters,
-	}
+// 	manager := &hcm.HttpConnectionManager{
+// 		CodecType:      hcm.HttpConnectionManager_AUTO,
+// 		RouteSpecifier: hcRds,
+// 		HttpFilters:    filters,
+// 	}
 
-	pbst, err := anypb.New(manager)
-	if err != nil {
-		panic(err)
-	}
+// 	pbst, err := anypb.New(manager)
+// 	if err != nil {
+// 		panic(err)
+// 	}
 
-	lsnr := &listener.Listener{
-		Name: svc.ServiceName,
-		ApiListener: &listener.ApiListener{
-			ApiListener: pbst,
-		},
-	}
+// 	lsnr := &listener.Listener{
+// 		Name: svc.ServiceName,
+// 		ApiListener: &listener.ApiListener{
+// 			ApiListener: pbst,
+// 		},
+// 	}
 
-	return eds, cls, rds, lsnr, nil
-}
+// 	return eds, cls, rds, lsnr, nil
+// }
 
 // // HTTPFilter constructs an xds HttpFilter with the provided name and config.
 // func HTTPFilter(name string, config proto.Message) *hcm.HttpFilter {

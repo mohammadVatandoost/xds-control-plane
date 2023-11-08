@@ -46,7 +46,7 @@ func (a *App) AddResourceWatchToNode(id string, resourceName string, typeURL str
 	resourceInstance, ok := a.resources[resourceName]
 	if !ok {
 		slog.Info("AddResourceWatchToNode, resource does not exist in the DB, creating", "name", resourceName, "nodeID", id, "typeURL", typeURL)
-		resourceInstance = resource.NewResource(resourceName, "1", "", typeURL, resourceName, nil)
+		resourceInstance = resource.NewResource(resourceName, "1", "", typeURL, resourceName, "", nil)
 		a.resources[resourceName] = resourceInstance
 	}
 	resourceInstance.Watchers[id] = struct{}{}

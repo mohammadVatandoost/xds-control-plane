@@ -52,7 +52,7 @@ func (a *App) UpdateNodeCache(nodeID string) {
 		}
 		// resource.ServiceObj.Spec.Ports[0].Name
 		//ToDo: later fix loop through each port name
-		endPoint, cluster, route, listner, err := xds.MakeXDSResource(resource, a.conf.Region, a.conf.Zone, "")
+		endPoint, cluster, route, listner, err := xds.MakeXDSResource(resource, a.conf.Region, a.conf.Zone)
 		if err != nil {
 			slog.Error("UpdateCache, failed to Make XDS Resource", "error", err, "resource", rn, "nodeID", nodeID)
 			continue
